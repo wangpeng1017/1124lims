@@ -12,6 +12,13 @@ import {
   ProfileOutlined,
   ReadOutlined,
   FileProtectOutlined,
+  DollarOutlined,
+  FileTextOutlined,
+  BarcodeOutlined,
+  SwapOutlined,
+  InboxOutlined,
+  ProjectOutlined,
+  PartitionOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme, Avatar, Typography } from 'antd';
@@ -57,6 +64,15 @@ const items: MenuItem[] = [
     getItem('电子试验记录本 (ELN)', '/basic-params/eln', <ReadOutlined />),
     getItem('检测参数/项目', '/basic-params/detection', <ExperimentOutlined />),
     getItem('检查标准/依据', '/basic-params/standards', <FileProtectOutlined />),
+  ]),
+  getItem('样品管理', '/sample-management', <ExperimentOutlined />, [
+    getItem('收样/计价', '/sample-management/receipt', <DollarOutlined />),
+    getItem('样品明细', '/sample-management/details', <FileTextOutlined />),
+    getItem('样品标签', '/sample-management/labels', <BarcodeOutlined />),
+    getItem('流转记录', '/sample-management/transfer', <SwapOutlined />),
+    getItem('我的样品', '/sample-management/my-samples', <InboxOutlined />),
+    getItem('任务分配（样品）', '/sample-management/task-sample', <ProjectOutlined />),
+    getItem('任务分配（参数）', '/sample-management/task-parameter', <PartitionOutlined />),
   ]),
 ];
 

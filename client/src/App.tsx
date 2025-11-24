@@ -16,6 +16,13 @@ import CapabilityReview from './pages/PersonnelManagement/CapabilityReview';
 import InspectionStandards from './pages/BasicParameters/InspectionStandards';
 import DetectionParameters from './pages/BasicParameters/DetectionParameters';
 import ELN from './pages/BasicParameters/ELN';
+import SampleReceipt from './pages/SampleManagement/SampleReceipt';
+import SampleDetails from './pages/SampleManagement/SampleDetails';
+import SampleLabels from './pages/SampleManagement/SampleLabels';
+import TransferRecords from './pages/SampleManagement/TransferRecords';
+import MySamples from './pages/SampleManagement/MySamples';
+import SampleTaskAssignment from './pages/SampleManagement/SampleTaskAssignment';
+import ParameterTaskAssignment from './pages/SampleManagement/ParameterTaskAssignment';
 
 const App: React.FC = () => {
   return (
@@ -43,6 +50,15 @@ const App: React.FC = () => {
             <Route path="eln" element={<ELN />} />
             <Route path="detection" element={<DetectionParameters />} />
             <Route path="standards" element={<InspectionStandards />} />
+          </Route>
+          <Route path="sample-management">
+            <Route path="receipt" element={<SampleReceipt />} />
+            <Route path="details" element={<SampleDetails />} />
+            <Route path="labels" element={<SampleLabels />} />
+            <Route path="transfer" element={<TransferRecords />} />
+            <Route path="my-samples" element={<MySamples />} />
+            <Route path="task-sample" element={<SampleTaskAssignment />} />
+            <Route path="task-parameter" element={<ParameterTaskAssignment />} />
           </Route>
         </Route>
       </Routes>
