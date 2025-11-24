@@ -103,6 +103,7 @@ const MainLayout: React.FC = () => {
           mode="inline"
           items={items}
           onClick={({ key }) => navigate(key.toString())}
+          style={{ marginBottom: 48 }}
         />
       </Sider>
       <Layout style={{ marginLeft: collapsed ? 80 : 200, transition: 'margin-left 0.2s' }}>
