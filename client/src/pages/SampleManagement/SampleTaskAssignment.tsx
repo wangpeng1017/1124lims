@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Table, Card, Button, Space, Modal, Form, Select, Input, Popconfirm, message, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { PlusOutlined, RobotOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import { sampleTaskAssignmentData, type ISampleTaskAssignment, sampleDetailData } from '../../mock/sample';
 import { employeeData } from '../../mock/personnel';
 
@@ -28,10 +28,7 @@ const SampleTaskAssignment: React.FC = () => {
         message.success('删除成功');
     };
 
-    const handleAutoAssign = () => {
-        message.info('自动分配功能：根据人员负载和能力自动分配任务');
-        // 实际应用中实现负载均衡算法
-    };
+
 
     const handleOk = () => {
         form.validateFields().then(values => {
@@ -106,7 +103,7 @@ const SampleTaskAssignment: React.FC = () => {
             title="任务分配（样品）"
             extra={
                 <Space>
-                    <Button icon={<RobotOutlined />} onClick={handleAutoAssign}>自动分配</Button>
+
                     <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新建任务</Button>
                 </Space>
             }
