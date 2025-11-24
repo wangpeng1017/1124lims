@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  FileOutlined,
   UserOutlined,
   ExperimentOutlined,
   EnvironmentOutlined,
@@ -10,6 +9,9 @@ import {
   ApartmentOutlined,
   SafetyCertificateOutlined,
   AuditOutlined,
+  ProfileOutlined,
+  ReadOutlined,
+  FileProtectOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme, Avatar, Typography } from 'antd';
@@ -38,7 +40,6 @@ const items: MenuItem[] = [
   getItem('设备管理', '/device', <ToolOutlined />),
   getItem('环境管理', '/environment', <EnvironmentOutlined />),
   getItem('易耗品管理', '/consumables', <ShopOutlined />),
-  getItem('方法管理', '/method', <FileOutlined />),
   getItem('委托信息', '/entrustment', <ExperimentOutlined />),
   getItem('人事管理', '/personnel', <TeamOutlined />, [
     getItem('员工列表', '/personnel/employee', <UserOutlined />),
@@ -46,6 +47,11 @@ const items: MenuItem[] = [
     getItem('站点信息', '/personnel/station', <EnvironmentOutlined />),
     getItem('能力值', '/personnel/capability', <SafetyCertificateOutlined />),
     getItem('能力评审', '/personnel/review', <AuditOutlined />),
+  ]),
+  getItem('检测基础参数', '/basic-params', <ProfileOutlined />, [
+    getItem('电子试验记录本 (ELN)', '/basic-params/eln', <ReadOutlined />),
+    getItem('检测参数/项目', '/basic-params/detection', <ExperimentOutlined />),
+    getItem('检查标准/依据', '/basic-params/standards', <FileProtectOutlined />),
   ]),
 ];
 
