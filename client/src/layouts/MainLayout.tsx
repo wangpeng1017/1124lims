@@ -6,6 +6,10 @@ import {
   EnvironmentOutlined,
   ToolOutlined,
   ShopOutlined,
+  TeamOutlined,
+  ApartmentOutlined,
+  SafetyCertificateOutlined,
+  AuditOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme, Avatar, Typography } from 'antd';
@@ -36,6 +40,13 @@ const items: MenuItem[] = [
   getItem('易耗品管理', '/consumables', <ShopOutlined />),
   getItem('方法管理', '/method', <FileOutlined />),
   getItem('委托信息', '/entrustment', <ExperimentOutlined />),
+  getItem('人事管理', '/personnel', <TeamOutlined />, [
+    getItem('员工列表', '/personnel/employee', <UserOutlined />),
+    getItem('部门信息', '/personnel/department', <ApartmentOutlined />),
+    getItem('站点信息', '/personnel/station', <EnvironmentOutlined />),
+    getItem('能力值', '/personnel/capability', <SafetyCertificateOutlined />),
+    getItem('能力评审', '/personnel/review', <AuditOutlined />),
+  ]),
 ];
 
 const MainLayout: React.FC = () => {
