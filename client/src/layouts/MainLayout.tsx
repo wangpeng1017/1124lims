@@ -31,11 +31,11 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem('方法管理', '/method', <FileOutlined />),
-  getItem('环境管理', '/environment', <EnvironmentOutlined />),
   getItem('设备管理', '/device', <ToolOutlined />),
-  getItem('委托信息', '/entrustment', <ExperimentOutlined />),
+  getItem('环境管理', '/environment', <EnvironmentOutlined />),
   getItem('易耗品管理', '/consumables', <ShopOutlined />),
+  getItem('方法管理', '/method', <FileOutlined />),
+  getItem('委托信息', '/entrustment', <ExperimentOutlined />),
 ];
 
 const MainLayout: React.FC = () => {
@@ -56,12 +56,12 @@ const MainLayout: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-        <div style={{ height: 32, margin: 16, background: 'rgba(255, 255, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Title level={5} style={{ color: 'white', margin: 0, display: collapsed ? 'none' : 'block' }}>LIMS System</Title>
+      <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)} theme="light">
+        <div style={{ height: 32, margin: 16, background: '#e6f7ff', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
+          <Title level={5} style={{ color: '#1890ff', margin: 0, display: collapsed ? 'none' : 'block' }}>LIMS系统</Title>
         </div>
         <Menu
-          theme="dark"
+          theme="light"
           defaultSelectedKeys={[location.pathname]}
           selectedKeys={[location.pathname]}
           mode="inline"

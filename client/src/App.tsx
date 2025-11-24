@@ -12,7 +12,7 @@ const App: React.FC = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<Navigate to="/method" replace />} />
+          <Route index element={<Navigate to="/device" replace />} />
           <Route path="method" element={<MethodManagement />} />
           <Route path="environment" element={<EnvironmentManagement />} />
           <Route path="device" element={<DeviceManagement />} />
