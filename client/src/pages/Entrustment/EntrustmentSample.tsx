@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Table, Card, Button, Space, Modal, Form, Input, Popconfirm, message, Tag, InputNumber } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { PlusOutlined, PrinterOutlined } from '@ant-design/icons';
+import { PlusOutlined, BarcodeOutlined, DownloadOutlined } from '@ant-design/icons';
 import { sampleData } from '../../mock/entrustment';
 import type { IEntrustmentSample } from '../../mock/entrustment';
+import Barcode from 'react-barcode';
+import html2canvas from 'html2canvas';
 
 const EntrustmentSample: React.FC = () => {
     const [dataSource, setDataSource] = useState<IEntrustmentSample[]>(sampleData);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<IEntrustmentSample | null>(null);
+    const [currentLabelRecord, setCurrentLabelRecord] = useState<IEntrustmentSample | null>(null);
     const [form] = Form.useForm();
+    const labelRef = useRef<HTMLDivElement>(null);
 
     const handleAdd = () => {
         setEditingRecord(null);
@@ -28,8 +33,25 @@ const EntrustmentSample: React.FC = () => {
         message.success('删除成功');
     };
 
-    const handlePrint = (record: IEntrustmentSample) => {
-        message.success(`正在打印样品标签: ${record.sampleNo}`);
+    const handleGenerateLabel = (record: IEntrustmentSample) => {
+        setCurrentLabelRecord(record);
+        setIsLabelModalOpen(true);
+    };
+
+    const handleDownloadLabel = async () => {
+        if (labelRef.current) {
+            try {
+                const canvas = await html2canvas(labelRef.current);
+                const link = document.createElement('a');
+                link.download = `Label_${currentLabelRecord?.sampleNo}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                message.success('标签下载成功');
+            } catch (error) {
+                message.error('标签生成失败');
+                console.error(error);
+            }
+        }
     };
 
     const handleOk = () => {
@@ -66,7 +88,7 @@ const EntrustmentSample: React.FC = () => {
             render: (_, record) => (
                 <Space size="middle">
                     <a onClick={() => handleEdit(record)}>编辑</a>
-                    <a onClick={() => handlePrint(record)}><PrinterOutlined /> 打印标签</a>
+                    <a onClick={() => handleGenerateLabel(record)}><BarcodeOutlined /> 生成标签</a>
                     <Popconfirm title="确定删除吗?" onConfirm={() => handleDelete(record.id)}>
                         <a style={{ color: 'red' }}>删除</a>
                     </Popconfirm>
@@ -78,6 +100,8 @@ const EntrustmentSample: React.FC = () => {
     return (
         <Card title="委托样品管理" extra={<Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>样品登记</Button>}>
             <Table columns={columns} dataSource={dataSource} rowKey="id" />
+
+            {/* Edit/Add Modal */}
             <Modal
                 title={editingRecord ? "编辑样品" : "样品登记"}
                 open={isModalOpen}
@@ -98,6 +122,42 @@ const EntrustmentSample: React.FC = () => {
                         <Input.TextArea />
                     </Form.Item>
                 </Form>
+            </Modal>
+
+            {/* Label Generation Modal */}
+            <Modal
+                title="样品标签生成"
+                open={isLabelModalOpen}
+                onCancel={() => setIsLabelModalOpen(false)}
+                footer={[
+                    <Button key="close" onClick={() => setIsLabelModalOpen(false)}>关闭</Button>,
+                    <Button key="download" type="primary" icon={<DownloadOutlined />} onClick={handleDownloadLabel}>下载标签</Button>
+                ]}
+                width={400}
+            >
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '20px',
+                        background: '#fff',
+                        border: '1px solid #f0f0f0'
+                    }}
+                >
+                    <div ref={labelRef} style={{ padding: '20px', background: 'white', textAlign: 'center' }}>
+                        {currentLabelRecord && (
+                            <>
+                                <Barcode value={currentLabelRecord.sampleNo} width={2} height={60} fontSize={14} />
+                                <div style={{ marginTop: '10px', fontSize: '16px', fontWeight: 'bold' }}>
+                                    <div>样品编号: {currentLabelRecord.sampleNo}</div>
+                                    <div>样品名称: {currentLabelRecord.name}</div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
             </Modal>
         </Card>
     );

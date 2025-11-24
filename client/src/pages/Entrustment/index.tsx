@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Table, Card, Tag, Space, Button, Modal, Form, Input, Popconfirm, message } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Table, Card, Tag, Space, Button, Modal, Form, Input, Popconfirm, message, Tooltip } from 'antd';
+import { SearchOutlined, LinkOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { entrustmentData } from '../../mock/entrustment';
 import type { IEntrustmentRecord } from '../../mock/entrustment';
@@ -19,7 +19,6 @@ const Entrustment: React.FC = () => {
 
     const handleEdit = (record: IEntrustmentRecord) => {
         setEditingRecord(record);
-        // Convert date strings to dayjs objects if needed, but here we keep strings for simplicity in mock
         form.setFieldsValue(record);
         setIsModalOpen(true);
     };
@@ -27,6 +26,21 @@ const Entrustment: React.FC = () => {
     const handleDelete = (id: number) => {
         setDataSource(prev => prev.filter(item => item.id !== id));
         message.success('删除成功');
+    };
+
+    const handleGenerateLink = (record: IEntrustmentRecord) => {
+        const link = `http://lims.example.com/fill/${record.entrustmentId}`;
+        Modal.info({
+            title: '生成外部链接',
+            content: (
+                <div>
+                    <p>委托单: {record.entrustmentId}</p>
+                    <p>外部链接已生成:</p>
+                    <a href={link} target="_blank" rel="noreferrer">{link}</a>
+                </div>
+            ),
+            onOk() { },
+        });
     };
 
     const handleOk = async () => {
@@ -133,6 +147,7 @@ const Entrustment: React.FC = () => {
                     .includes((value as string).toLowerCase()),
         },
         { title: '送样时间', dataIndex: 'sampleDate', key: 'sampleDate' },
+        { title: '试验时间', dataIndex: 'testDate', key: 'testDate' },
         {
             title: '样件名称',
             dataIndex: 'sampleName',
@@ -189,6 +204,9 @@ const Entrustment: React.FC = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
+                    <Tooltip title="生成外部链接">
+                        <a onClick={() => handleGenerateLink(record)}><LinkOutlined /></a>
+                    </Tooltip>
                     <a onClick={() => handleEdit(record)}>编辑</a>
                     <Popconfirm title="确定删除?" onConfirm={() => handleDelete(record.id)}>
                         <a style={{ color: 'red' }}>删除</a>
@@ -201,12 +219,7 @@ const Entrustment: React.FC = () => {
     return (
         <Card
             title="委托单管理"
-            extra={
-                <Space>
-                    <Button onClick={() => message.success('已生成外部链接: http://lims.example.com/fill/xyz123')}>生成外部链接</Button>
-                    <Button type="primary" onClick={handleAdd}>新建委托</Button>
-                </Space>
-            }
+            extra={<Button type="primary" onClick={handleAdd}>新建委托</Button>}
         >
             <Table columns={columns} dataSource={dataSource} rowKey="id" pagination={{ pageSize: 10 }} />
 
@@ -219,6 +232,9 @@ const Entrustment: React.FC = () => {
                         <Input />
                     </Form.Item>
                     <Form.Item name="sampleDate" label="送样时间" rules={[{ required: true }]}>
+                        <Input placeholder="YYYY.MM.DD" />
+                    </Form.Item>
+                    <Form.Item name="testDate" label="试验时间" rules={[{ required: true }]}>
                         <Input placeholder="YYYY.MM.DD" />
                     </Form.Item>
                     <Form.Item name="sampleName" label="样件名称" rules={[{ required: true }]}>
