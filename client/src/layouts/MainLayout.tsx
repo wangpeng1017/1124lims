@@ -40,7 +40,12 @@ const items: MenuItem[] = [
   getItem('设备管理', '/device', <ToolOutlined />),
   getItem('环境管理', '/environment', <EnvironmentOutlined />),
   getItem('易耗品管理', '/consumables', <ShopOutlined />),
-  getItem('委托信息', '/entrustment', <ExperimentOutlined />),
+  getItem('委托管理', '/entrustment', <ExperimentOutlined />, [
+    getItem('委托单', '/entrustment/order', <FileProtectOutlined />),
+    getItem('委托合同', '/entrustment/contract', <AuditOutlined />),
+    getItem('委托单位', '/entrustment/client', <ApartmentOutlined />),
+    getItem('委托样品', '/entrustment/sample', <ExperimentOutlined />),
+  ]),
   getItem('人事管理', '/personnel', <TeamOutlined />, [
     getItem('员工列表', '/personnel/employee', <UserOutlined />),
     getItem('部门信息', '/personnel/department', <ApartmentOutlined />),
@@ -132,7 +137,7 @@ const MainLayout: React.FC = () => {
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
-          LIMS ©{new Date().getFullYear()} Created by Trae AI
+          LIMS ©{new Date().getFullYear()}
         </Footer>
       </Layout>
     </Layout>

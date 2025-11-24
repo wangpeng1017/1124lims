@@ -3,7 +3,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import EnvironmentManagement from './pages/EnvironmentManagement';
 import DeviceManagement from './pages/DeviceManagement';
-import Entrustment from './pages/Entrustment';
+import EntrustmentOrder from './pages/Entrustment';
+import EntrustmentContract from './pages/Entrustment/EntrustmentContract';
+import ClientUnit from './pages/Entrustment/ClientUnit';
+import EntrustmentSample from './pages/Entrustment/EntrustmentSample';
 import Consumables from './pages/Consumables';
 import EmployeeList from './pages/PersonnelManagement/EmployeeList';
 import DepartmentInfo from './pages/PersonnelManagement/DepartmentInfo';
@@ -23,7 +26,12 @@ const App: React.FC = () => {
           <Route path="device" element={<DeviceManagement />} />
           <Route path="environment" element={<EnvironmentManagement />} />
           <Route path="consumables" element={<Consumables />} />
-          <Route path="entrustment" element={<Entrustment />} />
+          <Route path="entrustment">
+            <Route path="order" element={<EntrustmentOrder />} />
+            <Route path="contract" element={<EntrustmentContract />} />
+            <Route path="client" element={<ClientUnit />} />
+            <Route path="sample" element={<EntrustmentSample />} />
+          </Route>
           <Route path="personnel">
             <Route path="employee" element={<EmployeeList />} />
             <Route path="department" element={<DepartmentInfo />} />

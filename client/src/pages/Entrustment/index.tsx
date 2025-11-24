@@ -3,12 +3,12 @@ import { Table, Card, Tag, Space, Button, Modal, Form, Input, Popconfirm, messag
 import { SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { entrustmentData } from '../../mock/entrustment';
-import type { EntrustmentRecord } from '../../mock/entrustment';
+import type { IEntrustmentRecord } from '../../mock/entrustment';
 
 const Entrustment: React.FC = () => {
-    const [dataSource, setDataSource] = useState<EntrustmentRecord[]>(entrustmentData);
+    const [dataSource, setDataSource] = useState<IEntrustmentRecord[]>(entrustmentData);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingRecord, setEditingRecord] = useState<EntrustmentRecord | null>(null);
+    const [editingRecord, setEditingRecord] = useState<IEntrustmentRecord | null>(null);
     const [form] = Form.useForm();
 
     const handleAdd = () => {
@@ -17,7 +17,7 @@ const Entrustment: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (record: EntrustmentRecord) => {
+    const handleEdit = (record: IEntrustmentRecord) => {
         setEditingRecord(record);
         // Convert date strings to dayjs objects if needed, but here we keep strings for simplicity in mock
         form.setFieldsValue(record);
@@ -46,7 +46,7 @@ const Entrustment: React.FC = () => {
         }
     };
 
-    const columns: ColumnsType<EntrustmentRecord> = [
+    const columns: ColumnsType<IEntrustmentRecord> = [
         { title: '序号', dataIndex: 'id', key: 'id', width: 70 },
         {
             title: '委托编号',
@@ -199,7 +199,15 @@ const Entrustment: React.FC = () => {
     ];
 
     return (
-        <Card title="委托信息管理" extra={<Button type="primary" onClick={handleAdd}>新建委托</Button>}>
+        <Card
+            title="委托单管理"
+            extra={
+                <Space>
+                    <Button onClick={() => message.success('已生成外部链接: http://lims.example.com/fill/xyz123')}>生成外部链接</Button>
+                    <Button type="primary" onClick={handleAdd}>新建委托</Button>
+                </Space>
+            }
+        >
             <Table columns={columns} dataSource={dataSource} rowKey="id" pagination={{ pageSize: 10 }} />
 
             <Modal title={editingRecord ? "编辑委托" : "新建委托"} open={isModalOpen} onOk={handleOk} onCancel={() => setIsModalOpen(false)}>
