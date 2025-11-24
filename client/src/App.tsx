@@ -23,6 +23,12 @@ import TransferRecords from './pages/SampleManagement/TransferRecords';
 import MySamples from './pages/SampleManagement/MySamples';
 import SampleTaskAssignment from './pages/SampleManagement/SampleTaskAssignment';
 import ParameterTaskAssignment from './pages/SampleManagement/ParameterTaskAssignment';
+import SupplierInfo from './pages/OutsourcingManagement/SupplierInfo';
+import SupplierCapability from './pages/OutsourcingManagement/SupplierCapability';
+import OutsourceByOrder from './pages/OutsourcingManagement/OutsourceByOrder';
+import OutsourceByParameter from './pages/OutsourcingManagement/OutsourceByParameter';
+import OutsourceOrders from './pages/OutsourcingManagement/OutsourceOrders';
+import OutsourceCompletion from './pages/OutsourcingManagement/OutsourceCompletion';
 
 const App: React.FC = () => {
   return (
@@ -59,6 +65,14 @@ const App: React.FC = () => {
             <Route path="my-samples" element={<MySamples />} />
             <Route path="task-sample" element={<SampleTaskAssignment />} />
             <Route path="task-parameter" element={<ParameterTaskAssignment />} />
+          </Route>
+          <Route path="outsourcing-management">
+            <Route path="supplier-info" element={<SupplierInfo />} />
+            <Route path="supplier-capability" element={<SupplierCapability />} />
+            <Route path="outsource-by-order" element={<OutsourceByOrder />} />
+            <Route path="outsource-by-parameter" element={<OutsourceByParameter />} />
+            <Route path="outsource-orders" element={<OutsourceOrders />} />
+            <Route path="outsource-completion" element={<OutsourceCompletion />} />
           </Route>
         </Route>
       </Routes>
