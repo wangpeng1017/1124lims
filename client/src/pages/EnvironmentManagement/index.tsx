@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Card, Row, Col, Statistic, Select, Typography, Badge, Button, Modal, Form, Input, InputNumber, message, Popconfirm } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Card, Select, Typography, Button, Modal, Form, Input, InputNumber, message, Popconfirm, Table, Badge, Space } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { environmentData } from '../../mock/environment';
 import type { EnvironmentRecord } from '../../mock/environment';
 
@@ -56,10 +57,46 @@ const EnvironmentManagement: React.FC = () => {
         }
     };
 
+    const columns: ColumnsType<EnvironmentRecord> = [
+        { title: '位置', dataIndex: 'location', key: 'location', width: 120 },
+        { title: '房间名称', dataIndex: 'room', key: 'room' },
+        {
+            title: '温度 (℃)',
+            dataIndex: 'temperature',
+            key: 'temperature',
+            render: (temp) => <span style={{ color: temp > 26 ? '#cf1322' : '#3f8600' }}>{temp}</span>,
+            sorter: (a, b) => a.temperature - b.temperature,
+        },
+        {
+            title: '湿度 (%)',
+            dataIndex: 'humidity',
+            key: 'humidity',
+            render: (hum) => <span style={{ color: '#3f8600' }}>{hum}</span>,
+            sorter: (a, b) => a.humidity - b.humidity,
+        },
+        {
+            title: '状态',
+            key: 'status',
+            render: () => <Badge status="processing" text="正常" />
+        },
+        {
+            title: '操作',
+            key: 'action',
+            render: (_, record) => (
+                <Space size="middle">
+                    <a onClick={() => handleEdit(record)}>编辑</a>
+                    <Popconfirm title="确定删除?" onConfirm={() => handleDelete(record.id)}>
+                        <a style={{ color: 'red' }}>删除</a>
+                    </Popconfirm>
+                </Space>
+            ),
+        },
+    ];
+
     return (
         <div>
             <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Title level={4} style={{ margin: 0 }}>环境监控看板</Title>
+                <Title level={4} style={{ margin: 0 }}>环境监控列表</Title>
                 <div style={{ display: 'flex', gap: 8 }}>
                     <Input
                         placeholder="搜索房间名称"
@@ -75,33 +112,9 @@ const EnvironmentManagement: React.FC = () => {
                 </div>
             </div>
 
-            <Row gutter={[16, 16]}>
-                {filteredData.map(item => (
-                    <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
-                        <Card
-                            title={item.room}
-                            extra={<Badge status="processing" text="正常" />}
-                            hoverable
-                            actions={[
-                                <EditOutlined key="edit" onClick={() => handleEdit(item)} />,
-                                <Popconfirm title="确定删除?" onConfirm={() => handleDelete(item.id)}>
-                                    <DeleteOutlined key="delete" />
-                                </Popconfirm>
-                            ]}
-                        >
-                            <Row gutter={16}>
-                                <Col span={12}>
-                                    <Statistic title="温度" value={item.temperature} suffix="℃" valueStyle={{ color: item.temperature > 26 ? '#cf1322' : '#3f8600' }} />
-                                </Col>
-                                <Col span={12}>
-                                    <Statistic title="湿度" value={item.humidity} suffix="%" valueStyle={{ color: '#3f8600' }} />
-                                </Col>
-                            </Row>
-                            <div style={{ marginTop: 8, color: '#8c8c8c', fontSize: '12px' }}>位置: {item.location}</div>
-                        </Card>
-                    </Col>
-                ))}
-            </Row>
+            <Card>
+                <Table columns={columns} dataSource={filteredData} rowKey="id" pagination={{ pageSize: 10 }} />
+            </Card>
 
             <Modal title={editingRecord ? "编辑监控点" : "新增监控点"} open={isModalOpen} onOk={handleOk} onCancel={() => setIsModalOpen(false)}>
                 <Form form={form} layout="vertical">

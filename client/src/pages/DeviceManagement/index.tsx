@@ -4,7 +4,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { SearchOutlined } from '@ant-design/icons';
 import { deviceData } from '../../mock/devices';
 import type { Device } from '../../mock/devices';
-import ReactECharts from 'echarts-for-react';
+
 
 const DeviceManagement: React.FC = () => {
     const [dataSource, setDataSource] = useState<Device[]>(deviceData);
@@ -180,28 +180,6 @@ const DeviceManagement: React.FC = () => {
         },
     ];
 
-    const getChartOption = () => {
-        return {
-            title: { text: '设备利用率概览', left: 'center' },
-            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-            grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-            xAxis: [{
-                type: 'category',
-                data: dataSource.map(d => d.name.split(' ')[0]),
-                axisTick: { alignWithLabel: true },
-                axisLabel: { interval: 0, rotate: 45, width: 100, overflow: 'truncate' }
-            }],
-            yAxis: [{ type: 'value', name: '利用率 (%)' }],
-            series: [{
-                name: '利用率',
-                type: 'bar',
-                barWidth: '60%',
-                data: dataSource.map(d => d.utilization),
-                itemStyle: { color: '#1890ff' }
-            }]
-        };
-    };
-
     return (
         <div>
             <Row gutter={16} style={{ marginBottom: 24 }}>
@@ -209,10 +187,6 @@ const DeviceManagement: React.FC = () => {
                 <Col span={8}><Card><Statistic title="运行中" value={dataSource.filter(d => d.status === 'Running').length} valueStyle={{ color: '#3f8600' }} /></Card></Col>
                 <Col span={8}><Card><Statistic title="平均利用率" value={dataSource.length ? (dataSource.reduce((acc, cur) => acc + cur.utilization, 0) / dataSource.length).toFixed(1) : 0} suffix="%" /></Card></Col>
             </Row>
-
-            <Card title="设备利用率分析" style={{ marginBottom: 24 }}>
-                <ReactECharts option={getChartOption()} style={{ height: 400 }} />
-            </Card>
 
             <Card title="设备列表" extra={<Button type="primary" onClick={handleAdd}>新增设备</Button>}>
                 <Table columns={columns} dataSource={dataSource} rowKey="id" pagination={{ pageSize: 10 }} />
