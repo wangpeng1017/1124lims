@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Table, Card, Tag, Statistic, Row, Col, Button, Modal, Form, Input, InputNumber, Space, Popconfirm, message } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { consumablesData } from '../../mock/consumables';
 import type { Consumable } from '../../mock/consumables';
@@ -45,10 +46,96 @@ const Consumables: React.FC = () => {
         }
     };
 
+
+
+    // ... (inside component)
+
     const columns: ColumnsType<Consumable> = [
         { title: '物料编号', dataIndex: 'id', key: 'id' },
-        { title: '名称', dataIndex: 'name', key: 'name' },
-        { title: '规格型号', dataIndex: 'spec', key: 'spec' },
+        {
+            title: '名称',
+            dataIndex: 'name',
+            key: 'name',
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }} onKeyDown={e => e.stopPropagation()}>
+                    <Input
+                        placeholder="搜索名称"
+                        value={selectedKeys[0]}
+                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            onClick={() => confirm()}
+                            icon={<SearchOutlined />}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            搜索
+                        </Button>
+                        <Button
+                            onClick={() => clearFilters && clearFilters()}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            重置
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            filterIcon: (filtered: boolean) => (
+                <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+            ),
+            onFilter: (value, record) =>
+                record.name
+                    .toString()
+                    .toLowerCase()
+                    .includes((value as string).toLowerCase()),
+        },
+        {
+            title: '规格型号',
+            dataIndex: 'spec',
+            key: 'spec',
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }} onKeyDown={e => e.stopPropagation()}>
+                    <Input
+                        placeholder="搜索规格"
+                        value={selectedKeys[0]}
+                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            onClick={() => confirm()}
+                            icon={<SearchOutlined />}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            搜索
+                        </Button>
+                        <Button
+                            onClick={() => clearFilters && clearFilters()}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            重置
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            filterIcon: (filtered: boolean) => (
+                <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+            ),
+            onFilter: (value, record) =>
+                record.spec
+                    .toString()
+                    .toLowerCase()
+                    .includes((value as string).toLowerCase()),
+        },
         { title: '单位', dataIndex: 'unit', key: 'unit' },
         {
             title: '库存',
@@ -62,7 +149,14 @@ const Consumables: React.FC = () => {
             sorter: (a, b) => a.stock - b.stock,
         },
         { title: '库位', dataIndex: 'location', key: 'location' },
-        { title: '类别', dataIndex: 'category', key: 'category', render: (text) => <Tag>{text}</Tag> },
+        {
+            title: '类别',
+            dataIndex: 'category',
+            key: 'category',
+            filters: Array.from(new Set(consumablesData.map(c => c.category))).map(c => ({ text: c, value: c })),
+            onFilter: (value, record) => record.category === value,
+            render: (text) => <Tag>{text}</Tag>
+        },
         {
             title: '操作',
             key: 'action',

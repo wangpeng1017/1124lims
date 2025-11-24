@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Table, Card, Tag, Row, Col, Statistic, Button, Modal, Form, Input, Select, InputNumber, Space, Popconfirm, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { SearchOutlined } from '@ant-design/icons';
 import { deviceData } from '../../mock/devices';
 import type { Device } from '../../mock/devices';
 import ReactECharts from 'echarts-for-react';
@@ -51,21 +52,102 @@ const DeviceManagement: React.FC = () => {
             dataIndex: 'id',
             key: 'id',
             width: 80,
+            sorter: (a, b) => a.id - b.id,
         },
         {
             title: '名称及型号',
             dataIndex: 'name',
             key: 'name',
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }} onKeyDown={e => e.stopPropagation()}>
+                    <Input
+                        placeholder="搜索名称"
+                        value={selectedKeys[0]}
+                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            onClick={() => confirm()}
+                            icon={<SearchOutlined />}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            搜索
+                        </Button>
+                        <Button
+                            onClick={() => clearFilters && clearFilters()}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            重置
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            filterIcon: (filtered: boolean) => (
+                <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+            ),
+            onFilter: (value, record) =>
+                record.name
+                    .toString()
+                    .toLowerCase()
+                    .includes((value as string).toLowerCase()),
         },
         {
             title: '编号',
             dataIndex: 'code',
             key: 'code',
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }} onKeyDown={e => e.stopPropagation()}>
+                    <Input
+                        placeholder="搜索编号"
+                        value={selectedKeys[0]}
+                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            onClick={() => confirm()}
+                            icon={<SearchOutlined />}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            搜索
+                        </Button>
+                        <Button
+                            onClick={() => clearFilters && clearFilters()}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            重置
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            filterIcon: (filtered: boolean) => (
+                <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+            ),
+            onFilter: (value, record) =>
+                record.code
+                    .toString()
+                    .toLowerCase()
+                    .includes((value as string).toLowerCase()),
         },
         {
             title: '状态',
             dataIndex: 'status',
             key: 'status',
+            filters: [
+                { text: '运行', value: 'Running' },
+                { text: '维修', value: 'Maintenance' },
+                { text: '闲置', value: 'Idle' },
+            ],
+            onFilter: (value, record) => record.status === value,
             render: (status) => {
                 let color = 'green';
                 if (status === 'Maintenance') color = 'red';

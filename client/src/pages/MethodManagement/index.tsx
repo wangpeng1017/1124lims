@@ -60,6 +60,11 @@ const MethodManagement: React.FC = () => {
             title: '标准有效性',
             dataIndex: 'validity',
             key: 'validity',
+            filters: [
+                { text: '现行有效', value: '现行有效' },
+                { text: '废止', value: '废止' },
+            ],
+            onFilter: (value, record) => record.validity === value,
             render: (text) => <Tag color={text === '现行有效' ? 'success' : 'default'}>{text}</Tag>,
         },
         {

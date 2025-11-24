@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Row, Col, Statistic, Select, Typography, Badge, Button, Modal, Form, Input, InputNumber, message, Popconfirm } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { environmentData } from '../../mock/environment';
 import type { EnvironmentRecord } from '../../mock/environment';
 
@@ -10,12 +10,17 @@ const { Title } = Typography;
 const EnvironmentManagement: React.FC = () => {
     const [dataSource, setDataSource] = useState<EnvironmentRecord[]>(environmentData);
     const [filterLocation, setFilterLocation] = useState<string>('All');
+    const [searchText, setSearchText] = useState<string>('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<EnvironmentRecord | null>(null);
     const [form] = Form.useForm();
 
     const locations = Array.from(new Set(dataSource.map(d => d.location)));
-    const filteredData = filterLocation === 'All' ? dataSource : dataSource.filter(d => d.location === filterLocation);
+    const filteredData = dataSource.filter(d => {
+        const matchLocation = filterLocation === 'All' || d.location === filterLocation;
+        const matchName = d.room.toLowerCase().includes(searchText.toLowerCase());
+        return matchLocation && matchName;
+    });
 
     const handleAdd = () => {
         setEditingRecord(null);
@@ -56,6 +61,12 @@ const EnvironmentManagement: React.FC = () => {
             <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Title level={4} style={{ margin: 0 }}>环境监控看板</Title>
                 <div style={{ display: 'flex', gap: 8 }}>
+                    <Input
+                        placeholder="搜索房间名称"
+                        style={{ width: 200 }}
+                        prefix={<SearchOutlined />}
+                        onChange={e => setSearchText(e.target.value)}
+                    />
                     <Select defaultValue="All" style={{ width: 120 }} onChange={setFilterLocation}>
                         <Option value="All">全部区域</Option>
                         {locations.map(loc => <Option key={loc} value={loc}>{loc}</Option>)}

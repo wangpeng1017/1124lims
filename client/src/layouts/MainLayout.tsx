@@ -71,7 +71,7 @@ const MainLayout: React.FC = () => {
           zIndex: 100,
         }}
       >
-        <div style={{ height: 32, margin: 16, background: '#e6f7ff', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
+        <div style={{ height: 32, margin: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Title level={5} style={{ color: '#1890ff', margin: 0, display: collapsed ? 'none' : 'block' }}>LIMS系统</Title>
         </div>
         <Menu

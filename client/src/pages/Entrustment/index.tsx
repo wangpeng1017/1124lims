@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Table, Card, Tag, Space, Button, Modal, Form, Input, Popconfirm, message } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { entrustmentData } from '../../mock/entrustment';
 import type { EntrustmentRecord } from '../../mock/entrustment';
@@ -47,10 +48,133 @@ const Entrustment: React.FC = () => {
 
     const columns: ColumnsType<EntrustmentRecord> = [
         { title: '序号', dataIndex: 'id', key: 'id', width: 70 },
-        { title: '委托编号', dataIndex: 'entrustmentId', key: 'entrustmentId' },
-        { title: '检测报告编号', dataIndex: 'reportId', key: 'reportId' },
+        {
+            title: '委托编号',
+            dataIndex: 'entrustmentId',
+            key: 'entrustmentId',
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }} onKeyDown={e => e.stopPropagation()}>
+                    <Input
+                        placeholder="搜索委托编号"
+                        value={selectedKeys[0]}
+                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            onClick={() => confirm()}
+                            icon={<SearchOutlined />}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            搜索
+                        </Button>
+                        <Button
+                            onClick={() => clearFilters && clearFilters()}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            重置
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            filterIcon: (filtered: boolean) => (
+                <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+            ),
+            onFilter: (value, record) =>
+                record.entrustmentId
+                    .toString()
+                    .toLowerCase()
+                    .includes((value as string).toLowerCase()),
+        },
+        {
+            title: '检测报告编号',
+            dataIndex: 'reportId',
+            key: 'reportId',
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }} onKeyDown={e => e.stopPropagation()}>
+                    <Input
+                        placeholder="搜索报告编号"
+                        value={selectedKeys[0]}
+                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            onClick={() => confirm()}
+                            icon={<SearchOutlined />}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            搜索
+                        </Button>
+                        <Button
+                            onClick={() => clearFilters && clearFilters()}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            重置
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            filterIcon: (filtered: boolean) => (
+                <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+            ),
+            onFilter: (value, record) =>
+                record.reportId
+                    .toString()
+                    .toLowerCase()
+                    .includes((value as string).toLowerCase()),
+        },
         { title: '送样时间', dataIndex: 'sampleDate', key: 'sampleDate' },
-        { title: '样件名称', dataIndex: 'sampleName', key: 'sampleName' },
+        {
+            title: '样件名称',
+            dataIndex: 'sampleName',
+            key: 'sampleName',
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }} onKeyDown={e => e.stopPropagation()}>
+                    <Input
+                        placeholder="搜索样件名称"
+                        value={selectedKeys[0]}
+                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            onClick={() => confirm()}
+                            icon={<SearchOutlined />}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            搜索
+                        </Button>
+                        <Button
+                            onClick={() => clearFilters && clearFilters()}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            重置
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            filterIcon: (filtered: boolean) => (
+                <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+            ),
+            onFilter: (value, record) =>
+                record.sampleName
+                    .toString()
+                    .toLowerCase()
+                    .includes((value as string).toLowerCase()),
+        },
         { title: '试验项目', dataIndex: 'testItems', key: 'testItems', ellipsis: true },
         {
             title: '跟单人',
