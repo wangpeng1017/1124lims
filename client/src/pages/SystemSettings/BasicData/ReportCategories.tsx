@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, Table, Button, Space, Modal, Form, Input, Select, message, Popconfirm, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { reportCategoryData, type IReportCategory } from '../../mock/report';
+import { reportCategoryData, type IReportCategory } from '../../../mock/report';
 
 const ReportCategories: React.FC = () => {
     const [dataSource, setDataSource] = useState(reportCategoryData);

@@ -16,9 +16,9 @@ import DepartmentInfo from './pages/PersonnelManagement/DepartmentInfo';
 import StationInfo from './pages/PersonnelManagement/StationInfo';
 import CapabilityValue from './pages/PersonnelManagement/CapabilityValue';
 import CapabilityReview from './pages/PersonnelManagement/CapabilityReview';
-import InspectionStandards from './pages/BasicParameters/InspectionStandards';
-import DetectionParameters from './pages/BasicParameters/DetectionParameters';
-import ELN from './pages/BasicParameters/ELN';
+import InspectionStandards from './pages/SystemSettings/BasicData/InspectionStandards';
+import DetectionParameters from './pages/SystemSettings/BasicData/DetectionParameters';
+import ELN from './pages/SystemSettings/BasicData/ELN';
 import SampleReceipt from './pages/SampleManagement/SampleReceipt';
 import SampleDetails from './pages/SampleManagement/SampleDetails';
 import SampleLabels from './pages/SampleManagement/SampleLabels';
@@ -26,7 +26,6 @@ import TransferRecords from './pages/SampleManagement/TransferRecords';
 import MySamples from './pages/SampleManagement/MySamples';
 import SampleTaskAssignment from './pages/SampleManagement/SampleTaskAssignment';
 import ParameterTaskAssignment from './pages/SampleManagement/ParameterTaskAssignment';
-import SupplierCapability from './pages/OutsourcingManagement/SupplierCapability';
 import OutsourceByOrder from './pages/OutsourcingManagement/OutsourceByOrder';
 import OutsourceByParameter from './pages/OutsourcingManagement/OutsourceByParameter';
 import OutsourceOrders from './pages/OutsourcingManagement/OutsourceOrders';
@@ -39,7 +38,7 @@ import TestReports from './pages/ReportManagement/TestReports';
 import ReportReview from './pages/ReportManagement/ReportReview';
 import ReviewRecords from './pages/ReportManagement/ReviewRecords';
 import RawRecords from './pages/ReportManagement/RawRecords';
-import ReportCategories from './pages/ReportManagement/ReportCategories';
+import ReportCategories from './pages/SystemSettings/BasicData/ReportCategories';
 import Receivables from './pages/FinanceManagement/Receivables';
 import PaymentRecords from './pages/FinanceManagement/PaymentRecords';
 import InvoiceManagement from './pages/FinanceManagement/InvoiceManagement';
@@ -109,7 +108,6 @@ const App: React.FC = () => {
           </Route>
           <Route path="outsourcing-management">
             <Route path="supplier-info" element={<SupplierInfo />} />
-            <Route path="supplier-capability" element={<SupplierCapability />} />
             <Route path="outsource-by-order" element={<OutsourceByOrder />} />
             <Route path="outsource-by-parameter" element={<OutsourceByParameter />} />
             <Route path="outsource-orders" element={<OutsourceOrders />} />

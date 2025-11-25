@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Table, Card, Button, Space, Modal, Form, Select, Input, InputNumber, Descriptions, message, Tag, Popconfirm } from 'antd';
+import { Table, Card, Button, Space, Modal, Form, Select, Descriptions, message, Tag, Popconfirm, Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, DingdingOutlined } from '@ant-design/icons';
-import { outsourceOrderData, type IOutsourceOrder, supplierData } from '../../mock/outsourcing';
-import { entrustmentData, sampleData } from '../../mock/entrustment';
+import { outsourceOrderData, type IOutsourceOrder } from '../../mock/outsourcing';
+import { supplierData } from '../../mock/supplier';
+import { entrustmentData } from '../../mock/entrustment';
+import { sampleDetailData } from '../../mock/sample';
 
 const OutsourceByOrder: React.FC = () => {
     const [dataSource, setDataSource] = useState<IOutsourceOrder[]>(outsourceOrderData);
@@ -34,18 +36,13 @@ const OutsourceByOrder: React.FC = () => {
     const handleEntrustmentChange = (entrustmentId: string) => {
         setSelectedEntrustment(entrustmentId);
         // 获取该委托单的样品
-        const relatedSamples = sampleData;
+        // In real app, filter by entrustmentId. Here we just take some mock data.
+        const relatedSamples = sampleDetailData.slice(0, 2);
         const sampleIds = relatedSamples.map(s => s.sampleNo);
         form.setFieldsValue({
             sampleIds,
             sampleCount: sampleIds.length
         });
-    };
-
-    const handlePriceChange = () => {
-        const pricePerSample = form.getFieldValue('pricePerSample') || 0;
-        const sampleCount = form.getFieldValue('sampleCount') || 0;
-        form.setFieldValue('totalPrice', pricePerSample * sampleCount);
     };
 
     const handleOk = () => {
@@ -155,7 +152,7 @@ const OutsourceByOrder: React.FC = () => {
         },
     ];
 
-    const activeSuppliers = supplierData.filter(s => s.status === '启用');
+    const activeSuppliers = supplierData.filter(s => s.cooperationStatus === 'active');
 
     return (
         <Card
@@ -206,53 +203,25 @@ const OutsourceByOrder: React.FC = () => {
                                 </Descriptions.Item>
                             </Descriptions>
 
-                            <Form.Item name="sampleIds" hidden>
-                                <Input />
-                            </Form.Item>
-                            <Form.Item name="sampleCount" hidden>
-                                <Input />
-                            </Form.Item>
-
                             <Form.Item
                                 name="supplierId"
                                 label="供应商"
                                 rules={[{ required: true, message: '请选择供应商' }]}
                             >
                                 <Select placeholder="选择供应商">
-                                    {activeSuppliers.map(supplier => (
-                                        <Select.Option key={supplier.id} value={supplier.id}>
-                                            {supplier.name} ({supplier.level}级)
+                                    {activeSuppliers.map(s => (
+                                        <Select.Option key={s.id} value={s.id}>
+                                            {s.name} ({s.evaluationLevel}级)
                                         </Select.Option>
                                     ))}
                                 </Select>
                             </Form.Item>
 
-                            <Form.Item
-                                name="pricePerSample"
-                                label="单个样品价格（元）"
-                                rules={[{ required: true }]}
-                            >
-                                <InputNumber
-                                    min={0}
-                                    style={{ width: '100%' }}
-                                    onChange={handlePriceChange}
-                                />
-                            </Form.Item>
-
-                            <Form.Item name="totalPrice" label="总价（元）">
-                                <InputNumber disabled style={{ width: '100%' }} />
-                            </Form.Item>
-
-                            <Form.Item name="sendDate" label="寄送日期">
-                                <Input type="date" />
-                            </Form.Item>
-
-                            <Form.Item name="trackingNo" label="快递单号">
-                                <Input placeholder="选填" />
-                            </Form.Item>
-
-                            <Form.Item name="expectedReturnDate" label="预计返回日期">
-                                <Input type="date" />
+                            <Form.Item name="testItems" label="委外检测项目" rules={[{ required: true }]}>
+                                <Select mode="tags" placeholder="输入或选择检测项目">
+                                    <Select.Option value="成分分析">成分分析</Select.Option>
+                                    <Select.Option value="特殊性能测试">特殊性能测试</Select.Option>
+                                </Select>
                             </Form.Item>
 
                             <Form.Item name="remark" label="备注">

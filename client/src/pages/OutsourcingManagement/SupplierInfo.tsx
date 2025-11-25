@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Table, Card, Button, Space, Modal, Form, Input, Select, Popconfirm, message, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined } from '@ant-design/icons';
-import { supplierData, type ISupplier } from '../../mock/outsourcing';
+import { supplierData } from '../../mock/supplier';
+import type { ISupplier } from '../../mock/supplier';
 
 const SupplierInfo: React.FC = () => {
     const [dataSource, setDataSource] = useState<ISupplier[]>(supplierData);
@@ -22,17 +23,17 @@ const SupplierInfo: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
         setDataSource(dataSource.filter(item => item.id !== id));
         message.success('删除成功');
     };
 
     const handleToggleStatus = (record: ISupplier) => {
-        const newStatus = record.status === '启用' ? '停用' : '启用';
+        const newStatus = record.cooperationStatus === 'active' ? 'suspended' : 'active';
         setDataSource(dataSource.map(item =>
-            item.id === record.id ? { ...item, status: newStatus } : item
+            item.id === record.id ? { ...item, cooperationStatus: newStatus } : item
         ));
-        message.success(`已${newStatus}`);
+        message.success(`已${newStatus === 'active' ? '启用' : '停用'}`);
     };
 
     const handleOk = () => {
@@ -43,16 +44,18 @@ const SupplierInfo: React.FC = () => {
                 ));
                 message.success('更新成功');
             } else {
-                const newId = Math.max(...dataSource.map(item => item.id), 0) + 1;
-                const supplierCode = `SUP${String(newId).padStart(3, '0')}`;
+                const maxId = Math.max(...dataSource.map(item => parseInt(item.id.replace('SUP', '')) || 0), 0);
+                const newId = `SUP${String(maxId + 1).padStart(3, '0')}`;
+
                 setDataSource([...dataSource, {
                     id: newId,
-                    supplierCode,
+                    code: newId, // Assuming code is same as ID for now
                     ...values,
-                    status: '启用',
-                    creator: '当前用户',
-                    createTime: new Date().toISOString().split('T')[0]
-                }]);
+                    cooperationStatus: 'active',
+                    categories: [], // Default empty
+                    certifications: [], // Default empty
+                    cooperationStartDate: new Date().toISOString().split('T')[0],
+                } as ISupplier]);
                 message.success('新建成功');
             }
             setIsModalOpen(false);
@@ -60,12 +63,12 @@ const SupplierInfo: React.FC = () => {
     };
 
     const columns: ColumnsType<ISupplier> = [
-        { title: '供应商编号', dataIndex: 'supplierCode', key: 'supplierCode', width: 120 },
+        { title: '供应商编号', dataIndex: 'code', key: 'code', width: 120 },
         { title: '供应商名称', dataIndex: 'name', key: 'name', width: 200 },
         {
             title: '等级',
-            dataIndex: 'level',
-            key: 'level',
+            dataIndex: 'evaluationLevel',
+            key: 'evaluationLevel',
             width: 80,
             render: (level) => {
                 const colorMap: Record<string, string> = { A: 'gold', B: 'blue', C: 'default' };
@@ -73,16 +76,28 @@ const SupplierInfo: React.FC = () => {
             }
         },
         { title: '联系人', dataIndex: 'contactPerson', key: 'contactPerson', width: 100 },
-        { title: '联系电话', dataIndex: 'contactPhone', key: 'contactPhone', width: 130 },
-        { title: '资质证书', dataIndex: 'qualification', key: 'qualification', width: 120 },
-        { title: '能力范围', dataIndex: 'capabilityScope', key: 'capabilityScope', ellipsis: true },
+        { title: '联系电话', dataIndex: 'phone', key: 'phone', width: 130 },
+        {
+            title: '资质证书',
+            dataIndex: 'certifications',
+            key: 'certifications',
+            width: 120,
+            render: (certs) => certs?.map((c: any) => c.number).join(', ')
+        },
+        {
+            title: '能力范围',
+            dataIndex: 'capabilities',
+            key: 'capabilities',
+            ellipsis: true,
+            render: (caps) => caps?.map((c: any) => c.parameterName).join(', ')
+        },
         {
             title: '状态',
-            dataIndex: 'status',
-            key: 'status',
+            dataIndex: 'cooperationStatus',
+            key: 'cooperationStatus',
             width: 80,
             fixed: 'right',
-            render: (status) => <Tag color={status === '启用' ? 'green' : 'red'}>{status}</Tag>
+            render: (status) => <Tag color={status === 'active' ? 'green' : 'red'}>{status === 'active' ? '启用' : '停用'}</Tag>
         },
         {
             title: '操作',
@@ -93,7 +108,7 @@ const SupplierInfo: React.FC = () => {
                 <Space size="small">
                     <a onClick={() => handleEdit(record)}>编辑</a>
                     <a onClick={() => handleToggleStatus(record)}>
-                        {record.status === '启用' ? '停用' : '启用'}
+                        {record.cooperationStatus === 'active' ? '停用' : '启用'}
                     </a>
                     <Popconfirm title="确定删除吗?" onConfirm={() => handleDelete(record.id)}>
                         <a style={{ color: 'red' }}>删除</a>
@@ -126,7 +141,7 @@ const SupplierInfo: React.FC = () => {
                     <Form.Item name="name" label="供应商名称" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="level" label="供应商等级" rules={[{ required: true }]}>
+                    <Form.Item name="evaluationLevel" label="供应商等级" rules={[{ required: true }]}>
                         <Select>
                             <Select.Option value="A">A级（优秀）</Select.Option>
                             <Select.Option value="B">B级（良好）</Select.Option>
@@ -136,20 +151,14 @@ const SupplierInfo: React.FC = () => {
                     <Form.Item name="contactPerson" label="联系人" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="contactPhone" label="联系电话" rules={[{ required: true }]}>
+                    <Form.Item name="phone" label="联系电话" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="contactEmail" label="联系邮箱">
+                    <Form.Item name="email" label="联系邮箱">
                         <Input type="email" />
                     </Form.Item>
                     <Form.Item name="address" label="地址" rules={[{ required: true }]}>
                         <Input />
-                    </Form.Item>
-                    <Form.Item name="qualification" label="资质证书编号" rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="capabilityScope" label="能力范围" rules={[{ required: true }]}>
-                        <Input.TextArea rows={3} placeholder="请描述供应商的检测能力范围" />
                     </Form.Item>
                     <Form.Item name="remark" label="备注">
                         <Input.TextArea rows={2} />

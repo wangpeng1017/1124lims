@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { Table, Card, Tag, Button, Space, Modal, Form, Input, Select, Popconfirm, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined } from '@ant-design/icons';
-import { inspectionStandardsData, detectionParametersData } from '../../mock/basicParameters';
-import type { InspectionStandard } from '../../mock/basicParameters';
-import { deviceData } from '../../mock/devices';
-import { employeeData } from '../../mock/personnel';
+import { inspectionStandardsData, detectionParametersData } from '../../../mock/basicParameters';
+import type { InspectionStandard } from '../../../mock/basicParameters';
+import { deviceData } from '../../../mock/devices';
+import { employeeData } from '../../../mock/personnel';
 
 const InspectionStandards: React.FC = () => {
     const [dataSource, setDataSource] = useState<InspectionStandard[]>(inspectionStandardsData);

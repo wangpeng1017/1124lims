@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Card, DatePicker, Select, Space, Table, Row, Col } from 'antd';
+import { Card, DatePicker, Select, Space, Table, Row, Col, Tag } from 'antd';
 import ReactECharts from 'echarts-for-react';
-import { sampleData as rawSampleData } from '../../mock/entrustment';
+import { sampleDetailData } from '../../mock/sample';
+import type { ISampleDetail } from '../../mock/sample';
 import dayjs from 'dayjs';
 
 const { RangePicker } = DatePicker;
@@ -12,10 +13,10 @@ const SampleStats: React.FC = () => {
 
     // 数据处理：添加模拟字段
     const enhancedData = useMemo(() => {
-        return rawSampleData.map(item => ({
+        return sampleDetailData.map((item: ISampleDetail) => ({
             ...item,
-            receivedDate: '2023-11-' + (Math.floor(Math.random() * 30) + 1).toString().padStart(2, '0'),
-            sampleType: ['金属', '塑料', '橡胶', '建材'][Math.floor(Math.random() * 4)],
+            receivedDate: item.receiptDate || '2023-11-' + (Math.floor(Math.random() * 30) + 1).toString().padStart(2, '0'),
+            sampleType: item.name.includes('钢') ? '金属' : (item.name.includes('水') ? '建材' : '其他'),
             testParameters: ['抗拉强度', '屈服强度', '伸长率', '硬度', '冲击功'][Math.floor(Math.random() * 5)]
         }));
     }, []);
@@ -101,7 +102,7 @@ const SampleStats: React.FC = () => {
         const projectCount: Record<string, number> = {};
 
         filteredData.forEach(item => {
-            const projects = item.testParameters?.split(',') || ['未知项目'];
+            const projects = (item.testParameters as string)?.split(',') || ['未知项目'];
             projects.forEach(p => {
                 const project = p.trim();
                 projectCount[project] = (projectCount[project] || 0) + 1;
@@ -131,7 +132,15 @@ const SampleStats: React.FC = () => {
         { title: '样品类型', dataIndex: 'sampleType', key: 'sampleType', width: 100 },
         { title: '检测参数', dataIndex: 'testParameters', key: 'testParameters', width: 200, ellipsis: true },
         { title: '收样日期', dataIndex: 'receivedDate', key: 'receivedDate', width: 120 },
-        { title: '状态', dataIndex: 'status', key: 'status', width: 100 },
+        {
+            title: '状态',
+            dataIndex: 'status',
+            key: 'status',
+            width: 100,
+            render: (status: string) => (
+                <Tag color={status === '已完成' ? 'green' : 'blue'}>{status}</Tag>
+            )
+        },
     ];
 
     return (

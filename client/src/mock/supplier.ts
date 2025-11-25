@@ -10,6 +10,18 @@ export interface ISupplierCategory {
     status: 'active' | 'inactive';
 }
 
+// 供应商能力
+export interface ISupplierCapability {
+    id: string;
+    parameterId: number; // 关联检测参数ID
+    parameterName: string;
+    certificateNo: string; // 证书编号
+    validFrom: string;
+    validTo: string;
+    status: 'active' | 'expired';
+    remark?: string;
+}
+
 // 供应商信息
 export interface ISupplier {
     id: string;
@@ -29,6 +41,9 @@ export interface ISupplier {
         expiryDate: string; // 有效期
         attachmentUrl?: string; // 附件
     }[];
+
+    // 检测能力
+    capabilities?: ISupplierCapability[];
 
     // 合作信息
     cooperationStartDate: string; // 合作开始日期
@@ -139,6 +154,10 @@ export const supplierData: ISupplier[] = [
                 expiryDate: '2025-12-31'
             }
         ],
+        capabilities: [
+            { id: 'CAP001', parameterId: 1, parameterName: '拉伸强度', certificateNo: 'CERT-2023-001', validFrom: '2023-01-01', validTo: '2025-12-31', status: 'active' },
+            { id: 'CAP002', parameterId: 4, parameterName: '中性盐雾', certificateNo: 'CERT-2023-002', validFrom: '2023-01-01', validTo: '2025-12-31', status: 'active' }
+        ],
         cooperationStartDate: '2023-01-15',
         cooperationStatus: 'active',
         overallScore: 92,
@@ -165,6 +184,10 @@ export const supplierData: ISupplier[] = [
                 expiryDate: '2025-12-31'
             }
         ],
+        capabilities: [
+            { id: 'CAP003', parameterId: 2, parameterName: '弯曲性能', certificateNo: 'CERT-2023-101', validFrom: '2023-02-01', validTo: '2026-01-31', status: 'active' },
+            { id: 'CAP004', parameterId: 5, parameterName: '金相组织', certificateNo: 'CERT-2023-102', validFrom: '2023-02-01', validTo: '2026-01-31', status: 'active' }
+        ],
         cooperationStartDate: '2023-02-20',
         cooperationStatus: 'active',
         overallScore: 88,
@@ -190,6 +213,9 @@ export const supplierData: ISupplier[] = [
                 issueDate: '2021-03-01',
                 expiryDate: '2026-02-28'
             }
+        ],
+        capabilities: [
+            { id: 'CAP005', parameterId: 3, parameterName: '燃烧性能', certificateNo: 'CERT-2023-201', validFrom: '2023-03-01', validTo: '2024-02-28', status: 'active' }
         ],
         cooperationStartDate: '2023-03-10',
         cooperationStatus: 'active',

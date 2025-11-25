@@ -77,11 +77,7 @@ const items: MenuItem[] = [
     getItem('能力值', '/personnel/capability', <SafetyCertificateOutlined />),
     getItem('能力评审', '/personnel/review', <AuditOutlined />),
   ]),
-  getItem('检测基础参数', '/basic-params', <ProfileOutlined />, [
-    getItem('电子试验记录本 (ELN)', '/basic-params/eln', <ReadOutlined />),
-    getItem('检测参数/项目', '/basic-params/detection', <ExperimentOutlined />),
-    getItem('检查标准/依据', '/basic-params/standards', <FileProtectOutlined />),
-  ]),
+
   getItem('样品管理', '/sample-management', <ExperimentOutlined />, [
     getItem('收样/计价', '/sample-management/receipt', <DollarOutlined />),
     getItem('样品明细', '/sample-management/details', <FileTextOutlined />),
@@ -135,7 +131,13 @@ const items: MenuItem[] = [
   getItem('系统设置', '/system-settings', <SettingOutlined />, [
     getItem('用户管理', '/system-settings/users', <UserOutlined />),
     getItem('角色管理', '/system-settings/roles', <TeamOutlined />),
-    getItem('权限配置', '/system-settings/permissions', <SafetyCertificateOutlined />),
+    getItem('权限配置', '/system-settings/permission', <SafetyCertificateOutlined />),
+    getItem('基础数据配置', '/basic-params', <ProfileOutlined />, [
+      getItem('电子试验记录本 (ELN)', '/basic-params/eln', <ReadOutlined />),
+      getItem('检测参数/项目', '/basic-params/detection', <ExperimentOutlined />),
+      getItem('检查标准/依据', '/basic-params/standards', <FileProtectOutlined />),
+      getItem('样品报告分类', '/report-management/categories', <AppstoreOutlined />),
+    ]),
   ]),
 ];
 

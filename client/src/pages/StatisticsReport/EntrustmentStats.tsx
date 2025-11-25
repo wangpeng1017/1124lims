@@ -178,8 +178,6 @@ const EntrustmentStats: React.FC = () => {
             </Card>
         </div>
     );
-
-
 };
 
 export default EntrustmentStats;

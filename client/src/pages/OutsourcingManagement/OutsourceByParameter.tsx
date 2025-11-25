@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Table, Card, Button, Space, Modal, Form, Select, Input, InputNumber, message, Tag, Popconfirm, Badge, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, SafetyCertificateOutlined, DingdingOutlined } from '@ant-design/icons';
-import { outsourceParameterData, type IOutsourceParameter, supplierData, supplierCapabilityData } from '../../mock/outsourcing';
+import { outsourceParameterData, type IOutsourceParameter } from '../../mock/outsourcing';
+import { supplierData } from '../../mock/supplier';
+import type { ISupplier, ISupplierCapability } from '../../mock/supplier';
 import { sampleDetailData } from '../../mock/sample';
 import { detectionParametersData } from '../../mock/basicParams';
 
@@ -11,7 +13,7 @@ const OutsourceByParameter: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<IOutsourceParameter | null>(null);
     const [selectedParameter, setSelectedParameter] = useState<number | null>(null);
-    const [qualifiedSuppliers, setQualifiedSuppliers] = useState<number[]>([]);
+    const [qualifiedSuppliers, setQualifiedSuppliers] = useState<string[]>([]);
     const [form] = Form.useForm();
 
     const handleAdd = () => {
@@ -39,9 +41,12 @@ const OutsourceByParameter: React.FC = () => {
         setSelectedParameter(parameterId);
 
         // 获取具备该参数能力的供应商
-        const qualified = supplierCapabilityData
-            .filter(cap => cap.parameterId === parameterId && cap.status === '有效')
-            .map(cap => cap.supplierId);
+        const qualified = supplierData
+            .filter((supplier: ISupplier) =>
+                supplier.cooperationStatus === 'active' &&
+                supplier.capabilities?.some((cap: ISupplierCapability) => cap.parameterId === parameterId && cap.status === 'active')
+            )
+            .map((supplier: ISupplier) => supplier.id);
 
         setQualifiedSuppliers(qualified);
 
@@ -246,7 +251,7 @@ const OutsourceByParameter: React.FC = () => {
                                         return (
                                             <Select.Option key={supplierId} value={supplierId}>
                                                 <SafetyCertificateOutlined style={{ color: 'green', marginRight: 4 }} />
-                                                {supplier?.name} ({supplier?.level}级)
+                                                {supplier?.name} ({supplier?.evaluationLevel}级)
                                             </Select.Option>
                                         );
                                     })}

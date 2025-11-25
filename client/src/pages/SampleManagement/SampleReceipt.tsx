@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { Table, Card, Button, Space, Modal, Form, Input, Select, Popconfirm, message, InputNumber, Descriptions, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined } from '@ant-design/icons';
-import { sampleReceiptData, type ISampleReceipt } from '../../mock/sample';
+import { sampleReceiptData, type ISampleReceipt, sampleDetailData } from '../../mock/sample';
 import { entrustmentData } from '../../mock/entrustment';
-import { sampleData } from '../../mock/entrustment';
 
 const SampleReceipt: React.FC = () => {
     const [dataSource, setDataSource] = useState<ISampleReceipt[]>(sampleReceiptData);
@@ -39,7 +38,7 @@ const SampleReceipt: React.FC = () => {
         setSelectedEntrustment(entrustmentId);
         // 获取该委托单的样品列表
         // 实际应根据委托单ID筛选，此处模拟返回所有
-        const relatedSamples = sampleData;
+        const relatedSamples = sampleDetailData.slice(0, 2);
 
         // 自动设置样品编号和价格明细
         const sampleIds = relatedSamples.map(s => s.sampleNo);
@@ -210,10 +209,6 @@ const SampleReceipt: React.FC = () => {
                                     </>
                                 )}
                             </Form.List>
-
-                            <Form.Item name="remark" label="备注">
-                                <Input.TextArea rows={2} />
-                            </Form.Item>
                         </>
                     )}
                 </Form>
