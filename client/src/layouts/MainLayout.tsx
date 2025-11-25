@@ -44,54 +44,8 @@ function getItem(
   label: React.ReactNode,
   key: React.Key,
   icon?: React.ReactNode,
-import React, { useState } from 'react';
-import {
-    UserOutlined,
-    ExperimentOutlined,
-    EnvironmentOutlined,
-    ToolOutlined,
-    ShopOutlined,
-    TeamOutlined,
-    ApartmentOutlined,
-    SafetyCertificateOutlined,
-    AuditOutlined,
-    ProfileOutlined,
-    ReadOutlined,
-    FileProtectOutlined,
-    DollarOutlined,
-    FileTextOutlined,
-    BarcodeOutlined,
-    SwapOutlined,
-    InboxOutlined,
-    ProjectOutlined,
-    PartitionOutlined,
-    TeamOutlined as SupplierOutlined,
-    CheckCircleOutlined,
-    FileSearchOutlined,
-    FormOutlined,
-    FileDoneOutlined,
-    AuditOutlined as ReportAuditOutlined,
-    HistoryOutlined,
-    FolderOutlined,
-    AppstoreOutlined,
-    AccountBookOutlined,
-    TransactionOutlined,
-  } from '@ant-design/icons';
-import type { MenuProps } from 'antd';
-import { Breadcrumb, Layout, Menu, theme, Avatar, Typography } from 'antd';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-
-const { Header, Content, Footer, Sider } = Layout;
-const { Title } = Typography;
-
-  type MenuItem = Required < MenuProps > ['items'][number];
-
-function getItem(
-    label: React.ReactNode,
-    key: React.Key,
-    icon?: React.ReactNode,
-    children?: MenuItem[],
-  ): MenuItem {
+  children?: MenuItem[],
+): MenuItem {
   return {
     key,
     icon,
