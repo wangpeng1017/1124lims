@@ -55,6 +55,52 @@ export interface IRawRecord {
     generatedDate: string;
 }
 
+// 报告模板接口
+export interface IReportTemplate {
+    id: number;
+    name: string;
+    code: string;
+    category: string;
+    fileUrl: string; // 模拟文件路径
+    uploadDate: string;
+    uploader: string;
+    status: 'active' | 'inactive';
+}
+
+// 模拟报告模板数据
+export const reportTemplateData: IReportTemplate[] = [
+    {
+        id: 1,
+        name: '力学性能标准模板',
+        code: 'TPL-MECH-001',
+        category: '力学性能报告',
+        fileUrl: '/templates/mech_template_v1.docx',
+        uploadDate: '2023-01-15',
+        uploader: 'Admin',
+        status: 'active'
+    },
+    {
+        id: 2,
+        name: '材料性能标准模板',
+        code: 'TPL-MAT-001',
+        category: '材料性能报告',
+        fileUrl: '/templates/mat_template_v1.docx',
+        uploadDate: '2023-02-20',
+        uploader: 'Admin',
+        status: 'active'
+    },
+    {
+        id: 3,
+        name: '化学性能标准模板',
+        code: 'TPL-CHEM-001',
+        category: '化学性能报告',
+        fileUrl: '/templates/chem_template_v1.docx',
+        uploadDate: '2023-03-10',
+        uploader: 'Admin',
+        status: 'active'
+    }
+];
+
 // 报告分类接口
 export interface IReportCategory {
     id: number;

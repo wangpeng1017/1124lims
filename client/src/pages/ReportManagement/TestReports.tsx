@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, Table, Tag, Button, Space, Select, Modal, Descriptions, Divider } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { EyeOutlined, DownloadOutlined, FileTextOutlined } from '@ant-design/icons';
-import { testReportData, type ITestReport } from '../../mock/report';
+import { testReportData, reportTemplateData, type ITestReport } from '../../mock/report';
 
 const { Option } = Select;
 
@@ -10,6 +10,7 @@ const TestReports: React.FC = () => {
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const [previewReport, setPreviewReport] = useState<ITestReport | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
 
     const filteredData = testReportData.filter(item =>
         statusFilter ? item.status === statusFilter : true
@@ -17,6 +18,7 @@ const TestReports: React.FC = () => {
 
     const handlePreview = (record: ITestReport) => {
         setPreviewReport(record);
+        setSelectedTemplateId(record.templateId); // Default to current template
         setIsPreviewOpen(true);
     };
 
@@ -31,6 +33,9 @@ const TestReports: React.FC = () => {
     };
 
     const generateReportHTML = (report: ITestReport) => {
+        const template = reportTemplateData.find(t => t.id === selectedTemplateId);
+        const templateName = template ? template.name : '默认模板';
+
         return `
             <html>
             <head>
@@ -41,9 +46,11 @@ const TestReports: React.FC = () => {
                     table { width: 100%; border-collapse: collapse; margin: 20px 0; }
                     td, th { border: 1px solid #000; padding: 8px; }
                     .signature { margin-top: 60px; display: flex; justify-content: space-between; }
+                    .template-info { text-align: right; font-size: 10px; color: #888; margin-bottom: 20px; }
                 </style>
             </head>
             <body>
+                <div class="template-info">使用模板: ${templateName}</div>
                 <h1>检测报告</h1>
                 <p><strong>报告编号:</strong> ${report.reportNo}</p>
                 <p><strong>委托单位:</strong> ${report.clientName}</p>
@@ -157,6 +164,21 @@ const TestReports: React.FC = () => {
             >
                 {previewReport && (
                     <div style={{ padding: '20px', border: '1px solid #ddd', background: '#fff' }}>
+                        <div style={{ marginBottom: 16, textAlign: 'right' }}>
+                            <span>选择模板：</span>
+                            <Select
+                                value={selectedTemplateId}
+                                style={{ width: 200 }}
+                                onChange={setSelectedTemplateId}
+                            >
+                                {reportTemplateData
+                                    .filter(t => t.category === previewReport.reportType)
+                                    .map(t => (
+                                        <Option key={t.id} value={t.id}>{t.name}</Option>
+                                    ))
+                                }
+                            </Select>
+                        </div>
                         <h2 style={{ textAlign: 'center' }}>检测报告</h2>
                         <Divider />
                         <Descriptions bordered column={2}>
