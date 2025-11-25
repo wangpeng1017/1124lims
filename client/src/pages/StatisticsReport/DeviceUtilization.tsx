@@ -7,7 +7,6 @@ import dayjs from 'dayjs';
 const { RangePicker } = DatePicker;
 
 const DeviceUtilization: React.FC = () => {
-    const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
     const [selectedType, setSelectedType] = useState<string>('all');
 
     // 筛选数据

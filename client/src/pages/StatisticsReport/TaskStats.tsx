@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Card, DatePicker, Select, Space, Table, Row, Col, Statistic } from 'antd';
+import { Card, DatePicker, Space, Table, Row, Col, Statistic } from 'antd';
 import ReactECharts from 'echarts-for-react';
 import { testTaskData as taskData } from '../../mock/test';
 import dayjs from 'dayjs';
@@ -7,7 +7,6 @@ import dayjs from 'dayjs';
 const { RangePicker } = DatePicker;
 
 const TaskStats: React.FC = () => {
-    const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
 
     // 计算完成率
     const completionStats = useMemo(() => {

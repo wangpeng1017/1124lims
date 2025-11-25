@@ -25,6 +25,7 @@ import {
   FormOutlined,
   FileDoneOutlined,
   HistoryOutlined,
+  HistoryOutlined as ReportAuditOutlined,
   FolderOutlined,
   AccountBookOutlined,
   TransactionOutlined,
