@@ -53,7 +53,7 @@ import StatisticsReport from './pages/StatisticsReport';
 import EntrustmentStats from './pages/StatisticsReport/EntrustmentStats';
 import SampleStats from './pages/StatisticsReport/SampleStats';
 import TaskStats from './pages/StatisticsReport/TaskStats';
-import DeviceUtilization from './pages/StatisticsReport/DeviceUtilization';
+import ReportTemplates from './pages/ReportManagement/ReportTemplates';
 
 // 系统设置
 import SystemSettings from './pages/SystemSettings';
@@ -124,6 +124,7 @@ const App: React.FC = () => {
             <Route path="review" element={<ReportReview />} />
             <Route path="review-records" element={<ReviewRecords />} />
             <Route path="raw-records" element={<RawRecords />} />
+            <Route path="report-templates" element={<ReportTemplates />} />
             <Route path="categories" element={<ReportCategories />} />
           </Route>
           <Route path="finance-management">
@@ -140,13 +141,12 @@ const App: React.FC = () => {
             <Route path="entrustment" element={<EntrustmentStats />} />
             <Route path="sample" element={<SampleStats />} />
             <Route path="task" element={<TaskStats />} />
-            <Route path="device" element={<DeviceUtilization />} />
           </Route>
           <Route path="system-settings">
             <Route index element={<SystemSettings />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="roles" element={<RoleManagement />} />
-            <Route path="permissions" element={<PermissionConfig />} />
+            <Route path="permission" element={<PermissionConfig />} />
           </Route>
           <Route path="supplier-management">
             {/* 供应商管理 */}

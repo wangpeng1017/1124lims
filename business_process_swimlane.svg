@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 950">
+  <!-- Definitions -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+    <style>
+      .swimlane-header { fill: #f0f2f5; stroke: #d9d9d9; stroke-width: 1; }
+      .swimlane-body { fill: #ffffff; stroke: #d9d9d9; stroke-width: 1; }
+      .lane-text { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #333; }
+      .process-box { fill: #e6f7ff; stroke: #1890ff; stroke-width: 2; rx: 5; ry: 5; }
+      .process-text { font-family: Arial, sans-serif; font-size: 14px; fill: #333; text-anchor: middle; }
+      .connector { stroke: #333; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .title { font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; fill: #333; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="600" y="40" class="title">LIMS 业务流程泳道图</text>
+
+  <!-- Swimlanes -->
+  <!-- Lane 1: 客户/委托方 -->
+  <rect x="50" y="60" width="1100" height="120" class="swimlane-body"/>
+  <rect x="50" y="60" width="40" height="120" class="swimlane-header"/>
+  <text x="75" y="120" class="lane-text" transform="rotate(-90, 75, 120)">客户/委托方</text>
+
+  <!-- Lane 2: 业务受理 (委托/样品) -->
+  <rect x="50" y="180" width="1100" height="150" class="swimlane-body"/>
+  <rect x="50" y="180" width="40" height="150" class="swimlane-header"/>
+  <text x="75" y="255" class="lane-text" transform="rotate(-90, 75, 255)">业务受理</text>
+
+  <!-- Lane 3: 实验室 (检测/试验) -->
+  <rect x="50" y="330" width="1100" height="150" class="swimlane-body"/>
+  <rect x="50" y="330" width="40" height="150" class="swimlane-header"/>
+  <text x="75" y="405" class="lane-text" transform="rotate(-90, 75, 405)">实验室</text>
+
+  <!-- Lane 4: 报告管理 (审核/批准) -->
+  <rect x="50" y="480" width="1100" height="150" class="swimlane-body"/>
+  <rect x="50" y="480" width="40" height="150" class="swimlane-header"/>
+  <text x="75" y="555" class="lane-text" transform="rotate(-90, 75, 555)">报告管理</text>
+
+  <!-- Lane 5: 财务/归档 -->
+  <rect x="50" y="630" width="1100" height="120" class="swimlane-body"/>
+  <rect x="50" y="630" width="40" height="120" class="swimlane-header"/>
+  <text x="75" y="690" class="lane-text" transform="rotate(-90, 75, 690)">财务/归档</text>
+
+  <!-- Process Steps -->
+  
+  <!-- Step 1: 委托申请 -->
+  <rect x="150" y="90" width="120" height="60" class="process-box"/>
+  <text x="210" y="120" class="process-text">委托申请</text>
+  <text x="210" y="135" class="process-text">(送样/协议)</text>
+
+  <!-- Step 2: 委托登记 -->
+  <rect x="150" y="225" width="120" height="60" class="process-box"/>
+  <text x="210" y="255" class="process-text">委托登记</text>
+  <text x="210" y="270" class="process-text">(生成委托单)</text>
+
+  <!-- Step 3: 样品接收 -->
+  <rect x="320" y="225" width="120" height="60" class="process-box"/>
+  <text x="380" y="255" class="process-text">样品接收</text>
+  <text x="380" y="270" class="process-text">(编号/标签)</text>
+
+  <!-- Step 4: 任务分配 -->
+  <rect x="490" y="225" width="120" height="60" class="process-box"/>
+  <text x="550" y="255" class="process-text">任务分配</text>
+  <text x="550" y="270" class="process-text">(人员/设备)</text>
+
+  <!-- Step 5: 样品流转/领样 -->
+  <rect x="490" y="375" width="120" height="60" class="process-box"/>
+  <text x="550" y="405" class="process-text">样品流转</text>
+  <text x="550" y="420" class="process-text">(领样)</text>
+
+  <!-- Step 6: 试验检测 -->
+  <rect x="660" y="375" width="120" height="60" class="process-box"/>
+  <text x="720" y="405" class="process-text">试验检测</text>
+  <text x="720" y="420" class="process-text">(数据录入)</text>
+
+  <!-- Step 7: 报告编制 -->
+  <rect x="660" y="525" width="120" height="60" class="process-box"/>
+  <text x="720" y="555" class="process-text">报告编制</text>
+  <text x="720" y="570" class="process-text">(生成草稿)</text>
+
+  <!-- Step 8: 报告审核 -->
+  <rect x="830" y="525" width="120" height="60" class="process-box"/>
+  <text x="890" y="555" class="process-text">报告审核</text>
+
+  <!-- Step 9: 报告批准 -->
+  <rect x="1000" y="525" width="120" height="60" class="process-box"/>
+  <text x="1060" y="555" class="process-text">报告批准</text>
+  <text x="1060" y="570" class="process-text">(签发)</text>
+
+  <!-- Step 10: 报告发放 -->
+  <rect x="1000" y="225" width="120" height="60" class="process-box"/>
+  <text x="1060" y="255" class="process-text">报告发放</text>
+
+  <!-- Step 11: 费用结算 -->
+  <rect x="1000" y="660" width="120" height="60" class="process-box"/>
+  <text x="1060" y="690" class="process-text">费用结算</text>
+  <text x="1060" y="705" class="process-text">(开票/收款)</text>
+
+  <!-- Lane 6: 基础数据/资源支持 -->
+  <rect x="50" y="780" width="1100" height="120" class="swimlane-body"/>
+  <rect x="50" y="780" width="40" height="120" class="swimlane-header"/>
+  <text x="75" y="840" class="lane-text" transform="rotate(-90, 75, 840)">基础数据/资源</text>
+
+  <!-- Data Stores -->
+  <!-- Store 1: 检测参数库 -->
+  <rect x="490" y="810" width="120" height="60" class="process-box" style="stroke-dasharray: 5,5; fill: #fff7e6; stroke: #fa8c16;"/>
+  <text x="550" y="840" class="process-text">检测参数库</text>
+  <text x="550" y="855" class="process-text">(能力附表)</text>
+
+  <!-- Store 2: 检测标准库 -->
+  <rect x="660" y="810" width="120" height="60" class="process-box" style="stroke-dasharray: 5,5; fill: #fff7e6; stroke: #fa8c16;"/>
+  <text x="720" y="840" class="process-text">检测标准库</text>
+  <text x="720" y="855" class="process-text">(SOP)</text>
+
+  <!-- Store 3: 报告模板库 -->
+  <rect x="830" y="810" width="120" height="60" class="process-box" style="stroke-dasharray: 5,5; fill: #fff7e6; stroke: #fa8c16;"/>
+  <text x="890" y="840" class="process-text">报告模板库</text>
+
+  <!-- Connectors -->
+  <path d="M 210 150 L 210 225" class="connector"/>
+  <path d="M 270 255 L 320 255" class="connector"/>
+  <path d="M 440 255 L 490 255" class="connector"/>
+  <path d="M 550 285 L 550 375" class="connector"/>
+  <path d="M 610 405 L 660 405" class="connector"/>
+  <path d="M 720 435 L 720 525" class="connector"/>
+  <path d="M 780 555 L 830 555" class="connector"/>
+  <path d="M 950 555 L 1000 555" class="connector"/>
+  <path d="M 1060 525 L 1060 285" class="connector"/>
+  <path d="M 1060 285 L 1060 660" class="connector"/>
+
+  <!-- Data Flow Connectors (Dashed) -->
+  <path d="M 550 810 L 550 285" class="connector" style="stroke-dasharray: 4; stroke: #fa8c16; fill: none;"/>
+  <path d="M 720 810 L 720 435" class="connector" style="stroke-dasharray: 4; stroke: #fa8c16; fill: none;"/>
+  <path d="M 890 810 L 890 585" class="connector" style="stroke-dasharray: 4; stroke: #fa8c16; fill: none;"/>
+  <path d="M 720 585 L 890 585" class="connector" style="stroke-dasharray: 4; stroke: #fa8c16; fill: none; marker-end: none;"/> <!-- Helper line for template -->
+
+</svg>

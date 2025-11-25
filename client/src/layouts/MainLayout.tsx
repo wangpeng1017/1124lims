@@ -31,7 +31,9 @@ import {
   TransactionOutlined,
   AppstoreOutlined,
   BarChartOutlined,
-  SettingOutlined
+  SettingOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme, Avatar, Typography } from 'antd';
@@ -86,14 +88,8 @@ const items: MenuItem[] = [
     getItem('报告模板管理', '/report-management/report-templates', <FileTextOutlined />),
     getItem('报告分类', '/report-management/categories', <AppstoreOutlined />),
   ]),
-  getItem('统计报表', '/statistics-report', <BarChartOutlined />, [
-    getItem('委托单统计', '/statistics-report/entrustment', <FileTextOutlined />),
-    getItem('样品统计', '/statistics-report/sample', <ExperimentOutlined />),
-    getItem('任务完成率', '/statistics-report/task', <CheckCircleOutlined />),
-    getItem('设备利用率', '/statistics-report/device', <ToolOutlined />),
-  ]),
-  getItem('设备与仪器管理', '/device-management', <ToolOutlined />, [
-    getItem('设备/仪器档案', '/device-management/info', <ProfileOutlined />),
+  getItem('设备管理', '/device-management', <ToolOutlined />, [
+    getItem('设备档案', '/device-management/info', <ProfileOutlined />),
     getItem('设备保养', '/device-management/maintenance', <SafetyCertificateOutlined />),
     getItem('设备检修', '/device-management/repair', <ToolOutlined />),
     getItem('仪器定检', '/device-management/calibration', <AuditOutlined />),
@@ -109,6 +105,12 @@ const items: MenuItem[] = [
     getItem('能力值', '/personnel/capability', <SafetyCertificateOutlined />),
     getItem('能力评审', '/personnel/review', <AuditOutlined />),
   ]),
+  getItem('委外/分包管理', '/outsourcing-management', <SupplierOutlined />, [
+    getItem('委外分配（委托单）', '/outsourcing-management/outsource-by-order', <FileProtectOutlined />),
+    getItem('委外分配（参数）', '/outsourcing-management/outsource-by-parameter', <PartitionOutlined />),
+    getItem('委外单信息', '/outsourcing-management/outsource-orders', <FileSearchOutlined />),
+    getItem('委外任务完成', '/outsourcing-management/outsource-completion', <CheckCircleOutlined />),
+  ]),
   getItem('供应商管理', '/supplier-management', <ApartmentOutlined />, [
     getItem('供应商分类', '/supplier-management/category', <AppstoreOutlined />),
     getItem('供应商信息', '/supplier-management/info', <ProfileOutlined />),
@@ -116,28 +118,27 @@ const items: MenuItem[] = [
     getItem('绩效评价', '/supplier-management/evaluation', <AuditOutlined />),
     getItem('统计分析', '/supplier-management/statistics', <AppstoreOutlined />),
   ]),
-  getItem('委外/分包管理', '/outsourcing-management', <SupplierOutlined />, [
-    getItem('委外分配（委托单）', '/outsourcing-management/outsource-by-order', <FileProtectOutlined />),
-    getItem('委外分配（参数）', '/outsourcing-management/outsource-by-parameter', <PartitionOutlined />),
-    getItem('委外单信息', '/outsourcing-management/outsource-orders', <FileSearchOutlined />),
-    getItem('委外任务完成', '/outsourcing-management/outsource-completion', <CheckCircleOutlined />),
-  ]),
   getItem('财务管理', '/finance-management', <AccountBookOutlined />, [
     getItem('委托应收', '/finance-management/receivables', <DollarOutlined />),
     getItem('收款记录', '/finance-management/payment-records', <TransactionOutlined />),
     getItem('开票管理', '/finance-management/invoices', <FileProtectOutlined />),
   ]),
-  getItem('环境管理', '/environment', <EnvironmentOutlined />),
+  getItem('统计报表', '/statistics-report', <BarChartOutlined />, [
+    getItem('委托单统计', '/statistics-report/entrustment', <FileTextOutlined />),
+    getItem('样品统计', '/statistics-report/sample', <ExperimentOutlined />),
+    getItem('任务完成率', '/statistics-report/task', <CheckCircleOutlined />),
+  ]),
+  getItem('基础数据配置', '/basic-params', <ProfileOutlined />, [
+    getItem('电子试验记录本 (ELN)', '/basic-params/eln', <ReadOutlined />),
+    getItem('检测参数/项目', '/basic-params/detection', <ExperimentOutlined />),
+    getItem('检查标准/依据', '/basic-params/standards', <FileProtectOutlined />),
+    getItem('样品报告分类', '/report-management/categories', <AppstoreOutlined />),
+    getItem('环境管理', '/environment', <EnvironmentOutlined />),
+  ]),
   getItem('系统设置', '/system-settings', <SettingOutlined />, [
     getItem('用户管理', '/system-settings/users', <UserOutlined />),
     getItem('角色管理', '/system-settings/roles', <TeamOutlined />),
     getItem('权限配置', '/system-settings/permission', <SafetyCertificateOutlined />),
-    getItem('基础数据配置', '/basic-params', <ProfileOutlined />, [
-      getItem('电子试验记录本 (ELN)', '/basic-params/eln', <ReadOutlined />),
-      getItem('检测参数/项目', '/basic-params/detection', <ExperimentOutlined />),
-      getItem('检查标准/依据', '/basic-params/standards', <FileProtectOutlined />),
-      getItem('样品报告分类', '/report-management/categories', <AppstoreOutlined />),
-    ]),
   ]),
 ];
 
@@ -175,6 +176,7 @@ const MainLayout: React.FC = () => {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider
+        trigger={null}
         collapsible
         collapsed={collapsed}
         onCollapse={(value) => setCollapsed(value)}
@@ -199,7 +201,6 @@ const MainLayout: React.FC = () => {
           mode="inline"
           items={items}
           onClick={({ key }) => navigate(key.toString())}
-          style={{ marginBottom: 48 }}
         />
       </Sider>
       <Layout style={{ marginLeft: collapsed ? 80 : 200, transition: 'margin-left 0.2s' }}>
@@ -215,7 +216,14 @@ const MainLayout: React.FC = () => {
           width: '100%',
           boxShadow: '0 1px 4px rgba(0,21,41,.08)'
         }}>
-          <Breadcrumb style={{ margin: '16px 0' }} items={[{ title: 'LIMS' }, { title: getCurrentTitle() }]} />
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+              className: 'trigger',
+              onClick: () => setCollapsed(!collapsed),
+              style: { fontSize: '18px', marginRight: 16, cursor: 'pointer' }
+            })}
+            <Breadcrumb style={{ margin: '16px 0' }} items={[{ title: 'LIMS' }, { title: getCurrentTitle() }]} />
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>Admin User</span>
             <Avatar icon={<UserOutlined />} />
