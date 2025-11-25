@@ -1,6 +1,3 @@
-import { sampleDetailData } from './sample';
-import { employeeData } from './personnel';
-
 // 检测任务接口
 export interface ITestTask {
     id: number;

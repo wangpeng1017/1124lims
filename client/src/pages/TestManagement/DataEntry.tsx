@@ -105,7 +105,7 @@ const DataEntry: React.FC = () => {
                     </Col>
                 </Row>
 
-                <Divider orientation="left">环境条件</Divider>
+                <Divider>环境条件</Divider>
                 <Row gutter={24}>
                     <Col span={8}>
                         <Form.Item label="快速选择环境记录">
@@ -130,7 +130,7 @@ const DataEntry: React.FC = () => {
                     </Col>
                 </Row>
 
-                <Divider orientation="left">测试数据</Divider>
+                <Divider>测试数据</Divider>
                 <Row gutter={24}>
                     <Col span={6}>
                         <Form.Item name="value1" label="观测值 1" rules={[{ required: true }]}>
