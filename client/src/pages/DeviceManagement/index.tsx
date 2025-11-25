@@ -24,7 +24,7 @@ const DeviceManagement: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
         setDataSource(prev => prev.filter(item => item.id !== id));
         message.success('删除成功');
     };
@@ -36,8 +36,9 @@ const DeviceManagement: React.FC = () => {
                 setDataSource(prev => prev.map(item => item.id === editingRecord.id ? { ...item, ...values } : item));
                 message.success('更新成功');
             } else {
-                const newId = Math.max(...dataSource.map(d => d.id), 0) + 1;
-                setDataSource(prev => [{ id: newId, ...values }, ...prev]);
+                const maxId = dataSource.length > 0 ? Math.max(...dataSource.map(d => parseInt(d.id) || 0)) : 0;
+                const newId = (maxId + 1).toString();
+                setDataSource(prev => [{ id: newId, ...values } as Device, ...prev]);
                 message.success('添加成功');
             }
             setIsModalOpen(false);
@@ -52,7 +53,7 @@ const DeviceManagement: React.FC = () => {
             dataIndex: 'id',
             key: 'id',
             width: 80,
-            sorter: (a, b) => a.id - b.id,
+            sorter: (a, b) => (parseInt(a.id) || 0) - (parseInt(b.id) || 0),
         },
         {
             title: '名称及型号',

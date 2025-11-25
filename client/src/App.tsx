@@ -2,7 +2,10 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import EnvironmentManagement from './pages/EnvironmentManagement';
-import DeviceManagement from './pages/DeviceManagement';
+import DeviceInfo from './pages/DeviceManagement/DeviceInfo';
+import MaintenancePlan from './pages/DeviceManagement/MaintenancePlan';
+import RepairManagement from './pages/DeviceManagement/RepairManagement';
+import CalibrationPlan from './pages/DeviceManagement/CalibrationPlan';
 import EntrustmentOrder from './pages/Entrustment';
 import EntrustmentContract from './pages/Entrustment/EntrustmentContract';
 import ClientUnit from './pages/Entrustment/ClientUnit';
@@ -45,6 +48,19 @@ import StockTransactions from './pages/ConsumablesManagement/StockTransactions';
 
 // 供应商管理
 import SupplierInfo from './pages/SupplierManagement/SupplierInfo';
+
+//统计报表
+import StatisticsReport from './pages/StatisticsReport';
+import EntrustmentStats from './pages/StatisticsReport/EntrustmentStats';
+import SampleStats from './pages/StatisticsReport/SampleStats';
+import TaskStats from './pages/StatisticsReport/TaskStats';
+import DeviceUtilization from './pages/StatisticsReport/DeviceUtilization';
+
+// 系统设置
+import SystemSettings from './pages/SystemSettings';
+import UserManagement from './pages/SystemSettings/UserManagement';
+import RoleManagement from './pages/SystemSettings/RoleManagement';
+import PermissionConfig from './pages/SystemSettings/PermissionConfig';
 import SupplierCategory from './pages/SupplierManagement/SupplierCategory';
 import EvaluationTemplate from './pages/SupplierManagement/EvaluationTemplate';
 import PerformanceEvaluation from './pages/SupplierManagement/PerformanceEvaluation';
@@ -55,8 +71,13 @@ const App: React.FC = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<Navigate to="/device" replace />} />
-          <Route path="device" element={<DeviceManagement />} />
+          <Route index element={<Navigate to="/device-management/info" replace />} />
+          <Route path="device-management">
+            <Route path="info" element={<DeviceInfo />} />
+            <Route path="maintenance" element={<MaintenancePlan />} />
+            <Route path="repair" element={<RepairManagement />} />
+            <Route path="calibration" element={<CalibrationPlan />} />
+          </Route>
           <Route path="environment" element={<EnvironmentManagement />} />
           <Route path="consumables" element={<Consumables />} />
           <Route path="entrustment">
@@ -115,6 +136,19 @@ const App: React.FC = () => {
           <Route path="consumables-management">
             <Route path="info" element={<ConsumableInfo />} />
             <Route path="transactions" element={<StockTransactions />} />
+          </Route>
+          <Route path="statistics-report">
+            <Route index element={<StatisticsReport />} />
+            <Route path="entrustment" element={<EntrustmentStats />} />
+            <Route path="sample" element={<SampleStats />} />
+            <Route path="task" element={<TaskStats />} />
+            <Route path="device" element={<DeviceUtilization />} />
+          </Route>
+          <Route path="system-settings">
+            <Route index element={<SystemSettings />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="roles" element={<RoleManagement />} />
+            <Route path="permissions" element={<PermissionConfig />} />
           </Route>
           <Route path="supplier-management">
             {/* 供应商管理 */}

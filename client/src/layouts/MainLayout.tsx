@@ -24,12 +24,13 @@ import {
   FileSearchOutlined,
   FormOutlined,
   FileDoneOutlined,
-  AuditOutlined as ReportAuditOutlined,
   HistoryOutlined,
   FolderOutlined,
-  AppstoreOutlined,
   AccountBookOutlined,
   TransactionOutlined,
+  AppstoreOutlined,
+  BarChartOutlined,
+  SettingOutlined
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme, Avatar, Typography } from 'antd';
@@ -55,7 +56,12 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem('设备管理', '/devices', <ToolOutlined />),
+  getItem('设备与仪器管理', '/device-management', <ToolOutlined />, [
+    getItem('设备/仪器档案', '/device-management/info', <ProfileOutlined />),
+    getItem('设备保养', '/device-management/maintenance', <SafetyCertificateOutlined />),
+    getItem('设备检修', '/device-management/repair', <ToolOutlined />),
+    getItem('仪器定检', '/device-management/calibration', <AuditOutlined />),
+  ]),
   getItem('环境管理', '/environment', <EnvironmentOutlined />),
   getItem('委托管理', '/entrustment', <ExperimentOutlined />, [
     getItem('委托单', '/entrustment/order', <FileProtectOutlined />),
@@ -118,6 +124,17 @@ const items: MenuItem[] = [
   getItem('耗材管理', '/consumables-management', <ShopOutlined />, [
     getItem('耗材信息', '/consumables-management/info', <ProfileOutlined />),
     getItem('出入库管理', '/consumables-management/transactions', <SwapOutlined />),
+  ]),
+  getItem('统计报表', '/statistics-report', <BarChartOutlined />, [
+    getItem('委托单统计', '/statistics-report/entrustment', <FileTextOutlined />),
+    getItem('样品统计', '/statistics-report/sample', <ExperimentOutlined />),
+    getItem('任务完成率', '/statistics-report/task', <CheckCircleOutlined />),
+    getItem('设备利用率', '/statistics-report/device', <ToolOutlined />),
+  ]),
+  getItem('系统设置', '/system-settings', <SettingOutlined />, [
+    getItem('用户管理', '/system-settings/users', <UserOutlined />),
+    getItem('角色管理', '/system-settings/roles', <TeamOutlined />),
+    getItem('权限配置', '/system-settings/permissions', <SafetyCertificateOutlined />),
   ]),
 ];
 
