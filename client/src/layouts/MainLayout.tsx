@@ -23,6 +23,11 @@ import {
   CheckCircleOutlined,
   FileSearchOutlined,
   FormOutlined,
+  FileDoneOutlined,
+  AuditOutlined as ReportAuditOutlined,
+  HistoryOutlined,
+  FolderOutlined,
+  AppstoreOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme, Avatar, Typography } from 'antd';
@@ -91,6 +96,13 @@ const items: MenuItem[] = [
     getItem('我的任务', '/test-management/my-tasks', <UserOutlined />),
     getItem('数据录入', '/test-management/data-entry', <FormOutlined />),
     getItem('任务明细', '/test-management/task-details/TASK20231101001', <FileSearchOutlined />), // 示例链接
+  ]),
+  getItem('报告管理', '/report-management', <FileDoneOutlined />, [
+    getItem('样品检测报告', '/report-management/test-reports', <FileTextOutlined />),
+    getItem('报告审核/批准', '/report-management/review', <ReportAuditOutlined />),
+    getItem('审核记录', '/report-management/review-records', <HistoryOutlined />),
+    getItem('原始记录（委托单）', '/report-management/raw-records', <FolderOutlined />),
+    getItem('报告分类', '/report-management/categories', <AppstoreOutlined />),
   ]),
 ];
 

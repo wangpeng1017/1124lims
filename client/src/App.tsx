@@ -33,6 +33,11 @@ import TestTasks from './pages/TestManagement/TestTasks';
 import MyTasks from './pages/TestManagement/MyTasks';
 import DataEntry from './pages/TestManagement/DataEntry';
 import TaskDetails from './pages/TestManagement/TaskDetails';
+import TestReports from './pages/ReportManagement/TestReports';
+import ReportReview from './pages/ReportManagement/ReportReview';
+import ReviewRecords from './pages/ReportManagement/ReviewRecords';
+import RawRecords from './pages/ReportManagement/RawRecords';
+import ReportCategories from './pages/ReportManagement/ReportCategories';
 
 const App: React.FC = () => {
   return (
@@ -83,6 +88,13 @@ const App: React.FC = () => {
             <Route path="my-tasks" element={<MyTasks />} />
             <Route path="data-entry" element={<DataEntry />} />
             <Route path="task-details/:taskNo" element={<TaskDetails />} />
+          </Route>
+          <Route path="report-management">
+            <Route path="test-reports" element={<TestReports />} />
+            <Route path="review" element={<ReportReview />} />
+            <Route path="review-records" element={<ReviewRecords />} />
+            <Route path="raw-records" element={<RawRecords />} />
+            <Route path="categories" element={<ReportCategories />} />
           </Route>
         </Route>
       </Routes>
