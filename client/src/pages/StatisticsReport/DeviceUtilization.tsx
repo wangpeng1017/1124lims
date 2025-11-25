@@ -2,9 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Card, DatePicker, Select, Space, Table, Row, Col } from 'antd';
 import ReactECharts from 'echarts-for-react';
 import { deviceData } from '../../mock/devices';
-import dayjs from 'dayjs';
 
-const { RangePicker } = DatePicker;
 
 const DeviceUtilization: React.FC = () => {
     const [selectedType, setSelectedType] = useState<string>('all');
@@ -108,20 +106,17 @@ const DeviceUtilization: React.FC = () => {
     return (
         <div style={{ padding: 24 }}>
             <Card title="设备利用率报表" extra={
-                <Space>
-                    <RangePicker onChange={(dates) => setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs])} />
-                    <Select
-                        style={{ width: 150 }}
-                        placeholder="资产类型"
-                        value={selectedType}
-                        onChange={setSelectedType}
-                    >
-                        <Select.Option value="all">全部类型</Select.Option>
-                        <Select.Option value="instrument">仪器</Select.Option>
-                        <Select.Option value="device">设备</Select.Option>
-                        <Select.Option value="glassware">玻璃器皿</Select.Option>
-                    </Select>
-                </Space>
+                <Select
+                    style={{ width: 150 }}
+                    placeholder="资产类型"
+                    value={selectedType}
+                    onChange={setSelectedType}
+                >
+                    <Select.Option value="all">全部类型</Select.Option>
+                    <Select.Option value="instrument">仪器</Select.Option>
+                    <Select.Option value="device">设备</Select.Option>
+                    <Select.Option value="glassware">玻璃器皿</Select.Option>
+                </Select>
             }>
                 <Space direction="vertical" size="large" style={{ width: '100%' }}>
                     <Row gutter={16}>

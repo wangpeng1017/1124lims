@@ -1,10 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Card, DatePicker, Space, Table, Row, Col, Statistic } from 'antd';
 import ReactECharts from 'echarts-for-react';
 import { testTaskData as taskData } from '../../mock/test';
 import dayjs from 'dayjs';
 
-const { RangePicker } = DatePicker;
 
 const TaskStats: React.FC = () => {
 
@@ -146,9 +145,7 @@ const TaskStats: React.FC = () => {
 
     return (
         <div style={{ padding: 24 }}>
-            <Card title="任务完成率报表" extra={
-                <RangePicker onChange={(dates) => setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs])} />
-            }>
+            <Card title="任务完成率报表">
                 <Space direction="vertical" size="large" style={{ width: '100%' }}>
                     {/* 统计数据 */}
                     <Row gutter={16}>
