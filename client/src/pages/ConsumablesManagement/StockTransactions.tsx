@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Card, Table, Tag, Button, Space, Modal, Form, Input, InputNumber, Select, DatePicker, message, Tabs, Radio } from 'antd';
+import { Card, Table, Tag, Button, Space, Modal, Form, Input, InputNumber, Select, DatePicker, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { PlusOutlined, MinusOutlined, HistoryOutlined, SearchOutlined } from '@ant-design/icons';
+import { PlusOutlined, MinusOutlined, SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { consumablesData, stockTransactionData, type IConsumableInfo, type IStockTransaction } from '../../mock/consumables';
 import { employeeData, departmentData } from '../../mock/personnel';
