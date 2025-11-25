@@ -180,4 +180,6 @@ const EntrustmentStats: React.FC = () => {
     );
 
 
-    export default EntrustmentStats;
+};
+
+export default EntrustmentStats;

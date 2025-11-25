@@ -181,4 +181,6 @@ const RepairManagement: React.FC = () => {
     );
 
 
-    export default RepairManagement;
+};
+
+export default RepairManagement;
