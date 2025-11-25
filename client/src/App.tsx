@@ -29,6 +29,10 @@ import OutsourceByOrder from './pages/OutsourcingManagement/OutsourceByOrder';
 import OutsourceByParameter from './pages/OutsourcingManagement/OutsourceByParameter';
 import OutsourceOrders from './pages/OutsourcingManagement/OutsourceOrders';
 import OutsourceCompletion from './pages/OutsourcingManagement/OutsourceCompletion';
+import TestTasks from './pages/TestManagement/TestTasks';
+import MyTasks from './pages/TestManagement/MyTasks';
+import DataEntry from './pages/TestManagement/DataEntry';
+import TaskDetails from './pages/TestManagement/TaskDetails';
 
 const App: React.FC = () => {
   return (
@@ -73,6 +77,12 @@ const App: React.FC = () => {
             <Route path="outsource-by-parameter" element={<OutsourceByParameter />} />
             <Route path="outsource-orders" element={<OutsourceOrders />} />
             <Route path="outsource-completion" element={<OutsourceCompletion />} />
+          </Route>
+          <Route path="test-management">
+            <Route path="tasks" element={<TestTasks />} />
+            <Route path="my-tasks" element={<MyTasks />} />
+            <Route path="data-entry" element={<DataEntry />} />
+            <Route path="task-details/:taskNo" element={<TaskDetails />} />
           </Route>
         </Route>
       </Routes>

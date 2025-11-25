@@ -22,6 +22,7 @@ import {
   TeamOutlined as SupplierOutlined,
   CheckCircleOutlined,
   FileSearchOutlined,
+  FormOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme, Avatar, Typography } from 'antd';
@@ -84,6 +85,12 @@ const items: MenuItem[] = [
     getItem('委外分配（参数）', '/outsourcing-management/outsource-by-parameter', <PartitionOutlined />),
     getItem('委外单信息', '/outsourcing-management/outsource-orders', <FileSearchOutlined />),
     getItem('委外任务完成', '/outsourcing-management/outsource-completion', <CheckCircleOutlined />),
+  ]),
+  getItem('试验管理', '/test-management', <ExperimentOutlined />, [
+    getItem('检测任务', '/test-management/tasks', <CheckCircleOutlined />),
+    getItem('我的任务', '/test-management/my-tasks', <UserOutlined />),
+    getItem('数据录入', '/test-management/data-entry', <FormOutlined />),
+    getItem('任务明细', '/test-management/task-details/TASK20231101001', <FileSearchOutlined />), // 示例链接
   ]),
 ];
 
