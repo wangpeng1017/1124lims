@@ -5,7 +5,7 @@ import { FileTextOutlined, PrinterOutlined, PlusOutlined } from '@ant-design/ico
 import { rawRecordData, type IRawRecord } from '../../mock/report';
 
 const RawRecords: React.FC = () => {
-    const [dataSource, setDataSource] = useState(rawRecordData);
+    const [dataSource] = useState(rawRecordData);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [previewRecord, setPreviewRecord] = useState<IRawRecord | null>(null);
 

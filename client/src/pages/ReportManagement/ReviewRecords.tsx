@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Input, Timeline, Tag, Empty, Space, Select } from 'antd';
 import { ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, SearchOutlined } from '@ant-design/icons';
-import { reportReviewData, type IReportReview } from '../../mock/report';
+import { reportReviewData } from '../../mock/report';
 
 const ReviewRecords: React.FC = () => {
     const [searchText, setSearchText] = useState('');

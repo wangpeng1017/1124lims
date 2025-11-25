@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, Table, Button, Space, Modal, Form, Input, Radio, message, Tag, Badge } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { CheckCircleOutlined, CloseCircleOutlined, FileTextOutlined } from '@ant-design/icons';
-import { testReportData, type ITestReport, reportReviewData } from '../../mock/report';
+import { testReportData, type ITestReport } from '../../mock/report';
 
 const ReportReview: React.FC = () => {
     const [dataSource, setDataSource] = useState<ITestReport[]>(
@@ -42,7 +42,6 @@ const ReportReview: React.FC = () => {
                 setDataSource(updatedData);
                 message.success(`${isReviewStep ? '审核' : '批准'}通过`);
             } else {
-                // 驳回则回到草稿状态
                 const updatedData = dataSource.map(item =>
                     item.id === currentReport.id
                         ? { ...item, status: '草稿' as any }
@@ -52,7 +51,6 @@ const ReportReview: React.FC = () => {
                 message.warning('报告已驳回');
             }
 
-            // 模拟记录到钉钉审批流
             console.log('钉钉审批流ID:', `DD-PROC-${Date.now()}`);
             console.log('审批意见:', values.comments);
 
