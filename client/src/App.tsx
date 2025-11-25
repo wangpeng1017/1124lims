@@ -41,6 +41,8 @@ import ReportCategories from './pages/ReportManagement/ReportCategories';
 import Receivables from './pages/FinanceManagement/Receivables';
 import PaymentRecords from './pages/FinanceManagement/PaymentRecords';
 import InvoiceManagement from './pages/FinanceManagement/InvoiceManagement';
+import ConsumableInfo from './pages/ConsumablesManagement/ConsumableInfo';
+import StockTransactions from './pages/ConsumablesManagement/StockTransactions';
 
 const App: React.FC = () => {
   return (
@@ -103,6 +105,10 @@ const App: React.FC = () => {
             <Route path="receivables" element={<Receivables />} />
             <Route path="payment-records" element={<PaymentRecords />} />
             <Route path="invoices" element={<InvoiceManagement />} />
+          </Route>
+          <Route path="consumables-management">
+            <Route path="info" element={<ConsumableInfo />} />
+            <Route path="transactions" element={<StockTransactions />} />
           </Route>
         </Route>
       </Routes>
