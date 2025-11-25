@@ -3,12 +3,12 @@ import { Table, Card, Tag, Statistic, Row, Col, Button, Modal, Form, Input, Inpu
 import { SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { consumablesData } from '../../mock/consumables';
-import type { Consumable } from '../../mock/consumables';
+import type { IConsumableInfo } from '../../mock/consumables';
 
 const Consumables: React.FC = () => {
-    const [dataSource, setDataSource] = useState<Consumable[]>(consumablesData);
+    const [dataSource, setDataSource] = useState<IConsumableInfo[]>(consumablesData);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingRecord, setEditingRecord] = useState<Consumable | null>(null);
+    const [editingRecord, setEditingRecord] = useState<IConsumableInfo | null>(null);
     const [form] = Form.useForm();
 
     const handleAdd = () => {
@@ -17,13 +17,13 @@ const Consumables: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (record: Consumable) => {
+    const handleEdit = (record: IConsumableInfo) => {
         setEditingRecord(record);
         form.setFieldsValue(record);
         setIsModalOpen(true);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = (id: number) => {
         setDataSource(prev => prev.filter(item => item.id !== id));
         message.success('删除成功');
     };
@@ -36,8 +36,8 @@ const Consumables: React.FC = () => {
                 message.success('更新成功');
             } else {
                 // Simple ID generation for demo
-                const newId = String(Date.now());
-                setDataSource(prev => [{ id: newId, ...values, totalIn: 0, totalOut: 0 }, ...prev]);
+                const newId = Date.now();
+                setDataSource(prev => [{ id: newId, ...values, totalInQuantity: 0, totalOutQuantity: 0, status: '正常' as const }, ...prev]);
                 message.success('添加成功');
             }
             setIsModalOpen(false);
@@ -50,7 +50,7 @@ const Consumables: React.FC = () => {
 
     // ... (inside component)
 
-    const columns: ColumnsType<Consumable> = [
+    const columns: ColumnsType<IConsumableInfo> = [
         { title: '物料编号', dataIndex: 'id', key: 'id' },
         {
             title: '名称',
@@ -131,7 +131,7 @@ const Consumables: React.FC = () => {
                 <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
             ),
             onFilter: (value, record) =>
-                record.spec
+                record.specification
                     .toString()
                     .toLowerCase()
                     .includes((value as string).toLowerCase()),
@@ -139,14 +139,14 @@ const Consumables: React.FC = () => {
         { title: '单位', dataIndex: 'unit', key: 'unit' },
         {
             title: '库存',
-            dataIndex: 'stock',
-            key: 'stock',
-            render: (stock) => (
-                <span style={{ color: stock <= 2 ? 'red' : 'inherit', fontWeight: stock <= 2 ? 'bold' : 'normal' }}>
-                    {stock}
+            dataIndex: 'currentStock',
+            key: 'currentStock',
+            render: (currentStock, record) => (
+                <span style={{ color: currentStock <= record.minStock ? 'red' : 'inherit', fontWeight: currentStock <= record.minStock ? 'bold' : 'normal' }}>
+                    {currentStock}
                 </span>
             ),
-            sorter: (a, b) => a.stock - b.stock,
+            sorter: (a, b) => a.currentStock - b.currentStock,
         },
         { title: '库位', dataIndex: 'location', key: 'location' },
         {
@@ -175,7 +175,7 @@ const Consumables: React.FC = () => {
         <div>
             <Row gutter={16} style={{ marginBottom: 24 }}>
                 <Col span={8}><Card><Statistic title="总物料种类" value={dataSource.length} /></Card></Col>
-                <Col span={8}><Card><Statistic title="库存预警" value={dataSource.filter(c => c.stock <= 2).length} valueStyle={{ color: '#cf1322' }} /></Card></Col>
+                <Col span={8}><Card><Statistic title="库存预警" value={dataSource.filter(c => c.currentStock <= c.minStock).length} valueStyle={{ color: '#cf1322' }} /></Card></Col>
             </Row>
 
             <Card title="易耗品库存管理" extra={<Button type="primary" onClick={handleAdd}>新增物料</Button>}>

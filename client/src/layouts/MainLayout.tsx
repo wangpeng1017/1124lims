@@ -130,7 +130,10 @@ const MainLayout: React.FC = () => {
       if (!items) return undefined;
       for (const item of items) {
         if (item && 'key' in item && item.key === path) {
-          return item.label as string;
+          // Type guard to ensure we have a label
+          if ('label' in item && item.label) {
+            return item.label as string;
+          }
         }
         if (item && 'children' in item && item.children) {
           const childLabel = findLabel(item.children as MenuItem[], path);
