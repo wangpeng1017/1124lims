@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Card, DatePicker, Select, Space, Table, Row, Col } from 'antd';
+import { Card, Select, Space, Table, Row, Col } from 'antd';
 import ReactECharts from 'echarts-for-react';
 import { deviceData } from '../../mock/devices';
 

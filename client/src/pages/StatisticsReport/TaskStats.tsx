@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
-import { Card, DatePicker, Space, Table, Row, Col, Statistic } from 'antd';
+import { Card, Space, Table, Row, Col, Statistic } from 'antd';
 import ReactECharts from 'echarts-for-react';
 import { testTaskData as taskData } from '../../mock/test';
-import dayjs from 'dayjs';
 
 
 const TaskStats: React.FC = () => {
