@@ -38,6 +38,9 @@ import ReportReview from './pages/ReportManagement/ReportReview';
 import ReviewRecords from './pages/ReportManagement/ReviewRecords';
 import RawRecords from './pages/ReportManagement/RawRecords';
 import ReportCategories from './pages/ReportManagement/ReportCategories';
+import Receivables from './pages/FinanceManagement/Receivables';
+import PaymentRecords from './pages/FinanceManagement/PaymentRecords';
+import InvoiceManagement from './pages/FinanceManagement/InvoiceManagement';
 
 const App: React.FC = () => {
   return (
@@ -95,6 +98,11 @@ const App: React.FC = () => {
             <Route path="review-records" element={<ReviewRecords />} />
             <Route path="raw-records" element={<RawRecords />} />
             <Route path="categories" element={<ReportCategories />} />
+          </Route>
+          <Route path="finance-management">
+            <Route path="receivables" element={<Receivables />} />
+            <Route path="payment-records" element={<PaymentRecords />} />
+            <Route path="invoices" element={<InvoiceManagement />} />
           </Route>
         </Route>
       </Routes>

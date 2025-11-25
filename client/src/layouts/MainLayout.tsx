@@ -28,6 +28,10 @@ import {
   HistoryOutlined,
   FolderOutlined,
   AppstoreOutlined,
+  AccountBookOutlined,
+  DollarOutlined,
+  TransactionOutlined,
+  FileProtectOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme, Avatar, Typography } from 'antd';
@@ -103,6 +107,11 @@ const items: MenuItem[] = [
     getItem('审核记录', '/report-management/review-records', <HistoryOutlined />),
     getItem('原始记录（委托单）', '/report-management/raw-records', <FolderOutlined />),
     getItem('报告分类', '/report-management/categories', <AppstoreOutlined />),
+  ]),
+  getItem('财务管理', '/finance-management', <AccountBookOutlined />, [
+    getItem('委托应收', '/finance-management/receivables', <DollarOutlined />),
+    getItem('收款记录', '/finance-management/payment-records', <TransactionOutlined />),
+    getItem('开票管理', '/finance-management/invoices', <FileProtectOutlined />),
   ]),
 ];
 
