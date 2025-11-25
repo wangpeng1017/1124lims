@@ -23,7 +23,6 @@ import TransferRecords from './pages/SampleManagement/TransferRecords';
 import MySamples from './pages/SampleManagement/MySamples';
 import SampleTaskAssignment from './pages/SampleManagement/SampleTaskAssignment';
 import ParameterTaskAssignment from './pages/SampleManagement/ParameterTaskAssignment';
-import SupplierInfo from './pages/OutsourcingManagement/SupplierInfo';
 import SupplierCapability from './pages/OutsourcingManagement/SupplierCapability';
 import OutsourceByOrder from './pages/OutsourcingManagement/OutsourceByOrder';
 import OutsourceByParameter from './pages/OutsourcingManagement/OutsourceByParameter';
@@ -43,6 +42,13 @@ import PaymentRecords from './pages/FinanceManagement/PaymentRecords';
 import InvoiceManagement from './pages/FinanceManagement/InvoiceManagement';
 import ConsumableInfo from './pages/ConsumablesManagement/ConsumableInfo';
 import StockTransactions from './pages/ConsumablesManagement/StockTransactions';
+
+// 供应商管理
+import SupplierInfo from './pages/SupplierManagement/SupplierInfo';
+import SupplierCategory from './pages/SupplierManagement/SupplierCategory';
+import EvaluationTemplate from './pages/SupplierManagement/EvaluationTemplate';
+import PerformanceEvaluation from './pages/SupplierManagement/PerformanceEvaluation';
+import SupplierStatistics from './pages/SupplierManagement/SupplierStatistics';
 
 const App: React.FC = () => {
   return (
@@ -109,6 +115,14 @@ const App: React.FC = () => {
           <Route path="consumables-management">
             <Route path="info" element={<ConsumableInfo />} />
             <Route path="transactions" element={<StockTransactions />} />
+          </Route>
+          <Route path="supplier-management">
+            {/* 供应商管理 */}
+            <Route path="info" element={<SupplierInfo />} />
+            <Route path="category" element={<SupplierCategory />} />
+            <Route path="template" element={<EvaluationTemplate />} />
+            <Route path="evaluation" element={<PerformanceEvaluation />} />
+            <Route path="statistics" element={<SupplierStatistics />} />
           </Route>
         </Route>
       </Routes>

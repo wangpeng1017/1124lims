@@ -85,12 +85,17 @@ const items: MenuItem[] = [
     getItem('任务分配（参数）', '/sample-management/task-parameter', <PartitionOutlined />),
   ]),
   getItem('委外/分包管理', '/outsourcing-management', <SupplierOutlined />, [
-    getItem('供应商信息', '/outsourcing-management/supplier-info', <ApartmentOutlined />),
-    getItem('能力值（供应商）', '/outsourcing-management/supplier-capability', <SafetyCertificateOutlined />),
     getItem('委外分配（委托单）', '/outsourcing-management/outsource-by-order', <FileProtectOutlined />),
     getItem('委外分配（参数）', '/outsourcing-management/outsource-by-parameter', <PartitionOutlined />),
     getItem('委外单信息', '/outsourcing-management/outsource-orders', <FileSearchOutlined />),
     getItem('委外任务完成', '/outsourcing-management/outsource-completion', <CheckCircleOutlined />),
+  ]),
+  getItem('供应商管理', '/supplier-management', <ApartmentOutlined />, [
+    getItem('供应商分类', '/supplier-management/category', <AppstoreOutlined />),
+    getItem('供应商信息', '/supplier-management/info', <ProfileOutlined />),
+    getItem('评价模板', '/supplier-management/template', <FormOutlined />),
+    getItem('绩效评价', '/supplier-management/evaluation', <AuditOutlined />),
+    getItem('统计分析', '/supplier-management/statistics', <AppstoreOutlined />),
   ]),
   getItem('试验管理', '/test-management', <ExperimentOutlined />, [
     getItem('检测任务', '/test-management/tasks', <CheckCircleOutlined />),
