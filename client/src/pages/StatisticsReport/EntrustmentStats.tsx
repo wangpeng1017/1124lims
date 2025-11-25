@@ -168,6 +168,6 @@ return (
         </Card>
     </div>
 );
-};
+
 
 export default EntrustmentStats;

@@ -171,6 +171,6 @@ return (
         </Modal>
     </Card>
 );
-};
+
 
 export default RepairManagement;
