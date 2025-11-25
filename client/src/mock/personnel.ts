@@ -52,11 +52,12 @@ export const capabilityData: Capability[] = [
 export interface Review {
     id: number;
     empName: string;
+    capabilityId?: number; // Link to Capability
     trainingContent: string;
     examResult: 'Pass' | 'Fail';
     date: string;
 }
 
 export const reviewData: Review[] = [
-    { id: 1, empName: '张三', trainingContent: '新标准培训', examResult: 'Pass', date: '2023-11-20' },
+    { id: 1, empName: '张三', capabilityId: 1, trainingContent: '新标准培训', examResult: 'Pass', date: '2023-11-20' },
 ];

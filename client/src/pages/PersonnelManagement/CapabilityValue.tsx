@@ -47,7 +47,32 @@ const CapabilityValue: React.FC = () => {
         { title: '员工姓名', dataIndex: 'name', key: 'name' },
         { title: '检测参数/项目', dataIndex: 'parameter', key: 'parameter' },
         { title: '证书/资质', dataIndex: 'certificate', key: 'certificate' },
-        { title: '有效期至', dataIndex: 'expiryDate', key: 'expiryDate' },
+        {
+            title: '有效期至',
+            dataIndex: 'expiryDate',
+            key: 'expiryDate',
+            render: (date) => {
+                const today = new Date();
+                const expiry = new Date(date);
+                const diffTime = expiry.getTime() - today.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                let color = 'default';
+                if (diffDays < 0) {
+                    color = 'red'; // Expired
+                } else if (diffDays <= 30) {
+                    color = 'orange'; // Expiring soon
+                } else {
+                    color = 'green';
+                }
+
+                return (
+                    <span style={{ color: color === 'default' ? 'inherit' : color, fontWeight: color !== 'green' ? 'bold' : 'normal' }}>
+                        {date} {diffDays < 0 ? '(已过期)' : (diffDays <= 30 ? `(${diffDays}天后过期)` : '')}
+                    </span>
+                );
+            }
+        },
         {
             title: '操作',
             key: 'action',

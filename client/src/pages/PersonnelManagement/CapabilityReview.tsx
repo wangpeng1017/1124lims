@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Table, Card, Tag, Button, Space, Modal, Form, Input, Select, Popconfirm, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined } from '@ant-design/icons';
-import { reviewData, employeeData } from '../../mock/personnel';
+import { reviewData, employeeData, capabilityData } from '../../mock/personnel';
 import type { Review } from '../../mock/personnel';
 
 const CapabilityReview: React.FC = () => {
@@ -10,15 +10,18 @@ const CapabilityReview: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<Review | null>(null);
     const [form] = Form.useForm();
+    const [selectedEmpName, setSelectedEmpName] = useState<string | null>(null);
 
     const handleAdd = () => {
         setEditingRecord(null);
+        setSelectedEmpName(null);
         form.resetFields();
         setIsModalOpen(true);
     };
 
     const handleEdit = (record: Review) => {
         setEditingRecord(record);
+        setSelectedEmpName(record.empName);
         form.setFieldsValue(record);
         setIsModalOpen(true);
     };
@@ -42,15 +45,32 @@ const CapabilityReview: React.FC = () => {
         });
     };
 
+    const handleEmpChange = (value: string) => {
+        setSelectedEmpName(value);
+        form.setFieldValue('capabilityId', undefined); // Reset capability selection
+    };
+
+    const filteredCapabilities = selectedEmpName
+        ? capabilityData.filter(cap => cap.empName === selectedEmpName)
+        : [];
+
     const columns: ColumnsType<Review> = [
-        { title: '员工姓名', dataIndex: 'name', key: 'name' },
-        { title: '培训/考核内容', dataIndex: 'content', key: 'content' },
+        { title: '员工姓名', dataIndex: 'empName', key: 'empName' },
+        {
+            title: '关联能力',
+            key: 'capabilityId',
+            render: (_, record) => {
+                const cap = capabilityData.find(c => c.id === record.capabilityId);
+                return cap ? `${cap.parameter} (${cap.certificate})` : '-';
+            }
+        },
+        { title: '培训/考核内容', dataIndex: 'trainingContent', key: 'trainingContent' },
         { title: '考核日期', dataIndex: 'date', key: 'date' },
         {
             title: '考核结果',
-            dataIndex: 'result',
-            key: 'result',
-            render: (result) => <Tag color={result === '合格' ? 'green' : 'red'}>{result}</Tag>
+            dataIndex: 'examResult',
+            key: 'examResult',
+            render: (result) => <Tag color={result === 'Pass' ? 'green' : 'red'}>{result === 'Pass' ? '合格' : '不合格'}</Tag>
         },
         {
             title: '操作',
@@ -76,23 +96,32 @@ const CapabilityReview: React.FC = () => {
                 onCancel={() => setIsModalOpen(false)}
             >
                 <Form form={form} layout="vertical">
-                    <Form.Item name="name" label="员工姓名" rules={[{ required: true }]}>
-                        <Select>
+                    <Form.Item name="empName" label="员工姓名" rules={[{ required: true }]}>
+                        <Select onChange={handleEmpChange}>
                             {employeeData.map(emp => (
                                 <Select.Option key={emp.id} value={emp.name}>{emp.name}</Select.Option>
                             ))}
                         </Select>
                     </Form.Item>
-                    <Form.Item name="content" label="培训/考核内容" rules={[{ required: true }]}>
+                    <Form.Item name="capabilityId" label="关联能力">
+                        <Select placeholder="选择关联的能力（可选）" disabled={!selectedEmpName}>
+                            {filteredCapabilities.map(cap => (
+                                <Select.Option key={cap.id} value={cap.id}>
+                                    {cap.parameter} - {cap.certificate}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item name="trainingContent" label="培训/考核内容" rules={[{ required: true }]}>
                         <Input.TextArea />
                     </Form.Item>
                     <Form.Item name="date" label="考核日期" rules={[{ required: true }]}>
                         <Input type="date" />
                     </Form.Item>
-                    <Form.Item name="result" label="考核结果" rules={[{ required: true }]}>
+                    <Form.Item name="examResult" label="考核结果" rules={[{ required: true }]}>
                         <Select>
-                            <Select.Option value="合格">合格</Select.Option>
-                            <Select.Option value="不合格">不合格</Select.Option>
+                            <Select.Option value="Pass">合格</Select.Option>
+                            <Select.Option value="Fail">不合格</Select.Option>
                         </Select>
                     </Form.Item>
                 </Form>
