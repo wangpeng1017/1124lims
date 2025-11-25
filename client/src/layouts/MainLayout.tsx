@@ -57,27 +57,12 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem('设备与仪器管理', '/device-management', <ToolOutlined />, [
-    getItem('设备/仪器档案', '/device-management/info', <ProfileOutlined />),
-    getItem('设备保养', '/device-management/maintenance', <SafetyCertificateOutlined />),
-    getItem('设备检修', '/device-management/repair', <ToolOutlined />),
-    getItem('仪器定检', '/device-management/calibration', <AuditOutlined />),
-  ]),
-  getItem('环境管理', '/environment', <EnvironmentOutlined />),
   getItem('委托管理', '/entrustment', <ExperimentOutlined />, [
     getItem('委托单', '/entrustment/order', <FileProtectOutlined />),
     getItem('委托合同', '/entrustment/contract', <AuditOutlined />),
     getItem('委托单位', '/entrustment/client', <ApartmentOutlined />),
     getItem('委托样品', '/entrustment/sample', <ExperimentOutlined />),
   ]),
-  getItem('人事管理', '/personnel', <TeamOutlined />, [
-    getItem('员工列表', '/personnel/employee', <UserOutlined />),
-    getItem('部门信息', '/personnel/department', <ApartmentOutlined />),
-    getItem('站点信息', '/personnel/station', <EnvironmentOutlined />),
-    getItem('能力值', '/personnel/capability', <SafetyCertificateOutlined />),
-    getItem('能力评审', '/personnel/review', <AuditOutlined />),
-  ]),
-
   getItem('样品管理', '/sample-management', <ExperimentOutlined />, [
     getItem('收样/计价', '/sample-management/receipt', <DollarOutlined />),
     getItem('样品明细', '/sample-management/details', <FileTextOutlined />),
@@ -86,19 +71,6 @@ const items: MenuItem[] = [
     getItem('我的样品', '/sample-management/my-samples', <InboxOutlined />),
     getItem('任务分配（样品）', '/sample-management/task-sample', <ProjectOutlined />),
     getItem('任务分配（参数）', '/sample-management/task-parameter', <PartitionOutlined />),
-  ]),
-  getItem('委外/分包管理', '/outsourcing-management', <SupplierOutlined />, [
-    getItem('委外分配（委托单）', '/outsourcing-management/outsource-by-order', <FileProtectOutlined />),
-    getItem('委外分配（参数）', '/outsourcing-management/outsource-by-parameter', <PartitionOutlined />),
-    getItem('委外单信息', '/outsourcing-management/outsource-orders', <FileSearchOutlined />),
-    getItem('委外任务完成', '/outsourcing-management/outsource-completion', <CheckCircleOutlined />),
-  ]),
-  getItem('供应商管理', '/supplier-management', <ApartmentOutlined />, [
-    getItem('供应商分类', '/supplier-management/category', <AppstoreOutlined />),
-    getItem('供应商信息', '/supplier-management/info', <ProfileOutlined />),
-    getItem('评价模板', '/supplier-management/template', <FormOutlined />),
-    getItem('绩效评价', '/supplier-management/evaluation', <AuditOutlined />),
-    getItem('统计分析', '/supplier-management/statistics', <AppstoreOutlined />),
   ]),
   getItem('试验管理', '/test-management', <ExperimentOutlined />, [
     getItem('检测任务', '/test-management/tasks', <CheckCircleOutlined />),
@@ -111,16 +83,8 @@ const items: MenuItem[] = [
     getItem('报告审核/批准', '/report-management/review', <ReportAuditOutlined />),
     getItem('审核记录', '/report-management/review-records', <HistoryOutlined />),
     getItem('原始记录（委托单）', '/report-management/raw-records', <FolderOutlined />),
+    getItem('报告模板管理', '/report-management/report-templates', <FileTextOutlined />),
     getItem('报告分类', '/report-management/categories', <AppstoreOutlined />),
-  ]),
-  getItem('财务管理', '/finance-management', <AccountBookOutlined />, [
-    getItem('委托应收', '/finance-management/receivables', <DollarOutlined />),
-    getItem('收款记录', '/finance-management/payment-records', <TransactionOutlined />),
-    getItem('开票管理', '/finance-management/invoices', <FileProtectOutlined />),
-  ]),
-  getItem('耗材管理', '/consumables-management', <ShopOutlined />, [
-    getItem('耗材信息', '/consumables-management/info', <ProfileOutlined />),
-    getItem('出入库管理', '/consumables-management/transactions', <SwapOutlined />),
   ]),
   getItem('统计报表', '/statistics-report', <BarChartOutlined />, [
     getItem('委托单统计', '/statistics-report/entrustment', <FileTextOutlined />),
@@ -128,6 +92,42 @@ const items: MenuItem[] = [
     getItem('任务完成率', '/statistics-report/task', <CheckCircleOutlined />),
     getItem('设备利用率', '/statistics-report/device', <ToolOutlined />),
   ]),
+  getItem('设备与仪器管理', '/device-management', <ToolOutlined />, [
+    getItem('设备/仪器档案', '/device-management/info', <ProfileOutlined />),
+    getItem('设备保养', '/device-management/maintenance', <SafetyCertificateOutlined />),
+    getItem('设备检修', '/device-management/repair', <ToolOutlined />),
+    getItem('仪器定检', '/device-management/calibration', <AuditOutlined />),
+  ]),
+  getItem('耗材管理', '/consumables-management', <ShopOutlined />, [
+    getItem('耗材信息', '/consumables-management/info', <ProfileOutlined />),
+    getItem('出入库管理', '/consumables-management/transactions', <SwapOutlined />),
+  ]),
+  getItem('人事管理', '/personnel', <TeamOutlined />, [
+    getItem('员工列表', '/personnel/employee', <UserOutlined />),
+    getItem('部门信息', '/personnel/department', <ApartmentOutlined />),
+    getItem('站点信息', '/personnel/station', <EnvironmentOutlined />),
+    getItem('能力值', '/personnel/capability', <SafetyCertificateOutlined />),
+    getItem('能力评审', '/personnel/review', <AuditOutlined />),
+  ]),
+  getItem('供应商管理', '/supplier-management', <ApartmentOutlined />, [
+    getItem('供应商分类', '/supplier-management/category', <AppstoreOutlined />),
+    getItem('供应商信息', '/supplier-management/info', <ProfileOutlined />),
+    getItem('评价模板', '/supplier-management/template', <FormOutlined />),
+    getItem('绩效评价', '/supplier-management/evaluation', <AuditOutlined />),
+    getItem('统计分析', '/supplier-management/statistics', <AppstoreOutlined />),
+  ]),
+  getItem('委外/分包管理', '/outsourcing-management', <SupplierOutlined />, [
+    getItem('委外分配（委托单）', '/outsourcing-management/outsource-by-order', <FileProtectOutlined />),
+    getItem('委外分配（参数）', '/outsourcing-management/outsource-by-parameter', <PartitionOutlined />),
+    getItem('委外单信息', '/outsourcing-management/outsource-orders', <FileSearchOutlined />),
+    getItem('委外任务完成', '/outsourcing-management/outsource-completion', <CheckCircleOutlined />),
+  ]),
+  getItem('财务管理', '/finance-management', <AccountBookOutlined />, [
+    getItem('委托应收', '/finance-management/receivables', <DollarOutlined />),
+    getItem('收款记录', '/finance-management/payment-records', <TransactionOutlined />),
+    getItem('开票管理', '/finance-management/invoices', <FileProtectOutlined />),
+  ]),
+  getItem('环境管理', '/environment', <EnvironmentOutlined />),
   getItem('系统设置', '/system-settings', <SettingOutlined />, [
     getItem('用户管理', '/system-settings/users', <UserOutlined />),
     getItem('角色管理', '/system-settings/roles', <TeamOutlined />),
