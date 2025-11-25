@@ -29,9 +29,7 @@ import {
   FolderOutlined,
   AppstoreOutlined,
   AccountBookOutlined,
-  DollarOutlined,
   TransactionOutlined,
-  FileProtectOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme, Avatar, Typography } from 'antd';
