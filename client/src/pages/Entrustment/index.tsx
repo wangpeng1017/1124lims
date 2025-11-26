@@ -51,7 +51,7 @@ const Entrustment: React.FC = () => {
             const values = await form.validateFields();
             // Sync testItems string with testParams array
             const testItemsStr = values.testParams ? values.testParams.join('、') : values.testItems;
-            const finalValues = { ...values, testItems: testItemsStr };
+            const finalValues = { ...values, testItems: testItemsStr, assignmentMode: 'manual' };
 
             if (editingRecord) {
                 setDataSource(prev => prev.map(item => item.id === editingRecord.id ? { ...item, ...finalValues } : item));

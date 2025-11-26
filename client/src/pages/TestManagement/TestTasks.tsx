@@ -5,7 +5,7 @@ import { SearchOutlined, EyeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { testTaskData, type ITestTask } from '../../mock/test';
 import { employeeData } from '../../mock/personnel';
-import { entrustmentData } from '../../mock/entrustment';
+
 
 const { Option } = Select;
 
@@ -54,19 +54,7 @@ const TestTasks: React.FC = () => {
                 </Space>
             )
         },
-        {
-            title: '分配模式',
-            key: 'assignmentMode',
-            render: (_, record) => {
-                const entrustment = entrustmentData.find(e => e.entrustmentId === record.entrustmentId);
-                const mode = entrustment?.assignmentMode || 'manual';
-                return (
-                    <Tag color={mode === 'automatic' ? 'blue' : 'orange'}>
-                        {mode === 'automatic' ? '自动分配' : '人工分配'}
-                    </Tag>
-                );
-            }
-        },
+
         {
             title: '检测参数',
             dataIndex: 'parameters',
