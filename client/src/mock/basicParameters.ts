@@ -263,5 +263,77 @@ export const elnTemplatesData: ELNTemplate[] = [
             environment: true
         }
     },
-    { id: 5, name: 'CXPS-JS09-03 色度检测记录 (改).xlsx', createDate: '2023-11-26', author: '管理员', parameterName: '色度', standard: 'GB/T 5750.4-2006' }
+    { id: 5, name: 'CXPS-JS09-03 色度检测记录 (改).xlsx', createDate: '2023-11-26', author: '管理员', parameterName: '色度', standard: 'GB/T 5750.4-2006' },
+    {
+        id: 6,
+        name: '金属拉伸试验记录.xlsx',
+        createDate: '2023-11-26',
+        author: '管理员',
+        parameterName: '金属拉伸',
+        standard: 'GB/T 228.1-2021',
+        schema: {
+            title: '金属材料拉伸试验记录',
+            header: {
+                methodBasis: 'GB/T 228.1-2021',
+                device: '电子万能试验机'
+            },
+            columns: [
+                { title: '序号', dataIndex: 'index', width: 50 },
+                { title: '样品编号', dataIndex: 'sampleId' },
+                { title: '屈服强度 (MPa)', dataIndex: 'yieldStrength' },
+                { title: '抗拉强度 (MPa)', dataIndex: 'tensileStrength' },
+                { title: '断后伸长率 (%)', dataIndex: 'elongation' },
+                { title: '结果判定', dataIndex: 'result' }
+            ],
+            environment: true
+        }
+    },
+    {
+        id: 7,
+        name: '金属弯曲试验记录.xlsx',
+        createDate: '2023-11-26',
+        author: '管理员',
+        parameterName: '弯曲',
+        standard: 'GB/T 232-2010',
+        schema: {
+            title: '金属材料弯曲试验记录',
+            header: {
+                methodBasis: 'GB/T 232-2010',
+                device: '弯曲试验机'
+            },
+            columns: [
+                { title: '序号', dataIndex: 'index', width: 50 },
+                { title: '样品编号', dataIndex: 'sampleId' },
+                { title: '弯曲直径 (mm)', dataIndex: 'diameter' },
+                { title: '弯曲角度 (°)', dataIndex: 'angle' },
+                { title: '弯曲后外观', dataIndex: 'appearance' },
+                { title: '结果判定', dataIndex: 'result' }
+            ],
+            environment: true
+        }
+    },
+    {
+        id: 8,
+        name: '中性盐雾试验记录.xlsx',
+        createDate: '2023-11-26',
+        author: '管理员',
+        parameterName: '中性盐雾',
+        standard: 'GB/T 10125-2021',
+        schema: {
+            title: '中性盐雾试验记录',
+            header: {
+                methodBasis: 'GB/T 10125-2021',
+                device: '盐雾试验箱'
+            },
+            columns: [
+                { title: '序号', dataIndex: 'index', width: 50 },
+                { title: '样品编号', dataIndex: 'sampleId' },
+                { title: '试验时间 (h)', dataIndex: 'duration' },
+                { title: '腐蚀情况描述', dataIndex: 'corrosionDesc' },
+                { title: '保护等级 (Rp/Ra)', dataIndex: 'rating' },
+                { title: '结果判定', dataIndex: 'result' }
+            ],
+            environment: true
+        }
+    }
 ];
