@@ -101,6 +101,20 @@ export const testTaskData: ITestTask[] = [
         progress: 100,
         createdDate: '2023-10-25',
         priority: 'Normal'
+    },
+    {
+        id: 5,
+        taskNo: 'TASK20231126001',
+        sampleNo: 'S20231126001',
+        sampleName: '水质样品A',
+        entrustmentId: '202311001',
+        parameters: ['pH值', '类大肠菌群', '色度'],
+        assignedTo: '当前用户',
+        dueDate: '2023-11-30',
+        status: '进行中',
+        progress: 0,
+        createdDate: '2023-11-26',
+        priority: 'Urgent'
     }
 ];
 

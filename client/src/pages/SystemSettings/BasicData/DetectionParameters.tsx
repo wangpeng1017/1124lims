@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Table, Card, Button, Space, Modal, Form, Input, Popconfirm, message, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { PlusOutlined, FileExcelOutlined, EyeOutlined, DownloadOutlined, TableOutlined } from '@ant-design/icons';
+import { PlusOutlined, FileExcelOutlined, TableOutlined } from '@ant-design/icons';
 import { detectionParametersData, elnTemplatesData } from '../../../mock/basicParameters';
 import type { DetectionParameter, ELNTemplate } from '../../../mock/basicParameters';
 import DynamicFormRenderer from '../../../components/DynamicFormRenderer';
