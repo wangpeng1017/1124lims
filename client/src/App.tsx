@@ -10,6 +10,7 @@ import EntrustmentOrder from './pages/Entrustment';
 import EntrustmentContract from './pages/Entrustment/EntrustmentContract';
 import ClientUnit from './pages/Entrustment/ClientUnit';
 import EntrustmentSample from './pages/Entrustment/EntrustmentSample';
+import EntrustmentFill from './pages/Entrustment/EntrustmentFill';
 import Consumables from './pages/Consumables';
 import EmployeeList from './pages/PersonnelManagement/EmployeeList';
 import DepartmentInfo from './pages/PersonnelManagement/DepartmentInfo';
@@ -69,6 +70,7 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/fill/:entrustmentId" element={<EntrustmentFill />} />
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Navigate to="/device-management/info" replace />} />
           <Route path="device-management">

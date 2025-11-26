@@ -155,6 +155,90 @@ export const sampleDetailData: ISampleDetail[] = [
         collectionDate: '2023-11-03',
         collectionPerson: '赵六',
         status: '已分配'
+    },
+    {
+        id: 4,
+        sampleNo: 'S20231103001',
+        receiptId: 3,
+        entrustmentId: 'WT20231103001',
+        name: '沥青混合料',
+        spec: 'AC-13C',
+        quantity: 2,
+        receiptDate: '2023-11-03',
+        receiptPerson: '张三',
+        status: '待收样'
+    },
+    {
+        id: 5,
+        sampleNo: 'S20231103002',
+        receiptId: 3,
+        entrustmentId: 'WT20231103001',
+        name: '沥青混合料',
+        spec: 'AC-20C',
+        quantity: 2,
+        receiptDate: '2023-11-03',
+        receiptPerson: '张三',
+        status: '待收样'
+    },
+    {
+        id: 6,
+        sampleNo: 'S20231104001',
+        receiptId: 4,
+        entrustmentId: 'WT20231104001',
+        name: '钢绞线',
+        spec: '1x7-15.20-1860',
+        quantity: 5,
+        receiptDate: '2023-11-04',
+        receiptPerson: '李四',
+        status: '已收样'
+    },
+    {
+        id: 7,
+        sampleNo: 'S20231105001',
+        receiptId: 5,
+        entrustmentId: 'WT20231105001',
+        name: '土工布',
+        spec: '200g/m2',
+        quantity: 10,
+        receiptDate: '2023-11-05',
+        receiptPerson: '王五',
+        status: '检测中'
+    },
+    {
+        id: 8,
+        sampleNo: 'S20231106001',
+        receiptId: 6,
+        entrustmentId: 'WT20231106001',
+        name: '防水卷材',
+        spec: 'SBS I PY PE 3.0',
+        quantity: 3,
+        receiptDate: '2023-11-06',
+        receiptPerson: '赵六',
+        status: '已完成'
+    },
+    {
+        id: 9,
+        sampleNo: 'S20231107001',
+        receiptId: 7,
+        entrustmentId: 'WT20231107001',
+        name: '外加剂',
+        spec: '聚羧酸减水剂',
+        quantity: 1,
+        receiptDate: '2023-11-07',
+        receiptPerson: '张三',
+        status: '已归还'
+    },
+    {
+        id: 10,
+        sampleNo: 'S20231108001',
+        receiptId: 8,
+        entrustmentId: 'WT20231108001',
+        name: '粉煤灰',
+        spec: 'F类 II级',
+        quantity: 5,
+        receiptDate: '2023-11-08',
+        receiptPerson: '李四',
+        status: '已销毁'
     }
 ];
 

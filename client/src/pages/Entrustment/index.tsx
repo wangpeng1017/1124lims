@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Table, Card, Tag, Space, Button, Modal, Form, Input, Popconfirm, message, Tooltip } from 'antd';
 import { SearchOutlined, LinkOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import { useNavigate } from 'react-router-dom';
 import { entrustmentData } from '../../mock/entrustment';
 import type { IEntrustmentRecord } from '../../mock/entrustment';
 
@@ -10,6 +11,7 @@ const Entrustment: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<IEntrustmentRecord | null>(null);
     const [form] = Form.useForm();
+    const navigate = useNavigate();
 
     const handleAdd = () => {
         setEditingRecord(null);
@@ -29,7 +31,7 @@ const Entrustment: React.FC = () => {
     };
 
     const handleGenerateLink = (record: IEntrustmentRecord) => {
-        const link = `http://lims.example.com/fill/${record.entrustmentId}`;
+        const link = `${window.location.origin}/fill/${record.entrustmentId}`;
         Modal.info({
             title: '生成外部链接',
             content: (
@@ -103,6 +105,12 @@ const Entrustment: React.FC = () => {
                     .toString()
                     .toLowerCase()
                     .includes((value as string).toLowerCase()),
+            render: (text, record) => <a onClick={() => navigate(`/entrustment/order/${record.id}`)}>{text}</a>,
+        },
+        {
+            title: '合同编号',
+            dataIndex: 'contractNo',
+            key: 'contractNo',
         },
         {
             title: '检测报告编号',
@@ -226,6 +234,9 @@ const Entrustment: React.FC = () => {
             <Modal title={editingRecord ? "编辑委托" : "新建委托"} open={isModalOpen} onOk={handleOk} onCancel={() => setIsModalOpen(false)}>
                 <Form form={form} layout="vertical">
                     <Form.Item name="entrustmentId" label="委托编号" rules={[{ required: true }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="contractNo" label="合同编号">
                         <Input />
                     </Form.Item>
                     <Form.Item name="reportId" label="检测报告编号" rules={[{ required: true }]}>

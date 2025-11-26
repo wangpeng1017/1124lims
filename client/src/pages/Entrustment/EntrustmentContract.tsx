@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, Card, Button, Space, Modal, Form, Input, Popconfirm, message, Select } from 'antd';
+import { Table, Card, Button, Space, Modal, Form, Input, Popconfirm, message, Select, InputNumber } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined } from '@ant-design/icons';
 import { contractData, clientData, entrustmentData } from '../../mock/entrustment';
@@ -46,6 +46,12 @@ const EntrustmentContract: React.FC = () => {
         { title: '合同编号', dataIndex: 'contractNo', key: 'contractNo' },
         { title: '合同名称', dataIndex: 'contractName', key: 'contractName' },
         {
+            title: '合同金额 (元)',
+            dataIndex: 'amount',
+            key: 'amount',
+            render: (val) => val ? `¥ ${val.toLocaleString()}` : '-'
+        },
+        {
             title: '委托单编号',
             dataIndex: 'entrustmentId',
             key: 'entrustmentId',
@@ -83,6 +89,9 @@ const EntrustmentContract: React.FC = () => {
                     </Form.Item>
                     <Form.Item name="contractName" label="合同名称" rules={[{ required: true }]}>
                         <Input />
+                    </Form.Item>
+                    <Form.Item name="amount" label="合同金额" rules={[{ required: true }]}>
+                        <InputNumber style={{ width: '100%' }} prefix="¥" />
                     </Form.Item>
                     <Form.Item name="entrustmentId" label="委托单编号" rules={[{ required: true }]}>
                         <Select>
