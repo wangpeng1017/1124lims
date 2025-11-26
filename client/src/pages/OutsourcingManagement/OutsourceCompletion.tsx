@@ -3,6 +3,8 @@ import { Table, Card, Button, Space, Modal, Form, Select, Input, message, Tag, T
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { outsourceResultData, type IOutsourceResult, outsourceOrderData, outsourceParameterData } from '../../mock/outsourcing';
+import { elnTemplatesData } from '../../mock/basicParameters';
+import DynamicFormRenderer from '../../components/DynamicFormRenderer';
 
 const { TabPane } = Tabs;
 
@@ -12,12 +14,14 @@ const OutsourceCompletion: React.FC = () => {
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<IOutsourceResult | null>(null);
     const [selectedOutsource, setSelectedOutsource] = useState<string>('');
+    const [currentTemplate, setCurrentTemplate] = useState<any>(null);
     const [form] = Form.useForm();
     const [reviewForm] = Form.useForm();
 
     const handleAdd = () => {
         form.resetFields();
         setSelectedOutsource('');
+        setCurrentTemplate(null);
         setIsModalOpen(true);
     };
 
@@ -33,17 +37,38 @@ const OutsourceCompletion: React.FC = () => {
         const order = outsourceOrderData.find(o => o.outsourceNo === outsourceNo);
         const param = outsourceParameterData.find(p => p.outsourceNo === outsourceNo);
 
+        setCurrentTemplate(null); // Reset template first
+
         if (order) {
             form.setFieldValue('outsourceType', '委托单');
+            // For order type, we might not know the parameter yet, or it might be multiple.
+            // User will input parameter name manually.
         } else if (param) {
             form.setFieldValue('outsourceType', '参数');
             form.setFieldValue('parameterName', param.parameterName);
+            // Check for template
+            const template = elnTemplatesData.find(t => t.parameterName === param.parameterName);
+            if (template) {
+                setCurrentTemplate(template);
+            }
         }
+    };
+
+    const handleParameterNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        const template = elnTemplatesData.find(t => t.parameterName === value);
+        setCurrentTemplate(template || null);
     };
 
     const handleOk = () => {
         form.validateFields().then(values => {
             const newId = Math.max(...dataSource.map(item => item.id), 0) + 1;
+
+            // If using dynamic form, we might want to format the testValue differently
+            // For now, we just dump all values, but in a real app we might serialize the dynamic data
+            // into the testValue string or a separate JSON field.
+            // Let's assume for this mock that we just keep the form values as is.
+
             setDataSource([...dataSource, {
                 id: newId,
                 ...values,
@@ -167,7 +192,7 @@ const OutsourceCompletion: React.FC = () => {
                 open={isModalOpen}
                 onOk={handleOk}
                 onCancel={() => setIsModalOpen(false)}
-                width={600}
+                width={800} // Increased width for dynamic form
             >
                 <Form form={form} layout="vertical">
                     <Form.Item
@@ -203,24 +228,30 @@ const OutsourceCompletion: React.FC = () => {
                                 label="检测参数"
                                 rules={[{ required: true }]}
                             >
-                                <Input placeholder="输入检测参数名称" />
+                                <Input placeholder="输入检测参数名称" onChange={handleParameterNameChange} />
                             </Form.Item>
 
-                            <Form.Item
-                                name="testValue"
-                                label="检测值/结果"
-                                rules={[{ required: true }]}
-                            >
-                                <Input.TextArea rows={3} placeholder="输入检测结果" />
-                            </Form.Item>
+                            {currentTemplate ? (
+                                <DynamicFormRenderer template={currentTemplate} form={form} />
+                            ) : (
+                                <Form.Item
+                                    name="testValue"
+                                    label="检测值/结果"
+                                    rules={[{ required: true }]}
+                                >
+                                    <Input.TextArea rows={3} placeholder="输入检测结果" />
+                                </Form.Item>
+                            )}
 
-                            <Form.Item
-                                name="testDate"
-                                label="检测日期"
-                                rules={[{ required: true }]}
-                            >
-                                <Input type="date" />
-                            </Form.Item>
+                            {!currentTemplate?.schema?.environment && (
+                                <Form.Item
+                                    name="testDate"
+                                    label="检测日期"
+                                    rules={[{ required: true }]}
+                                >
+                                    <Input type="date" />
+                                </Form.Item>
+                            )}
 
                             <Form.Item
                                 name="testPerson"
