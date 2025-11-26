@@ -48,6 +48,7 @@ export const entrustmentData: IEntrustmentRecord[] = [
     { id: 9, entrustmentId: '202308009', reportId: 'w-2023-ALTC-TC-076', sampleDate: '23.8.23', testDate: '23.8.24', sampleName: '加油管支架', sampleIds: [], testItems: '中性盐雾', follower: '武基勇', assignmentMode: 'automatic', contractNo: 'CT20230809' },
     { id: 10, entrustmentId: '202310001', reportId: 'w-2023-ALTC-TC-095', sampleDate: '23.10.7', testDate: '23.10.8', sampleName: '管路固定支架', sampleIds: [], testItems: '中性盐雾', follower: '武基勇', assignmentMode: 'manual', contractNo: 'CT20231001' },
     { id: 11, entrustmentId: '202311001', reportId: 'w-2023-ALTC-TC-096', sampleDate: '23.11.26', testDate: '23.11.27', sampleName: '水质样品A', sampleIds: ['S20231126001'], testItems: 'pH值、类大肠菌群、色度', follower: '管理员', assignmentMode: 'manual', contractNo: 'CT20231101' },
+    { id: 12, entrustmentId: '202311002', reportId: 'w-2023-ALTC-TC-097', sampleDate: '23.11.27', testDate: '23.11.28', sampleName: '工业废水', sampleIds: ['S20231127001'], testItems: 'pH值', follower: '张三', assignmentMode: 'manual', contractNo: 'CT20231102' },
 ];
 
 export const contractData: IEntrustmentContract[] = [

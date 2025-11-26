@@ -306,7 +306,7 @@ const Entrustment: React.FC = () => {
             title="委托单管理"
             extra={<Button type="primary" onClick={handleAdd}>新建委托</Button>}
         >
-            <Table columns={columns} dataSource={dataSource} rowKey="id" pagination={{ pageSize: 10 }} />
+            <Table columns={columns} dataSource={dataSource} rowKey="id" pagination={{ pageSize: 10 }} scroll={{ x: 1500 }} />
 
             <Modal title={editingRecord ? "编辑委托" : "新建委托"} open={isModalOpen} onOk={handleOk} onCancel={() => setIsModalOpen(false)}>
                 <Form form={form} layout="vertical">
