@@ -109,7 +109,6 @@ const items: MenuItem[] = [
     getItem('供应商信息', '/supplier-management/info', <ProfileOutlined />),
     getItem('评价模板', '/supplier-management/template', <FormOutlined />),
     getItem('绩效评价', '/supplier-management/evaluation', <AuditOutlined />),
-    getItem('统计分析', '/supplier-management/statistics', <AppstoreOutlined />),
   ]),
   getItem('财务管理', '/finance-management', <AccountBookOutlined />, [
     getItem('委托应收', '/finance-management/receivables', <DollarOutlined />),

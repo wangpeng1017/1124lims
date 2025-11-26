@@ -156,7 +156,6 @@ const App: React.FC = () => {
             <Route path="category" element={<SupplierCategory />} />
             <Route path="template" element={<EvaluationTemplate />} />
             <Route path="evaluation" element={<PerformanceEvaluation />} />
-            <Route path="statistics" element={<SupplierStatistics />} />
           </Route>
         </Route>
       </Routes>
