@@ -6,7 +6,7 @@ const { Title, Text } = Typography;
 
 interface DynamicFormRendererProps {
     template: ELNTemplate;
-    form: any;
+    form?: any;
 }
 
 /**
