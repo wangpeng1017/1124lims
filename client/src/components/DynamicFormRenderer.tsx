@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Form, Input, Table, Row, Col, Typography } from 'antd';
-import type { ELNTemplate } from '../../mock/basicParameters';
+import type { ELNTemplate } from '../mock/basicParameters';
 
 const { Title, Text } = Typography;
 
@@ -12,7 +12,7 @@ interface DynamicFormRendererProps {
 /**
  * 动态表单渲染器 - 根据 ELN 模板的 schema 渲染不同的表单布局
  */
-const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({ template, form }) => {
+const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({ template }) => {
     if (!template.schema) {
         // 如果没有 schema，显示默认的简单表单
         return (
@@ -33,7 +33,7 @@ const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({ template, for
     const { schema } = template;
 
     // 渲染表格列
-    const renderColumns = (columns: any[]) => {
+    const renderColumns = (columns: any[]): any[] => {
         return columns.map((col: any) => {
             if (col.children) {
                 // 如果有子列，创建列组
@@ -121,7 +121,7 @@ const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({ template, for
             {/* 数据表格 */}
             {schema.columns && (
                 <Form.List name="dataRows">
-                    {(fields, { add, remove }) => (
+                    {(fields, { add }) => (
                         <>
                             <Table
                                 columns={renderColumns(schema.columns)}
