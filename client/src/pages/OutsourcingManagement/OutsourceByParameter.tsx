@@ -6,7 +6,7 @@ import { outsourceParameterData, type IOutsourceParameter } from '../../mock/out
 import { supplierData } from '../../mock/supplier';
 import type { ISupplier, ISupplierCapability } from '../../mock/supplier';
 import { sampleDetailData } from '../../mock/sample';
-import { detectionParametersData } from '../../mock/basicParams';
+import { detectionParametersData } from '../../mock/basicParameters';
 
 const OutsourceByParameter: React.FC = () => {
     const [dataSource, setDataSource] = useState<IOutsourceParameter[]>(outsourceParameterData);

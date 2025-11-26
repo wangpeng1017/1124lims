@@ -4,7 +4,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { parameterTaskAssignmentData, type IParameterTaskAssignment, sampleDetailData } from '../../mock/sample';
 import { employeeData, capabilityData, reviewData } from '../../mock/personnel';
-import { detectionParametersData } from '../../mock/basicParams';
+import { detectionParametersData } from '../../mock/basicParameters';
 
 const ParameterTaskAssignment: React.FC = () => {
     const [dataSource, setDataSource] = useState<IParameterTaskAssignment[]>(parameterTaskAssignmentData);

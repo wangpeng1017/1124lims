@@ -5,6 +5,8 @@ import { useLocation } from 'react-router-dom';
 import { testTaskData, type ITestTask } from '../../mock/test';
 import { deviceData } from '../../mock/devices';
 import { environmentData } from '../../mock/environment';
+import { elnTemplatesData } from '../../mock/basicParameters';
+import DynamicFormRenderer from '../../components/DynamicFormRenderer';
 
 const DataEntry: React.FC = () => {
     const location = useLocation();
@@ -12,6 +14,7 @@ const DataEntry: React.FC = () => {
     const [selectedTask, setSelectedTask] = useState<ITestTask | null>(null);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [reportData, setReportData] = useState<any>(null);
+    const [currentTemplate, setCurrentTemplate] = useState<any>(null);
 
     // 获取进行中的任务
     const activeTasks = testTaskData.filter(t => t.status === '进行中');
@@ -29,16 +32,32 @@ const DataEntry: React.FC = () => {
     const handleTaskChange = (taskNo: string) => {
         const task = activeTasks.find(t => t.taskNo === taskNo);
         setSelectedTask(task || null);
-        form.resetFields(['parameterName', 'value1', 'value2', 'result', 'unit', 'conclusion']);
+        setCurrentTemplate(null);
+        form.resetFields(['parameterName', 'value1', 'value2', 'result', 'unit', 'conclusion', 'dataRows', 'envTemperature', 'envHumidity', 'testDate', 'remarks']);
+    };
+
+    const handleParameterChange = (value: string) => {
+        const template = elnTemplatesData.find(t => t.parameterName === value);
+        setCurrentTemplate(template || null);
+        form.resetFields(['value1', 'value2', 'result', 'unit', 'conclusion', 'dataRows', 'envTemperature', 'envHumidity', 'testDate', 'remarks']);
     };
 
     const handleEnvironmentChange = (envId: number) => {
         const env = environmentData.find(e => e.id === envId);
         if (env) {
-            form.setFieldsValue({
-                temperature: env.temperature,
-                humidity: env.humidity
-            });
+            // Check if we are using dynamic form (fields might be named differently or nested)
+            // For now, assume standard names or map them
+            if (currentTemplate) {
+                form.setFieldsValue({
+                    envTemperature: env.temperature,
+                    envHumidity: env.humidity
+                });
+            } else {
+                form.setFieldsValue({
+                    temperature: env.temperature,
+                    humidity: env.humidity
+                });
+            }
             message.success(`已加载 ${env.room} 环境数据`);
         }
     };
@@ -66,7 +85,7 @@ const DataEntry: React.FC = () => {
 
     return (
         <Card title="试验数据录入" bordered={false}>
-            <Form form={form} layout="vertical" initialValues={{ temperature: 23.5, humidity: 45 }}>
+            <Form form={form} layout="vertical" initialValues={{ temperature: 23.5, humidity: 45, envTemperature: 23.5, envHumidity: 45 }}>
                 <Row gutter={24}>
                     <Col span={8}>
                         <Form.Item name="taskNo" label="选择任务" rules={[{ required: true }]}>
@@ -85,7 +104,11 @@ const DataEntry: React.FC = () => {
                     </Col>
                     <Col span={8}>
                         <Form.Item name="parameterName" label="检测参数" rules={[{ required: true }]}>
-                            <Select placeholder="选择参数" disabled={!selectedTask}>
+                            <Select
+                                placeholder="选择参数"
+                                disabled={!selectedTask}
+                                onChange={handleParameterChange}
+                            >
                                 {selectedTask?.parameters.map(p => (
                                     <Select.Option key={p} value={p}>{p}</Select.Option>
                                 ))}
@@ -118,51 +141,68 @@ const DataEntry: React.FC = () => {
                             </Select>
                         </Form.Item>
                     </Col>
-                    <Col span={6}>
-                        <Form.Item name="temperature" label="温度 (°C)">
-                            <InputNumber style={{ width: '100%' }} />
-                        </Form.Item>
-                    </Col>
-                    <Col span={6}>
-                        <Form.Item name="humidity" label="湿度 (%)">
-                            <InputNumber style={{ width: '100%' }} />
-                        </Form.Item>
-                    </Col>
+                    {/* If using dynamic template, environment fields are inside the renderer or handled differently. 
+                        For hybrid approach, we can keep them here if the template doesn't have 'environment' section, 
+                        OR hide them if the template handles it. 
+                        Based on our schema, the template HAS an environment section. 
+                        So we should hide these if currentTemplate is set and has environment: true 
+                    */}
+                    {!currentTemplate?.schema?.environment && (
+                        <>
+                            <Col span={6}>
+                                <Form.Item name="temperature" label="温度 (°C)">
+                                    <InputNumber style={{ width: '100%' }} />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item name="humidity" label="湿度 (%)">
+                                    <InputNumber style={{ width: '100%' }} />
+                                </Form.Item>
+                            </Col>
+                        </>
+                    )}
                 </Row>
 
                 <Divider>测试数据</Divider>
-                <Row gutter={24}>
-                    <Col span={6}>
-                        <Form.Item name="value1" label="观测值 1" rules={[{ required: true }]}>
-                            <Input />
-                        </Form.Item>
-                    </Col>
-                    <Col span={6}>
-                        <Form.Item name="value2" label="观测值 2">
-                            <Input />
-                        </Form.Item>
-                    </Col>
-                    <Col span={6}>
-                        <Form.Item name="result" label="计算结果" rules={[{ required: true }]}>
-                            <Input />
-                        </Form.Item>
-                    </Col>
-                    <Col span={6}>
-                        <Form.Item name="unit" label="单位" rules={[{ required: true }]}>
-                            <Input />
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={24}>
-                    <Col span={6}>
-                        <Form.Item name="conclusion" label="判定结论" rules={[{ required: true }]}>
-                            <Select>
-                                <Select.Option value="合格">合格</Select.Option>
-                                <Select.Option value="不合格">不合格</Select.Option>
-                            </Select>
-                        </Form.Item>
-                    </Col>
-                </Row>
+
+                {currentTemplate ? (
+                    <DynamicFormRenderer template={currentTemplate} form={form} />
+                ) : (
+                    <>
+                        <Row gutter={24}>
+                            <Col span={6}>
+                                <Form.Item name="value1" label="观测值 1" rules={[{ required: true }]}>
+                                    <Input />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item name="value2" label="观测值 2">
+                                    <Input />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item name="result" label="计算结果" rules={[{ required: true }]}>
+                                    <Input />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item name="unit" label="单位" rules={[{ required: true }]}>
+                                    <Input />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                        <Row gutter={24}>
+                            <Col span={6}>
+                                <Form.Item name="conclusion" label="判定结论" rules={[{ required: true }]}>
+                                    <Select>
+                                        <Select.Option value="合格">合格</Select.Option>
+                                        <Select.Option value="不合格">不合格</Select.Option>
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                    </>
+                )}
 
                 <Divider />
                 <Space>

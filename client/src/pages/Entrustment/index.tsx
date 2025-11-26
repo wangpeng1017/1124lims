@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Table, Card, Tag, Space, Button, Modal, Form, Input, Popconfirm, message, Tooltip } from 'antd';
+import { Table, Card, Tag, Space, Button, Modal, Form, Input, Popconfirm, message, Tooltip, Select } from 'antd';
 import { SearchOutlined, LinkOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 import { entrustmentData } from '../../mock/entrustment';
 import type { IEntrustmentRecord } from '../../mock/entrustment';
+import { detectionParametersData } from '../../mock/basicParameters';
 
 const Entrustment: React.FC = () => {
     const [dataSource, setDataSource] = useState<IEntrustmentRecord[]>(entrustmentData);
@@ -48,12 +49,16 @@ const Entrustment: React.FC = () => {
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
+            // Sync testItems string with testParams array
+            const testItemsStr = values.testParams ? values.testParams.join('、') : values.testItems;
+            const finalValues = { ...values, testItems: testItemsStr };
+
             if (editingRecord) {
-                setDataSource(prev => prev.map(item => item.id === editingRecord.id ? { ...item, ...values } : item));
+                setDataSource(prev => prev.map(item => item.id === editingRecord.id ? { ...item, ...finalValues } : item));
                 message.success('更新成功');
             } else {
                 const newId = Math.max(...dataSource.map(d => d.id), 0) + 1;
-                setDataSource(prev => [{ id: newId, ...values }, ...prev]);
+                setDataSource(prev => [{ id: newId, ...finalValues }, ...prev]);
                 message.success('添加成功');
             }
             setIsModalOpen(false);
@@ -251,10 +256,20 @@ const Entrustment: React.FC = () => {
                     <Form.Item name="sampleName" label="样件名称" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="testItems" label="试验项目" rules={[{ required: true }]}>
-                        <Input.TextArea />
+                    <Form.Item name="testParams" label="检测项目" rules={[{ required: true }]}>
+                        <Select
+                            mode="multiple"
+                            placeholder="请选择检测参数"
+                            optionFilterProp="children"
+                        >
+                            {detectionParametersData.map(param => (
+                                <Select.Option key={param.id} value={param.name}>
+                                    {param.name} ({param.method})
+                                </Select.Option>
+                            ))}
+                        </Select>
                     </Form.Item>
-                    <Form.Item name="follower" label="跟单人" rules={[{ required: true }]}>
+                    <Form.Item name="follower" label="跟进人" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
                 </Form>

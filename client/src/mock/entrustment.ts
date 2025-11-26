@@ -7,6 +7,7 @@ export interface IEntrustmentRecord {
     sampleName: string; // Keep for display summary
     sampleIds: string[]; // Link to SampleDetail
     testItems: string;
+    testParams?: string[]; // Selected detection parameters
     follower: string;
     assignmentMode?: 'manual' | 'automatic'; // New field
     contractNo?: string; // New field: Contract Number
