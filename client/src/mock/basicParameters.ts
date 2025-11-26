@@ -335,5 +335,116 @@ export const elnTemplatesData: ELNTemplate[] = [
             ],
             environment: true
         }
+    },
+    {
+        id: 9,
+        name: '混凝土抗压强度试验记录.xlsx',
+        createDate: '2023-11-26',
+        author: '管理员',
+        parameterName: '抗压强度',
+        standard: 'GB/T 50081-2019',
+        schema: {
+            title: '混凝土立方体抗压强度试验记录',
+            header: {
+                methodBasis: 'GB/T 50081-2019',
+                device: '压力试验机'
+            },
+            columns: [
+                { title: '序号', dataIndex: 'index', width: 50 },
+                { title: '试件编号', dataIndex: 'sampleId' },
+                { title: '养护龄期 (d)', dataIndex: 'age' },
+                { title: '破坏荷载 (kN)', dataIndex: 'load' },
+                { title: '抗压强度 (MPa)', dataIndex: 'strength' },
+                { title: '结果判定', dataIndex: 'result' }
+            ],
+            environment: true
+        }
+    },
+    {
+        id: 10,
+        name: '混凝土抗折强度试验记录.xlsx',
+        createDate: '2023-11-26',
+        author: '管理员',
+        parameterName: '抗折强度',
+        standard: 'GB/T 50081-2019',
+        schema: {
+            title: '混凝土抗折强度试验记录',
+            header: {
+                methodBasis: 'GB/T 50081-2019',
+                device: '万能试验机'
+            },
+            columns: [
+                { title: '序号', dataIndex: 'index', width: 50 },
+                { title: '试件编号', dataIndex: 'sampleId' },
+                { title: '跨度 (mm)', dataIndex: 'span' },
+                { title: '破坏荷载 (kN)', dataIndex: 'load' },
+                { title: '抗折强度 (MPa)', dataIndex: 'strength' },
+                { title: '结果判定', dataIndex: 'result' }
+            ],
+            environment: true
+        }
+    },
+    {
+        id: 11,
+        name: '金属拉伸试验记录.xlsx',
+        createDate: '2023-11-26',
+        author: '管理员',
+        parameterName: '屈服强度',
+        standard: 'GB/T 228.1-2021',
+        schema: {
+            title: '金属材料拉伸试验记录',
+            header: { methodBasis: 'GB/T 228.1-2021', device: '电子万能试验机' },
+            columns: [
+                { title: '序号', dataIndex: 'index', width: 50 },
+                { title: '样品编号', dataIndex: 'sampleId' },
+                { title: '屈服强度 (MPa)', dataIndex: 'yieldStrength' },
+                { title: '抗拉强度 (MPa)', dataIndex: 'tensileStrength' },
+                { title: '断后伸长率 (%)', dataIndex: 'elongation' },
+                { title: '结果判定', dataIndex: 'result' }
+            ],
+            environment: true
+        }
+    },
+    {
+        id: 12,
+        name: '金属拉伸试验记录.xlsx',
+        createDate: '2023-11-26',
+        author: '管理员',
+        parameterName: '抗拉强度',
+        standard: 'GB/T 228.1-2021',
+        schema: {
+            title: '金属材料拉伸试验记录',
+            header: { methodBasis: 'GB/T 228.1-2021', device: '电子万能试验机' },
+            columns: [
+                { title: '序号', dataIndex: 'index', width: 50 },
+                { title: '样品编号', dataIndex: 'sampleId' },
+                { title: '屈服强度 (MPa)', dataIndex: 'yieldStrength' },
+                { title: '抗拉强度 (MPa)', dataIndex: 'tensileStrength' },
+                { title: '断后伸长率 (%)', dataIndex: 'elongation' },
+                { title: '结果判定', dataIndex: 'result' }
+            ],
+            environment: true
+        }
+    },
+    {
+        id: 13,
+        name: '金属拉伸试验记录.xlsx',
+        createDate: '2023-11-26',
+        author: '管理员',
+        parameterName: '伸长率',
+        standard: 'GB/T 228.1-2021',
+        schema: {
+            title: '金属材料拉伸试验记录',
+            header: { methodBasis: 'GB/T 228.1-2021', device: '电子万能试验机' },
+            columns: [
+                { title: '序号', dataIndex: 'index', width: 50 },
+                { title: '样品编号', dataIndex: 'sampleId' },
+                { title: '屈服强度 (MPa)', dataIndex: 'yieldStrength' },
+                { title: '抗拉强度 (MPa)', dataIndex: 'tensileStrength' },
+                { title: '断后伸长率 (%)', dataIndex: 'elongation' },
+                { title: '结果判定', dataIndex: 'result' }
+            ],
+            environment: true
+        }
     }
 ];
