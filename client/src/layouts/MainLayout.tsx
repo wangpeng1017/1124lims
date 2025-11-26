@@ -68,8 +68,10 @@ const items: MenuItem[] = [
     getItem('样品台账', '/sample-management/details', <FileTextOutlined />),
     getItem('样品流转', '/sample-management/transfer', <SwapOutlined />),
     getItem('我的样品', '/sample-management/my-samples', <InboxOutlined />),
-    getItem('任务分配（样品）', '/sample-management/task-sample', <ProjectOutlined />),
-    getItem('任务分配（参数）', '/sample-management/task-parameter', <PartitionOutlined />),
+  ]),
+  getItem('任务分配', '/task-assignment', <ProjectOutlined />, [
+    getItem('任务分配（样品）', '/task-assignment/sample', <ProjectOutlined />),
+    getItem('任务分配（参数）', '/task-assignment/parameter', <PartitionOutlined />),
   ]),
   getItem('试验管理', '/test-management', <ExperimentOutlined />, [
     getItem('检测任务', '/test-management/tasks', <CheckCircleOutlined />),

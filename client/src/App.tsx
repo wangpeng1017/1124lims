@@ -101,8 +101,10 @@ const App: React.FC = () => {
             <Route path="details" element={<SampleDetails />} />
             <Route path="transfer" element={<TransferRecords />} />
             <Route path="my-samples" element={<MySamples />} />
-            <Route path="task-sample" element={<SampleTaskAssignment />} />
-            <Route path="task-parameter" element={<ParameterTaskAssignment />} />
+          </Route>
+          <Route path="task-assignment">
+            <Route path="sample" element={<SampleTaskAssignment />} />
+            <Route path="parameter" element={<ParameterTaskAssignment />} />
           </Route>
           <Route path="outsourcing-management">
             <Route path="supplier-info" element={<SupplierInfo />} />
