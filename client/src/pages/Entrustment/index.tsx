@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Table, Card, Tag, Space, Button, Modal, Form, Input, Popconfirm, message, Tooltip, Select } from 'antd';
-import { SearchOutlined, LinkOutlined } from '@ant-design/icons';
+import { SearchOutlined, LinkOutlined, FileExcelOutlined, TableOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 import { entrustmentData } from '../../mock/entrustment';
 import type { IEntrustmentRecord } from '../../mock/entrustment';
-import { detectionParametersData } from '../../mock/basicParameters';
+import { detectionParametersData, elnTemplatesData } from '../../mock/basicParameters';
+import type { ELNTemplate } from '../../mock/basicParameters';
+import DynamicFormRenderer from '../../components/DynamicFormRenderer';
 
 const Entrustment: React.FC = () => {
     const [dataSource, setDataSource] = useState<IEntrustmentRecord[]>(entrustmentData);
@@ -13,6 +15,11 @@ const Entrustment: React.FC = () => {
     const [editingRecord, setEditingRecord] = useState<IEntrustmentRecord | null>(null);
     const [form] = Form.useForm();
     const navigate = useNavigate();
+
+    // Preview Modal State
+    const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+    const [previewTemplate, setPreviewTemplate] = useState<ELNTemplate | null>(null);
+    const [previewForm] = Form.useForm();
 
     const handleAdd = () => {
         setEditingRecord(null);
@@ -44,6 +51,11 @@ const Entrustment: React.FC = () => {
             ),
             onOk() { },
         });
+    };
+
+    const handlePreview = (template: ELNTemplate) => {
+        setPreviewTemplate(template);
+        setIsPreviewModalOpen(true);
     };
 
     const handleOk = async () => {
@@ -205,6 +217,66 @@ const Entrustment: React.FC = () => {
         },
         { title: '试验项目', dataIndex: 'testItems', key: 'testItems', ellipsis: true },
         {
+            title: '检测模板',
+            key: 'templates',
+            width: 200,
+            render: (_, record) => {
+                // Determine parameters: use testParams array if available, otherwise split testItems string
+                const params = record.testParams || (record.testItems ? record.testItems.split('、') : []);
+
+                // Find matching templates
+                const templates = params
+                    .map(param => elnTemplatesData.find(t => t.parameterName === param))
+                    .filter((t): t is ELNTemplate => !!t);
+
+                if (templates.length === 0) {
+                    return <span style={{ color: '#ccc' }}>无关联模板</span>;
+                }
+
+                return (
+                    <Space direction="vertical" size={0}>
+                        {templates.map(t => (
+                            <Tag
+                                key={t.id}
+                                icon={<FileExcelOutlined />}
+                                color="success"
+                                style={{ cursor: 'pointer', marginBottom: 2 }}
+                                onClick={() => handlePreview(t)}
+                            >
+                                {t.name}
+                            </Tag>
+                        ))}
+                    </Space>
+                );
+            }
+        },
+        {
+            title: '检测内容',
+            key: 'content',
+            width: 100,
+            render: (_, record) => {
+                const params = record.testParams || (record.testItems ? record.testItems.split('、') : []);
+                const templates = params
+                    .map(param => elnTemplatesData.find(t => t.parameterName === param))
+                    .filter((t): t is ELNTemplate => !!t);
+
+                return (
+                    <Button
+                        size="small"
+                        icon={<TableOutlined />}
+                        disabled={templates.length === 0}
+                        onClick={() => {
+                            if (templates.length > 0) {
+                                handlePreview(templates[0]); // Preview the first one for now, or could open a selector
+                            }
+                        }}
+                    >
+                        查看
+                    </Button>
+                );
+            }
+        },
+        {
             title: '跟单人',
             dataIndex: 'follower',
             key: 'follower',
@@ -273,6 +345,25 @@ const Entrustment: React.FC = () => {
                         <Input />
                     </Form.Item>
                 </Form>
+            </Modal>
+
+            {/* Preview Modal */}
+            <Modal
+                title={`模板预览: ${previewTemplate?.name || ''}`}
+                open={isPreviewModalOpen}
+                onCancel={() => setIsPreviewModalOpen(false)}
+                width={800}
+                footer={[
+                    <Button key="close" onClick={() => setIsPreviewModalOpen(false)}>
+                        关闭
+                    </Button>
+                ]}
+            >
+                {previewTemplate && (
+                    <Form form={previewForm} layout="vertical">
+                        <DynamicFormRenderer template={previewTemplate} />
+                    </Form>
+                )}
             </Modal>
         </Card>
     );
