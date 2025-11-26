@@ -9,7 +9,6 @@ import CalibrationPlan from './pages/DeviceManagement/CalibrationPlan';
 import EntrustmentOrder from './pages/Entrustment';
 import EntrustmentContract from './pages/Entrustment/EntrustmentContract';
 import ClientUnit from './pages/Entrustment/ClientUnit';
-import EntrustmentSample from './pages/Entrustment/EntrustmentSample';
 import EntrustmentFill from './pages/Entrustment/EntrustmentFill';
 import Consumables from './pages/Consumables';
 import EmployeeList from './pages/PersonnelManagement/EmployeeList';
@@ -20,9 +19,8 @@ import CapabilityReview from './pages/PersonnelManagement/CapabilityReview';
 import InspectionStandards from './pages/SystemSettings/BasicData/InspectionStandards';
 import DetectionParameters from './pages/SystemSettings/BasicData/DetectionParameters';
 import ELN from './pages/SystemSettings/BasicData/ELN';
-import SampleReceipt from './pages/SampleManagement/SampleReceipt';
+import SampleRegistration from './pages/SampleManagement/SampleRegistration';
 import SampleDetails from './pages/SampleManagement/SampleDetails';
-import SampleLabels from './pages/SampleManagement/SampleLabels';
 import TransferRecords from './pages/SampleManagement/TransferRecords';
 import MySamples from './pages/SampleManagement/MySamples';
 import SampleTaskAssignment from './pages/SampleManagement/SampleTaskAssignment';
@@ -85,7 +83,6 @@ const App: React.FC = () => {
             <Route path="order" element={<EntrustmentOrder />} />
             <Route path="contract" element={<EntrustmentContract />} />
             <Route path="client" element={<ClientUnit />} />
-            <Route path="sample" element={<EntrustmentSample />} />
           </Route>
           <Route path="personnel">
             <Route path="employee" element={<EmployeeList />} />
@@ -100,9 +97,8 @@ const App: React.FC = () => {
             <Route path="standards" element={<InspectionStandards />} />
           </Route>
           <Route path="sample-management">
-            <Route path="receipt" element={<SampleReceipt />} />
+            <Route path="receipt" element={<SampleRegistration />} />
             <Route path="details" element={<SampleDetails />} />
-            <Route path="labels" element={<SampleLabels />} />
             <Route path="transfer" element={<TransferRecords />} />
             <Route path="my-samples" element={<MySamples />} />
             <Route path="task-sample" element={<SampleTaskAssignment />} />
