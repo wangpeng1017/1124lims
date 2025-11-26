@@ -101,8 +101,6 @@ const items: MenuItem[] = [
     getItem('员工列表', '/personnel/employee', <UserOutlined />),
     getItem('部门信息', '/personnel/department', <ApartmentOutlined />),
     getItem('站点信息', '/personnel/station', <EnvironmentOutlined />),
-    getItem('能力值', '/personnel/capability', <SafetyCertificateOutlined />),
-    getItem('能力评审', '/personnel/review', <AuditOutlined />),
   ]),
   getItem('委外/分包管理', '/outsourcing-management', <SupplierOutlined />, [
     getItem('委外分配（委托单）', '/outsourcing-management/outsource-by-order', <FileProtectOutlined />),
@@ -133,6 +131,10 @@ const items: MenuItem[] = [
     getItem('检查标准/依据', '/basic-params/standards', <FileProtectOutlined />),
     getItem('样品报告分类', '/report-management/categories', <AppstoreOutlined />),
     getItem('环境管理', '/environment', <EnvironmentOutlined />),
+    getItem('资质管理', '/basic-params/qualification', <SafetyCertificateOutlined />, [
+      getItem('人员资质配置', '/basic-params/qualification/value', <SafetyCertificateOutlined />),
+      getItem('能力评审', '/basic-params/qualification/review', <AuditOutlined />),
+    ]),
   ]),
   getItem('系统设置', '/system-settings', <SettingOutlined />, [
     getItem('用户管理', '/system-settings/users', <UserOutlined />),

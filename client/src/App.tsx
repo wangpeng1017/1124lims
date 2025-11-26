@@ -88,13 +88,15 @@ const App: React.FC = () => {
             <Route path="employee" element={<EmployeeList />} />
             <Route path="department" element={<DepartmentInfo />} />
             <Route path="station" element={<StationInfo />} />
-            <Route path="capability" element={<CapabilityValue />} />
-            <Route path="review" element={<CapabilityReview />} />
           </Route>
           <Route path="basic-params">
             <Route path="eln" element={<ELN />} />
             <Route path="detection" element={<DetectionParameters />} />
             <Route path="standards" element={<InspectionStandards />} />
+            <Route path="qualification">
+              <Route path="value" element={<CapabilityValue />} />
+              <Route path="review" element={<CapabilityReview />} />
+            </Route>
           </Route>
           <Route path="sample-management">
             <Route path="receipt" element={<SampleRegistration />} />

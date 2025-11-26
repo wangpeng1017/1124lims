@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, Table, Button, Space, Modal, Form, Input, Select, Tag, message, Popconfirm } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, KeyOutlined } from '@ant-design/icons';
 import { userData as initialData, roleData } from '../../mock/system';
+import { employeeData } from '../../mock/personnel';
 import type { IUser } from '../../mock/system';
 
 const UserManagement: React.FC = () => {
@@ -158,6 +159,40 @@ const UserManagement: React.FC = () => {
                     >
                         <Input disabled={!!editingRecord} />
                     </Form.Item>
+
+                    <Form.Item
+                        name="employeeId"
+                        label="关联员工"
+                        tooltip="选择员工后将自动填充姓名、部门和联系电话"
+                    >
+                        <Select
+                            placeholder="请选择关联员工"
+                            allowClear
+                            onChange={(value) => {
+                                const employee = employeeData.find(e => e.id === value);
+                                if (employee) {
+                                    form.setFieldsValue({
+                                        realName: employee.name,
+                                        department: employee.department,
+                                        phone: employee.contact
+                                    });
+                                } else {
+                                    form.setFieldsValue({
+                                        realName: '',
+                                        department: '',
+                                        phone: ''
+                                    });
+                                }
+                            }}
+                        >
+                            {employeeData.map(emp => (
+                                <Select.Option key={emp.id} value={emp.id}>
+                                    {emp.name} ({emp.department})
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+
                     <Form.Item
                         name="realName"
                         label="真实姓名"

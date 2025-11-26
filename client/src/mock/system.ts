@@ -12,6 +12,7 @@ export interface IUser {
     status: 'active' | 'inactive';
     createTime: string;
     lastLoginTime?: string;
+    employeeId?: number; // Linked Employee ID
 }
 
 // 角色接口
@@ -43,7 +44,8 @@ export const userData: IUser[] = [
         roles: ['admin'],
         status: 'active',
         createTime: '2023-01-01',
-        lastLoginTime: '2023-11-25 09:00:00'
+        lastLoginTime: '2023-11-25 09:00:00',
+        employeeId: 1
     },
     {
         id: '2',
