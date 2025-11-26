@@ -62,7 +62,7 @@ import PermissionConfig from './pages/SystemSettings/PermissionConfig';
 import SupplierCategory from './pages/SupplierManagement/SupplierCategory';
 import EvaluationTemplate from './pages/SupplierManagement/EvaluationTemplate';
 import PerformanceEvaluation from './pages/SupplierManagement/PerformanceEvaluation';
-import SupplierStatistics from './pages/SupplierManagement/SupplierStatistics';
+
 
 const App: React.FC = () => {
   return (
