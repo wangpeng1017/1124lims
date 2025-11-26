@@ -97,11 +97,7 @@ const items: MenuItem[] = [
     getItem('耗材信息', '/consumables-management/info', <ProfileOutlined />),
     getItem('出入库管理', '/consumables-management/transactions', <SwapOutlined />),
   ]),
-  getItem('人事管理', '/personnel', <TeamOutlined />, [
-    getItem('员工列表', '/personnel/employee', <UserOutlined />),
-    getItem('部门信息', '/personnel/department', <ApartmentOutlined />),
-    getItem('站点信息', '/personnel/station', <EnvironmentOutlined />),
-  ]),
+
   getItem('委外/分包管理', '/outsourcing-management', <SupplierOutlined />, [
     getItem('委外分配（委托单）', '/outsourcing-management/outsource-by-order', <FileProtectOutlined />),
     getItem('委外分配（参数）', '/outsourcing-management/outsource-by-parameter', <PartitionOutlined />),
@@ -136,13 +132,17 @@ const items: MenuItem[] = [
       getItem('能力评审', '/basic-params/qualification/review', <AuditOutlined />),
     ]),
   ]),
+  getItem('人事管理', '/personnel', <TeamOutlined />, [
+    getItem('员工列表', '/personnel/employee', <UserOutlined />),
+    getItem('部门信息', '/personnel/department', <ApartmentOutlined />),
+    getItem('站点信息', '/personnel/station', <EnvironmentOutlined />),
+  ]),
   getItem('系统设置', '/system-settings', <SettingOutlined />, [
     getItem('用户管理', '/system-settings/users', <UserOutlined />),
     getItem('角色管理', '/system-settings/roles', <TeamOutlined />),
     getItem('权限配置', '/system-settings/permission', <SafetyCertificateOutlined />),
   ]),
 ];
-
 const MainLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const {
