@@ -23,7 +23,6 @@ import DetectionParameters from './pages/SystemSettings/BasicData/DetectionParam
 import ELN from './pages/SystemSettings/BasicData/ELN';
 import SampleRegistration from './pages/SampleManagement/SampleRegistration';
 import SampleDetails from './pages/SampleManagement/SampleDetails';
-import TransferRecords from './pages/SampleManagement/TransferRecords';
 import MySamples from './pages/SampleManagement/MySamples';
 import SampleTaskAssignment from './pages/SampleManagement/SampleTaskAssignment';
 import ParameterTaskAssignment from './pages/SampleManagement/ParameterTaskAssignment';
@@ -109,7 +108,6 @@ const App: React.FC = () => {
           <Route path="sample-management">
             <Route path="receipt" element={<SampleRegistration />} />
             <Route path="details" element={<SampleDetails />} />
-            <Route path="transfer" element={<TransferRecords />} />
             <Route path="my-samples" element={<MySamples />} />
           </Route>
           <Route path="task-assignment">

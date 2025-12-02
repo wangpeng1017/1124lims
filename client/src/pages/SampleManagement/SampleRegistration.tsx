@@ -210,20 +210,6 @@ const SampleRegistration: React.FC = () => {
                                             </>
                                         ),
                                     },
-                                    {
-                                        key: '2',
-                                        label: '计价信息',
-                                        children: (
-                                            <>
-                                                <Form.Item name="unitPrice" label="单价 (元)" rules={[{ required: true }]}>
-                                                    <InputNumber prefix="¥" min={0} style={{ width: '100%' }} />
-                                                </Form.Item>
-                                                <Form.Item name="totalPrice" label="总价 (元)">
-                                                    <InputNumber prefix="¥" min={0} style={{ width: '100%' }} disabled />
-                                                </Form.Item>
-                                            </>
-                                        ),
-                                    },
                                 ]}
                             />
                         </>

@@ -8,8 +8,6 @@ export interface ISampleReceipt {
     sampleIds: string[]; // 样品编号列表
     receiptDate: string; // 收样日期
     receivedBy: string; // 收样人
-    totalPrice: number; // 总计价
-    priceDetails: { sampleNo: string; price: number }[]; // 价格明细
     status: string; // 状态：待确认、已确认
     remark?: string;
 }
@@ -92,11 +90,6 @@ export const sampleReceiptData: ISampleReceipt[] = [
         sampleIds: ['S20231101001', 'S20231101002'],
         receiptDate: '2023-11-01',
         receivedBy: '张三',
-        totalPrice: 5000,
-        priceDetails: [
-            { sampleNo: 'S20231101001', price: 3000 },
-            { sampleNo: 'S20231101002', price: 2000 }
-        ],
         status: '已确认',
         remark: '样品完好'
     },
@@ -107,10 +100,6 @@ export const sampleReceiptData: ISampleReceipt[] = [
         sampleIds: ['S20231102001'],
         receiptDate: '2023-11-02',
         receivedBy: '李四',
-        totalPrice: 3500,
-        priceDetails: [
-            { sampleNo: 'S20231102001', price: 3500 }
-        ],
         status: '待确认'
     }
 ];
