@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Table, Card, Tag, Space, Button, Drawer, Form, Input, Popconfirm, message, Tooltip, Select, Row, Col, Divider, List, Radio, Modal } from 'antd';
-import { LinkOutlined, PlusOutlined, DeleteOutlined, EditOutlined, UserOutlined, GlobalOutlined } from '@ant-design/icons';
+import { Table, Card, Tag, Space, Button, Drawer, Form, Input, Popconfirm, message, Tooltip, Select, Row, Col, Divider, List, Radio, Modal, DatePicker } from 'antd';
+import { LinkOutlined, PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { entrustmentData } from '../../mock/entrustment';
 import type { IEntrustmentRecord, IEntrustmentProject } from '../../mock/entrustment';
 import { detectionParametersData } from '../../mock/basicParameters';
+import { deviceData } from '../../mock/devices';
 import { supplierData } from '../../mock/supplier';
+import dayjs from 'dayjs';
 
 const orgUsers = [
     {
@@ -161,7 +163,10 @@ const Entrustment: React.FC = () => {
         assignForm.resetFields();
         assignForm.setFieldsValue({
             assignTo: project.assignTo,
-            subcontractor: project.subcontractor
+            subcontractor: project.subcontractor,
+            deviceId: project.deviceId,
+            assignDate: project.assignDate ? dayjs(project.assignDate) : dayjs(),
+            deadline: project.deadline ? dayjs(project.deadline) : undefined
         });
         setIsAssignModalOpen(true);
     };
@@ -180,6 +185,15 @@ const Entrustment: React.FC = () => {
                     }
                     if ('subcontractor' in values) {
                         next.subcontractor = values.subcontractor || undefined;
+                    }
+                    if ('deviceId' in values) {
+                        next.deviceId = values.deviceId || undefined;
+                    }
+                    if ('assignDate' in values) {
+                        next.assignDate = values.assignDate ? values.assignDate.format('YYYY-MM-DD') : undefined;
+                    }
+                    if ('deadline' in values) {
+                        next.deadline = values.deadline ? values.deadline.format('YYYY-MM-DD') : undefined;
                     }
 
                     if (!next.assignTo && !next.subcontractor) {
@@ -289,12 +303,17 @@ const Entrustment: React.FC = () => {
             dataIndex: 'testItems',
             key: 'testItems',
             ellipsis: true,
-            render: (text, record) => {
+            render: (_, record) => {
                 const count = record.projects?.length || 0;
+                const projectNames = record.projects?.slice(0, 2).map(p => p.name).join('、');
+                const hasMore = (record.projects?.length || 0) > 2;
                 return (
                     <Space>
                         <Tag color="blue">{count}个项目</Tag>
-                        {text}
+                        <span style={{ fontSize: 12, color: '#666' }}>
+                            {projectNames}
+                            {hasMore ? '...' : ''}
+                        </span>
                     </Space>
                 );
             }
@@ -352,7 +371,7 @@ const Entrustment: React.FC = () => {
                 scroll={{ x: 1300 }}
                 expandable={{
                     expandedRowRender,
-                    defaultExpandAllRows: true
+                    defaultExpandAllRows: false
                 }}
             />
 
@@ -447,28 +466,6 @@ const Entrustment: React.FC = () => {
                         renderItem={item => (
                             <List.Item
                                 actions={[
-                                    <Tooltip key="assign" title={item.status !== 'pending' ? '任务已开始，不可修改分配' : undefined}>
-                                        <Button
-                                            type="link"
-                                            size="small"
-                                            icon={<UserOutlined />}
-                                            disabled={item.status !== 'pending'}
-                                            onClick={() => handleOpenAssign(item, 'internal')}
-                                        >
-                                            分配
-                                        </Button>
-                                    </Tooltip>,
-                                    <Tooltip key="subcontract" title={item.status !== 'pending' ? '任务已开始，不可修改分配' : undefined}>
-                                        <Button
-                                            type="link"
-                                            size="small"
-                                            icon={<GlobalOutlined />}
-                                            disabled={item.status !== 'pending'}
-                                            onClick={() => handleOpenAssign(item, 'external')}
-                                        >
-                                            分包
-                                        </Button>
-                                    </Tooltip>,
                                     <Button type="text" size="small" icon={<EditOutlined />} onClick={() => handleEditProject(item)} />,
                                     <Button type="text" danger size="small" icon={<DeleteOutlined />} onClick={() => handleDeleteProject(item.id)} />
                                 ]}
@@ -512,41 +509,85 @@ const Entrustment: React.FC = () => {
                 }
             >
                 <Form form={assignForm} layout="vertical">
-                    <Divider>内部分配</Divider>
-                    <Form.Item name="assignTo" label="分配给(组织架构人员)">
-                        <Select
-                            allowClear
-                            placeholder="请选择内部分配人员"
-                            showSearch
-                            optionFilterProp="children"
-                        >
-                            {orgUsers.map(group => (
-                                <Select.OptGroup key={group.department} label={group.department}>
-                                    {group.users.map(user => (
-                                        <Select.Option key={user.id} value={user.name}>
-                                            {user.name}
+                    {assignType === 'internal' ? (
+                        <>
+                            <Divider>内部分配</Divider>
+                            <Form.Item name="assignTo" label="分配给(组织架构人员)">
+                                <Select
+                                    allowClear
+                                    placeholder="请选择内部分配人员"
+                                    showSearch
+                                    optionFilterProp="children"
+                                >
+                                    {orgUsers.map(group => (
+                                        <Select.OptGroup key={group.department} label={group.department}>
+                                            {group.users.map(user => (
+                                                <Select.Option key={user.id} value={user.name}>
+                                                    {user.name}
+                                                </Select.Option>
+                                            ))}
+                                        </Select.OptGroup>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                            <Form.Item name="deviceId" label="分配设备">
+                                <Select
+                                    allowClear
+                                    placeholder="请选择设备"
+                                    showSearch
+                                    optionFilterProp="children"
+                                >
+                                    {deviceData.map(device => (
+                                        <Select.Option key={device.id} value={device.id}>
+                                            {device.name} ({device.code})
                                         </Select.Option>
                                     ))}
-                                </Select.OptGroup>
-                            ))}
-                        </Select>
-                    </Form.Item>
-
-                    <Divider>外部分配</Divider>
-                    <Form.Item name="subcontractor" label="分包供应商(来源于供应商列表)">
-                        <Select
-                            allowClear
-                            placeholder="请选择外部分配供应商"
-                            showSearch
-                            optionFilterProp="children"
-                        >
-                            {outsourcingSuppliers.map(supplier => (
-                                <Select.Option key={supplier.id} value={supplier.name}>
-                                    {supplier.name}
-                                </Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
+                                </Select>
+                            </Form.Item>
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item name="assignDate" label="分配时间" initialValue={dayjs()}>
+                                        <DatePicker style={{ width: '100%' }} />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item name="deadline" label="截止时间">
+                                        <DatePicker style={{ width: '100%' }} />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        </>
+                    ) : (
+                        <>
+                            <Divider>外部分配</Divider>
+                            <Form.Item name="subcontractor" label="分包供应商(来源于供应商列表)">
+                                <Select
+                                    allowClear
+                                    placeholder="请选择外部分配供应商"
+                                    showSearch
+                                    optionFilterProp="children"
+                                >
+                                    {outsourcingSuppliers.map(supplier => (
+                                        <Select.Option key={supplier.id} value={supplier.name}>
+                                            {supplier.name}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item name="assignDate" label="分配时间" initialValue={dayjs()}>
+                                        <DatePicker style={{ width: '100%' }} />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item name="deadline" label="截止时间">
+                                        <DatePicker style={{ width: '100%' }} />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        </>
+                    )}
                 </Form>
             </Drawer>
 

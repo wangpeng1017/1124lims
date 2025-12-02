@@ -7,6 +7,9 @@ export interface IEntrustmentProject {
     status: 'pending' | 'assigned' | 'subcontracted' | 'completed';
     assignTo?: string; // Internal user name
     subcontractor?: string; // External supplier name
+    deviceId?: string;
+    assignDate?: string;
+    deadline?: string;
 }
 
 export interface IEntrustmentRecord {
