@@ -125,7 +125,7 @@ const items: MenuItem[] = [
     getItem('检测参数/项目', '/basic-params/detection', <ExperimentOutlined />),
     getItem('检查标准/依据', '/basic-params/standards', <FileProtectOutlined />),
     getItem('样品报告分类', '/report-management/categories', <AppstoreOutlined />),
-    getItem('环境管理', '/environment', <EnvironmentOutlined />),
+
     getItem('资质管理', '/basic-params/qualification', <SafetyCertificateOutlined />, [
       getItem('人员资质配置', '/basic-params/qualification/value', <SafetyCertificateOutlined />),
       getItem('能力评审', '/basic-params/qualification/review', <AuditOutlined />),

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
-import EnvironmentManagement from './pages/EnvironmentManagement';
+
 import DeviceInfo from './pages/DeviceManagement/DeviceInfo';
 import MaintenancePlan from './pages/DeviceManagement/MaintenancePlan';
 import RepairManagement from './pages/DeviceManagement/RepairManagement';
@@ -77,7 +77,7 @@ const App: React.FC = () => {
             <Route path="repair" element={<RepairManagement />} />
             <Route path="calibration" element={<CalibrationPlan />} />
           </Route>
-          <Route path="environment" element={<EnvironmentManagement />} />
+
           <Route path="consumables" element={<Consumables />} />
           <Route path="entrustment">
             <Route path="order" element={<EntrustmentOrder />} />
