@@ -6,7 +6,34 @@ import { entrustmentData } from '../../mock/entrustment';
 import type { IEntrustmentRecord, IEntrustmentProject } from '../../mock/entrustment';
 import { detectionParametersData, elnTemplatesData } from '../../mock/basicParameters';
 import type { ELNTemplate } from '../../mock/basicParameters';
+import { supplierData } from '../../mock/supplier';
 import DynamicFormRenderer from '../../components/DynamicFormRenderer';
+
+const orgUsers = [
+    {
+        department: '力学实验室',
+        users: [
+            { id: 'EMP001', name: '张三' },
+            { id: 'EMP002', name: '李四' }
+        ]
+    },
+    {
+        department: '金相实验室',
+        users: [
+            { id: 'EMP003', name: '王五' },
+            { id: 'EMP004', name: '赵六' }
+        ]
+    },
+    {
+        department: '化学实验室',
+        users: [
+            { id: 'EMP005', name: '陈七' },
+            { id: 'EMP006', name: '刘八' }
+        ]
+    }
+];
+
+const outsourcingSuppliers = supplierData.filter(s => s.categories.includes('CAT001'));
 
 const Entrustment: React.FC = () => {
     const [dataSource, setDataSource] = useState<IEntrustmentRecord[]>(entrustmentData);
@@ -137,14 +164,17 @@ const Entrustment: React.FC = () => {
 
     // 任务分配/分包逻辑
     const handleOpenAssign = (project: IEntrustmentProject, type: 'internal' | 'external') => {
+        if (project.status !== 'pending') {
+            message.warning('任务已开始，不可修改分配');
+            return;
+        }
         setCurrentProject(project);
         setAssignType(type);
         assignForm.resetFields();
-        if (type === 'internal' && project.assignTo) {
-            assignForm.setFieldsValue({ assignTo: project.assignTo });
-        } else if (type === 'external' && project.subcontractor) {
-            assignForm.setFieldsValue({ subcontractor: project.subcontractor });
-        }
+        assignForm.setFieldsValue({
+            assignTo: project.assignTo,
+            subcontractor: project.subcontractor
+        });
         setIsAssignModalOpen(true);
     };
 
@@ -155,16 +185,29 @@ const Entrustment: React.FC = () => {
 
             setProjects(prev => prev.map(p => {
                 if (p.id === currentProject.id) {
-                    if (assignType === 'internal') {
-                        return { ...p, status: 'assigned', assignTo: values.assignTo };
-                    } else {
-                        return { ...p, status: 'subcontracted', subcontractor: values.subcontractor };
+                    const next: IEntrustmentProject = { ...p };
+
+                    if ('assignTo' in values) {
+                        next.assignTo = values.assignTo || undefined;
                     }
+                    if ('subcontractor' in values) {
+                        next.subcontractor = values.subcontractor || undefined;
+                    }
+
+                    if (!next.assignTo && !next.subcontractor) {
+                        next.status = 'pending';
+                    } else if (next.assignTo) {
+                        next.status = 'assigned';
+                    } else if (next.subcontractor) {
+                        next.status = 'subcontracted';
+                    }
+
+                    return next;
                 }
                 return p;
             }));
             setIsAssignModalOpen(false);
-            message.success(assignType === 'internal' ? '任务分配成功' : '委外分包成功');
+            message.success('分配信息已更新');
         } catch (error) {
             console.error('Assign Validate Failed:', error);
         }
@@ -405,8 +448,28 @@ const Entrustment: React.FC = () => {
                         renderItem={item => (
                             <List.Item
                                 actions={[
-                                    <Button type="link" size="small" icon={<UserOutlined />} onClick={() => handleOpenAssign(item, 'internal')}>分配</Button>,
-                                    <Button type="link" size="small" icon={<GlobalOutlined />} onClick={() => handleOpenAssign(item, 'external')}>分包</Button>,
+                                    <Tooltip key="assign" title={item.status !== 'pending' ? '任务已开始，不可修改分配' : undefined}>
+                                        <Button
+                                            type="link"
+                                            size="small"
+                                            icon={<UserOutlined />}
+                                            disabled={item.status !== 'pending'}
+                                            onClick={() => handleOpenAssign(item, 'internal')}
+                                        >
+                                            分配
+                                        </Button>
+                                    </Tooltip>,
+                                    <Tooltip key="subcontract" title={item.status !== 'pending' ? '任务已开始，不可修改分配' : undefined}>
+                                        <Button
+                                            type="link"
+                                            size="small"
+                                            icon={<GlobalOutlined />}
+                                            disabled={item.status !== 'pending'}
+                                            onClick={() => handleOpenAssign(item, 'external')}
+                                        >
+                                            分包
+                                        </Button>
+                                    </Tooltip>,
                                     <Button type="text" size="small" icon={<EditOutlined />} onClick={() => handleEditProject(item)} />,
                                     <Button type="text" danger size="small" icon={<DeleteOutlined />} onClick={() => handleDeleteProject(item.id)} />
                                 ]}
@@ -435,64 +498,58 @@ const Entrustment: React.FC = () => {
                 </Form>
             </Drawer>
 
-            {/* 项目编辑 Modal */}
-            <Modal
-                title={editingProject ? "编辑项目" : "添加项目"}
-                open={isProjectModalOpen}
-                onOk={handleSaveProject}
-                onCancel={() => setIsProjectModalOpen(false)}
-            >
-                <Form form={projectForm} layout="vertical">
-                    <Form.Item name="name" label="项目名称" rules={[{ required: true }]} tooltip="如: 力学性能、金相分析">
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="testItems" label="检测参数" rules={[{ required: true }]}>
-                        <Select mode="multiple" placeholder="请选择检测参数">
-                            {detectionParametersData.map(param => (
-                                <Select.Option key={param.id} value={param.name}>
-                                    {param.name}
+    {/* 任务分配/分包 Drawer */}
+    <Drawer
+        title={assignType === 'internal' ? '项目分配' : '项目分配'}
+        open={isAssignModalOpen}
+        width={480}
+        placement="right"
+        onClose={() => setIsAssignModalOpen(false)}
+        extra={
+            <Space>
+                <Button onClick={() => setIsAssignModalOpen(false)}>取消</Button>
+                <Button type="primary" onClick={handleSaveAssign}>保存</Button>
+            </Space>
+        }
+    >
+        <Form form={assignForm} layout="vertical">
+            <Divider>内部分配</Divider>
+            <Form.Item name="assignTo" label="分配给(组织架构人员)">
+                <Select
+                    allowClear
+                    placeholder="请选择内部分配人员"
+                    showSearch
+                    optionFilterProp="children"
+                >
+                    {orgUsers.map(group => (
+                        <Select.OptGroup key={group.department} label={group.department}>
+                            {group.users.map(user => (
+                                <Select.Option key={user.id} value={user.name}>
+                                    {user.name}
                                 </Select.Option>
                             ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item name="method" label="检测方法" rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="standard" label="判定标准" rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                </Form>
-            </Modal>
+                        </Select.OptGroup>
+                    ))}
+                </Select>
+            </Form.Item>
 
-            {/* 任务分配/分包 Modal */}
-            <Modal
-                title={assignType === 'internal' ? "内部任务分配" : "委外分包"}
-                open={isAssignModalOpen}
-                onOk={handleSaveAssign}
-                onCancel={() => setIsAssignModalOpen(false)}
-            >
-                <Form form={assignForm} layout="vertical">
-                    {assignType === 'internal' ? (
-                        <Form.Item name="assignTo" label="分配给(实验室/人员)" rules={[{ required: true }]}>
-                            <Select>
-                                <Select.Option value="力学实验室">力学实验室</Select.Option>
-                                <Select.Option value="金相实验室">金相实验室</Select.Option>
-                                <Select.Option value="化学实验室">化学实验室</Select.Option>
-                                <Select.Option value="张三">张三</Select.Option>
-                                <Select.Option value="李四">李四</Select.Option>
-                            </Select>
-                        </Form.Item>
-                    ) : (
-                        <Form.Item name="subcontractor" label="分包供应商" rules={[{ required: true }]}>
-                            <Select>
-                                <Select.Option value="SGS">SGS</Select.Option>
-                                <Select.Option value="华测检测">华测检测</Select.Option>
-                                <Select.Option value="国轻检测">国轻检测</Select.Option>
-                            </Select>
-                        </Form.Item>
-                    )}
-                </Form>
-            </Modal>
+            <Divider>外部分配</Divider>
+            <Form.Item name="subcontractor" label="分包供应商(来源于供应商列表)">
+                <Select
+                    allowClear
+                    placeholder="请选择外部分配供应商"
+                    showSearch
+                    optionFilterProp="children"
+                >
+                    {outsourcingSuppliers.map(supplier => (
+                        <Select.Option key={supplier.id} value={supplier.name}>
+                            {supplier.name}
+                        </Select.Option>
+                    ))}
+                </Select>
+            </Form.Item>
+        </Form>
+    </Drawer>
 
             {/* Preview Modal */}
             <Modal
