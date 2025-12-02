@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Table, Card, Tag, Space, Button, Drawer, Form, Input, Popconfirm, message, Tooltip, Select, Row, Col, Divider, List, Radio, Modal } from 'antd';
-import { LinkOutlined, FileExcelOutlined, TableOutlined, PlusOutlined, DeleteOutlined, EditOutlined, UserOutlined, GlobalOutlined } from '@ant-design/icons';
+import { LinkOutlined, PlusOutlined, DeleteOutlined, EditOutlined, UserOutlined, GlobalOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { entrustmentData } from '../../mock/entrustment';
 import type { IEntrustmentRecord, IEntrustmentProject } from '../../mock/entrustment';
-import { detectionParametersData, elnTemplatesData } from '../../mock/basicParameters';
-import type { ELNTemplate } from '../../mock/basicParameters';
+import { detectionParametersData } from '../../mock/basicParameters';
 import { supplierData } from '../../mock/supplier';
-import DynamicFormRenderer from '../../components/DynamicFormRenderer';
 
 const orgUsers = [
     {
@@ -54,11 +52,6 @@ const Entrustment: React.FC = () => {
     const [currentProject, setCurrentProject] = useState<IEntrustmentProject | null>(null);
     const [assignForm] = Form.useForm();
 
-    // Preview Modal State
-    const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
-    const [previewTemplate, setPreviewTemplate] = useState<ELNTemplate | null>(null);
-    const [previewForm] = Form.useForm();
-
     const handleAdd = () => {
         setEditingRecord(null);
         setProjects([]);
@@ -91,11 +84,6 @@ const Entrustment: React.FC = () => {
             ),
             onOk() { },
         });
-    };
-
-    const handlePreview = (template: ELNTemplate) => {
-        setPreviewTemplate(template);
-        setIsPreviewModalOpen(true);
     };
 
     // 保存委托单
@@ -213,6 +201,77 @@ const Entrustment: React.FC = () => {
         }
     };
 
+    const expandedRowRender = (record: IEntrustmentRecord) => {
+        const projectColumns: ColumnsType<IEntrustmentProject> = [
+            { title: '项目名称', dataIndex: 'name', key: 'name' },
+            {
+                title: '检测参数',
+                dataIndex: 'testItems',
+                key: 'testItems',
+                render: (items: string[]) => (
+                    <Space size={[0, 8]} wrap>
+                        {items.map(item => <Tag key={item}>{item}</Tag>)}
+                    </Space>
+                )
+            },
+            { title: '检测方法', dataIndex: 'method', key: 'method' },
+            { title: '判定标准', dataIndex: 'standard', key: 'standard' },
+            {
+                title: '状态',
+                key: 'status',
+                render: (_, project) => {
+                    let color = 'default';
+                    let text = '待处理';
+                    if (project.status === 'assigned') {
+                        color = 'blue';
+                        text = `已分配: ${project.assignTo}`;
+                    } else if (project.status === 'subcontracted') {
+                        color = 'orange';
+                        text = `已分包: ${project.subcontractor}`;
+                    } else if (project.status === 'completed') {
+                        color = 'success';
+                        text = '已完成';
+                    }
+                    return <Tag color={color}>{text}</Tag>;
+                }
+            },
+            {
+                title: '操作',
+                key: 'action',
+                render: (_, project) => (
+                    <Space size="small">
+                        <Button
+                            type="link"
+                            size="small"
+                            disabled={project.status !== 'pending'}
+                            onClick={() => handleOpenAssign(project, 'internal')}
+                        >
+                            分配
+                        </Button>
+                        <Button
+                            type="link"
+                            size="small"
+                            disabled={project.status !== 'pending'}
+                            onClick={() => handleOpenAssign(project, 'external')}
+                        >
+                            分包
+                        </Button>
+                    </Space>
+                )
+            }
+        ];
+
+        return (
+            <Table
+                columns={projectColumns}
+                dataSource={record.projects || []}
+                pagination={false}
+                rowKey="id"
+                locale={{ emptyText: '暂无检测项目' }}
+            />
+        );
+    };
+
     const columns: ColumnsType<IEntrustmentRecord> = [
         { title: '序号', dataIndex: 'id', key: 'id', width: 70 },
         {
@@ -226,7 +285,7 @@ const Entrustment: React.FC = () => {
         { title: '样品名称', dataIndex: 'sampleName', key: 'sampleName', width: 150 },
         { title: '送样时间', dataIndex: 'sampleDate', key: 'sampleDate', width: 120 },
         {
-            title: '检测项目',
+            title: '检测项目摘要',
             dataIndex: 'testItems',
             key: 'testItems',
             ellipsis: true,
@@ -245,83 +304,13 @@ const Entrustment: React.FC = () => {
             key: 'status',
             width: 120,
             render: (_, record) => {
-                // 简单根据项目状态汇总
                 const projects = record.projects || [];
                 if (projects.length === 0) return <Tag>待录入</Tag>;
                 const allCompleted = projects.every(p => p.status === 'completed');
                 if (allCompleted) return <Tag color="success">已完成</Tag>;
                 const hasAssigned = projects.some(p => p.status === 'assigned' || p.status === 'subcontracted');
                 if (hasAssigned) return <Tag color="processing">进行中</Tag>;
-                return <Tag color="warning">待处理</Tag>;
-            }
-        },
-        {
-            title: '检测模板',
-            key: 'templates',
-            width: 200,
-            render: (_, record) => {
-                // Determine parameters: use projects testItems if available, otherwise split testItems string
-                const params = record.projects && record.projects.length > 0
-                    ? record.projects.flatMap(p => p.testItems)
-                    : (record.testItems ? record.testItems.split('、') : []);
-
-                // Find matching templates
-                const templates = params
-                    .map((param: string) => elnTemplatesData.find(t => t.parameterName === param))
-                    .filter((t): t is ELNTemplate => !!t);
-
-                if (templates.length === 0) {
-                    return <span style={{ color: '#ccc' }}>无关联模板</span>;
-                }
-
-                // Deduplicate templates
-                const uniqueTemplates = Array.from(new Set(templates.map(t => t.id)))
-                    .map(id => templates.find(t => t.id === id)!);
-
-                return (
-                    <Space direction="vertical" size={0}>
-                        {uniqueTemplates.map((t: ELNTemplate) => (
-                            <Tag
-                                key={t.id}
-                                icon={<FileExcelOutlined />}
-                                color="success"
-                                style={{ cursor: 'pointer', marginBottom: 2 }}
-                                onClick={() => handlePreview(t)}
-                            >
-                                {t.name}
-                            </Tag>
-                        ))}
-                    </Space>
-                );
-            }
-        },
-        {
-            title: '检测内容',
-            key: 'content',
-            width: 100,
-            render: (_, record) => {
-                const params = record.projects && record.projects.length > 0
-                    ? record.projects.flatMap(p => p.testItems)
-                    : (record.testItems ? record.testItems.split('、') : []);
-
-                const templates = params
-                    .map((param: string) => elnTemplatesData.find(t => t.parameterName === param))
-                    .filter((t): t is ELNTemplate => !!t);
-
-                return (
-                    <Button
-                        size="small"
-                        icon={<TableOutlined />}
-                        disabled={templates.length === 0}
-                        onClick={() => {
-                            if (templates.length > 0) {
-                                handlePreview(templates[0]);
-                            }
-                        }}
-                    >
-                        查看
-                    </Button>
-                );
+                return <Tag color="warning">待分配</Tag>;
             }
         },
         {
@@ -355,7 +344,17 @@ const Entrustment: React.FC = () => {
             title="委托单管理"
             extra={<Button type="primary" onClick={handleAdd}>新建委托</Button>}
         >
-            <Table columns={columns} dataSource={dataSource} rowKey="id" pagination={{ pageSize: 10 }} scroll={{ x: 1500 }} />
+            <Table
+                columns={columns}
+                dataSource={dataSource}
+                rowKey="id"
+                pagination={{ pageSize: 10 }}
+                scroll={{ x: 1300 }}
+                expandable={{
+                    expandedRowRender,
+                    defaultExpandAllRows: true
+                }}
+            />
 
             {/* 编辑/新建 Drawer */}
             <Drawer
@@ -585,25 +584,6 @@ const Entrustment: React.FC = () => {
                         </Col>
                     </Row>
                 </Form>
-            </Modal>
-
-            {/* Preview Modal */}
-            <Modal
-                title={`模板预览: ${previewTemplate?.name || ''}`}
-                open={isPreviewModalOpen}
-                onCancel={() => setIsPreviewModalOpen(false)}
-                width={800}
-                footer={[
-                    <Button key="close" onClick={() => setIsPreviewModalOpen(false)}>
-                        关闭
-                    </Button>
-                ]}
-            >
-                {previewTemplate && (
-                    <Form form={previewForm} layout="vertical">
-                        <DynamicFormRenderer template={previewTemplate} />
-                    </Form>
-                )}
             </Modal>
         </Card>
     );

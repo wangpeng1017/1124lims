@@ -56,6 +56,8 @@ import SampleStats from './pages/StatisticsReport/SampleStats';
 import TaskStats from './pages/StatisticsReport/TaskStats';
 import ReportTemplates from './pages/ReportManagement/ReportTemplates';
 
+import SystemDocuments from './pages/SystemDocuments';
+
 // 系统设置
 import SystemSettings from './pages/SystemSettings';
 import UserManagement from './pages/SystemSettings/UserManagement';
@@ -149,6 +151,7 @@ const App: React.FC = () => {
             <Route path="sample" element={<SampleStats />} />
             <Route path="task" element={<TaskStats />} />
           </Route>
+          <Route path="system-documents" element={<SystemDocuments />} />
           <Route path="system-settings">
             <Route index element={<SystemSettings />} />
             <Route path="users" element={<UserManagement />} />

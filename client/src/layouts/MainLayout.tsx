@@ -122,6 +122,7 @@ const items: MenuItem[] = [
     getItem('样品统计', '/statistics-report/sample', <ExperimentOutlined />),
     getItem('任务完成率', '/statistics-report/task', <CheckCircleOutlined />),
   ]),
+  getItem('体系文件', '/system-documents', <FileTextOutlined />),
   getItem('基础数据配置', '/basic-params', <ProfileOutlined />, [
     getItem('电子试验记录本 (ELN)', '/basic-params/eln', <ReadOutlined />),
     getItem('检测参数/项目', '/basic-params/detection', <ExperimentOutlined />),
