@@ -10,6 +10,7 @@ import EntrustmentOrder from './pages/Entrustment';
 import EntrustmentContract from './pages/Entrustment/EntrustmentContract';
 import ClientUnit from './pages/Entrustment/ClientUnit';
 import EntrustmentFill from './pages/Entrustment/EntrustmentFill';
+import EntrustmentConsultation from './pages/Entrustment/EntrustmentConsultation';
 import Consumables from './pages/Consumables';
 import EmployeeList from './pages/PersonnelManagement/EmployeeList';
 import DepartmentInfo from './pages/PersonnelManagement/DepartmentInfo';
@@ -80,6 +81,7 @@ const App: React.FC = () => {
 
           <Route path="consumables" element={<Consumables />} />
           <Route path="entrustment">
+            <Route path="consultation" element={<EntrustmentConsultation />} />
             <Route path="order" element={<EntrustmentOrder />} />
             <Route path="contract" element={<EntrustmentContract />} />
             <Route path="client" element={<ClientUnit />} />
