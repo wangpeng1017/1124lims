@@ -87,11 +87,7 @@ const SampleRegistration: React.FC = () => {
                     entrustmentId: selectedEntrustment,
                     receiptDate,
                     receiptPerson: '当前用户',
-                    name: values.name,
-                    spec: values.spec,
-                    totalQuantity: values.quantity,
-                    unit: values.unit,
-                    remainingQuantity: values.quantity,
+                    ...values,
                     status: '已收样'
                 }]);
                 message.success('收样登记成功');
@@ -208,22 +204,8 @@ const SampleRegistration: React.FC = () => {
                                                 <Form.Item name="spec" label="规格型号" rules={[{ required: true }]}>
                                                     <Input />
                                                 </Form.Item>
-                                                <Form.Item name="quantity" label="样品总量" rules={[{ required: true }]}>
+                                                <Form.Item name="quantity" label="数量" rules={[{ required: true }]}>
                                                     <InputNumber min={1} style={{ width: '100%' }} />
-                                                </Form.Item>
-                                                <Form.Item name="unit" label="单位" rules={[{ required: true, message: '请选择单位' }]} initialValue="个">
-                                                    <Select placeholder="选择单位">
-                                                        <Select.Option value="个">个</Select.Option>
-                                                        <Select.Option value="件">件</Select.Option>
-                                                        <Select.Option value="批">批</Select.Option>
-                                                        <Select.Option value="kg">kg</Select.Option>
-                                                        <Select.Option value="g">g</Select.Option>
-                                                        <Select.Option value="L">L</Select.Option>
-                                                        <Select.Option value="mL">mL</Select.Option>
-                                                        <Select.Option value="m">m</Select.Option>
-                                                        <Select.Option value="m²">m²</Select.Option>
-                                                        <Select.Option value="m³">m³</Select.Option>
-                                                    </Select>
                                                 </Form.Item>
                                             </>
                                         ),
