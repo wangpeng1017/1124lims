@@ -302,20 +302,10 @@ const Entrustment: React.FC = () => {
             title: '检测项目摘要',
             dataIndex: 'testItems',
             key: 'testItems',
-            ellipsis: true,
+            width: 120,
             render: (_, record) => {
                 const count = record.projects?.length || 0;
-                const projectNames = record.projects?.slice(0, 2).map(p => p.name).join('、');
-                const hasMore = (record.projects?.length || 0) > 2;
-                return (
-                    <Space>
-                        <Tag color="blue">{count}个项目</Tag>
-                        <span style={{ fontSize: 12, color: '#666' }}>
-                            {projectNames}
-                            {hasMore ? '...' : ''}
-                        </span>
-                    </Space>
-                );
+                return <Tag color="blue">{count}个项目</Tag>;
             }
         },
         {
