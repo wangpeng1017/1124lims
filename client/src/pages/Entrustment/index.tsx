@@ -498,58 +498,94 @@ const Entrustment: React.FC = () => {
                 </Form>
             </Drawer>
 
-    {/* 任务分配/分包 Drawer */}
-    <Drawer
-        title={assignType === 'internal' ? '项目分配' : '项目分配'}
-        open={isAssignModalOpen}
-        width={480}
-        placement="right"
-        onClose={() => setIsAssignModalOpen(false)}
-        extra={
-            <Space>
-                <Button onClick={() => setIsAssignModalOpen(false)}>取消</Button>
-                <Button type="primary" onClick={handleSaveAssign}>保存</Button>
-            </Space>
-        }
-    >
-        <Form form={assignForm} layout="vertical">
-            <Divider>内部分配</Divider>
-            <Form.Item name="assignTo" label="分配给(组织架构人员)">
-                <Select
-                    allowClear
-                    placeholder="请选择内部分配人员"
-                    showSearch
-                    optionFilterProp="children"
-                >
-                    {orgUsers.map(group => (
-                        <Select.OptGroup key={group.department} label={group.department}>
-                            {group.users.map(user => (
-                                <Select.Option key={user.id} value={user.name}>
-                                    {user.name}
+            {/* 任务分配/分包 Drawer */}
+            <Drawer
+                title={assignType === 'internal' ? '项目分配' : '项目分配'}
+                open={isAssignModalOpen}
+                width={480}
+                placement="right"
+                onClose={() => setIsAssignModalOpen(false)}
+                extra={
+                    <Space>
+                        <Button onClick={() => setIsAssignModalOpen(false)}>取消</Button>
+                        <Button type="primary" onClick={handleSaveAssign}>保存</Button>
+                    </Space>
+                }
+            >
+                <Form form={assignForm} layout="vertical">
+                    <Divider>内部分配</Divider>
+                    <Form.Item name="assignTo" label="分配给(组织架构人员)">
+                        <Select
+                            allowClear
+                            placeholder="请选择内部分配人员"
+                            showSearch
+                            optionFilterProp="children"
+                        >
+                            {orgUsers.map(group => (
+                                <Select.OptGroup key={group.department} label={group.department}>
+                                    {group.users.map(user => (
+                                        <Select.Option key={user.id} value={user.name}>
+                                            {user.name}
+                                        </Select.Option>
+                                    ))}
+                                </Select.OptGroup>
+                            ))}
+                        </Select>
+                    </Form.Item>
+
+                    <Divider>外部分配</Divider>
+                    <Form.Item name="subcontractor" label="分包供应商(来源于供应商列表)">
+                        <Select
+                            allowClear
+                            placeholder="请选择外部分配供应商"
+                            showSearch
+                            optionFilterProp="children"
+                        >
+                            {outsourcingSuppliers.map(supplier => (
+                                <Select.Option key={supplier.id} value={supplier.name}>
+                                    {supplier.name}
                                 </Select.Option>
                             ))}
-                        </Select.OptGroup>
-                    ))}
-                </Select>
-            </Form.Item>
+                        </Select>
+                    </Form.Item>
+                </Form>
+            </Drawer>
 
-            <Divider>外部分配</Divider>
-            <Form.Item name="subcontractor" label="分包供应商(来源于供应商列表)">
-                <Select
-                    allowClear
-                    placeholder="请选择外部分配供应商"
-                    showSearch
-                    optionFilterProp="children"
-                >
-                    {outsourcingSuppliers.map(supplier => (
-                        <Select.Option key={supplier.id} value={supplier.name}>
-                            {supplier.name}
-                        </Select.Option>
-                    ))}
-                </Select>
-            </Form.Item>
-        </Form>
-    </Drawer>
+            {/* 项目管理 Modal */}
+            <Modal
+                title={editingProject ? "编辑检测项目" : "添加检测项目"}
+                open={isProjectModalOpen}
+                onCancel={() => setIsProjectModalOpen(false)}
+                onOk={handleSaveProject}
+                width={600}
+            >
+                <Form form={projectForm} layout="vertical">
+                    <Form.Item name="name" label="项目名称" rules={[{ required: true }]}>
+                        <Input placeholder="例如：混凝土抗压强度检测" />
+                    </Form.Item>
+                    <Form.Item name="testItems" label="检测参数" rules={[{ required: true }]}>
+                        <Select mode="multiple" placeholder="请选择检测参数">
+                            {detectionParametersData.map(param => (
+                                <Select.Option key={param.id} value={param.name}>
+                                    {param.name}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item name="method" label="检测方法">
+                                <Input />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item name="standard" label="判定标准">
+                                <Input />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                </Form>
+            </Modal>
 
             {/* Preview Modal */}
             <Modal
