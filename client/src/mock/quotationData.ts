@@ -57,8 +57,10 @@ export interface Quotation {
 
     // 客户反馈
     clientStatus: 'pending' | 'ok' | 'ng';  // 待反馈/接受/拒绝
+    clientFeedbackDate?: string;  // 客户反馈日期
     ngReason?: string;           // NG原因
     contractFile?: string;       // 盖章合同文件路径
+    contractFileName?: string;   // 合同文件名
 
     // PDF
     pdfUrl?: string;             // 生成的PDF路径

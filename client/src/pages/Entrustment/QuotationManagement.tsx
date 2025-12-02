@@ -28,6 +28,7 @@ const QuotationManagement: React.FC = () => {
     const [feedbackQuotation, setFeedbackQuotation] = useState<Quotation | null>(null);
     const [feedbackType, setFeedbackType] = useState<'ok' | 'ng'>('ok');
     const [feedbackForm] = Form.useForm();
+    const [contractFileList, setContractFileList] = useState<any[]>([]);
 
     // 筛选逻辑
     const applyFilters = (
@@ -149,13 +150,10 @@ const QuotationManagement: React.FC = () => {
     };
 
     const handleClientFeedback = (record: Quotation, status: 'ok' | 'ng') => {
-        if (record.status !== 'approved') {
-            message.warning('只有已批准的报价单可以标记客户反馈');
-            return;
-        }
         setFeedbackQuotation(record);
         setFeedbackType(status);
         feedbackForm.resetFields();
+        setContractFileList([]);
         setIsFeedbackModalVisible(true);
     };
 
@@ -178,18 +176,25 @@ const QuotationManagement: React.FC = () => {
         feedbackForm.validateFields().then(values => {
             if (!feedbackQuotation) return;
 
+            const now = new Date().toISOString().split('T')[0];
             const newData = dataSource.map(item => {
                 if (item.id === feedbackQuotation.id) {
                     if (feedbackType === 'ok') {
+                        // OK反馈 - 保存合同信息
+                        const contractFile = contractFileList[0];
                         return {
                             ...item,
                             clientStatus: 'ok' as const,
-                            contractFile: values.contractFile || '/uploads/contracts/temp.pdf'
+                            clientFeedbackDate: now,
+                            contractFile: contractFile ? `/uploads/contracts/${contractFile.name}` : undefined,
+                            contractFileName: contractFile?.name
                         };
                     } else {
+                        // NG反馈 - 保存原因
                         return {
                             ...item,
                             clientStatus: 'ng' as const,
+                            clientFeedbackDate: now,
                             ngReason: values.ngReason
                         };
                     }
@@ -201,6 +206,7 @@ const QuotationManagement: React.FC = () => {
             applyFilters(newData, statusFilter, clientStatusFilter, searchText);
             message.success(`已标记为${feedbackType.toUpperCase()}`);
             setIsFeedbackModalVisible(false);
+            setContractFileList([]);
         });
     };
 
@@ -253,10 +259,24 @@ const QuotationManagement: React.FC = () => {
             title: '客户反馈',
             dataIndex: 'clientStatus',
             key: 'clientStatus',
-            width: 100,
-            render: (clientStatus: Quotation['clientStatus']) => {
-                const config = CLIENT_STATUS_MAP[clientStatus];
-                return <Tag color={config.color}>{config.text}</Tag>;
+            width: 200,
+            render: (_: any, record: Quotation) => {
+                const config = CLIENT_STATUS_MAP[record.clientStatus];
+                return (
+                    <Space direction="vertical" size={0}>
+                        <Tag color={config.color}>{config.text}</Tag>
+                        {record.clientStatus === 'ok' && record.contractFileName && (
+                            <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
+                                <FileTextOutlined /> {record.contractFileName}
+                            </div>
+                        )}
+                        {record.clientStatus === 'ng' && record.ngReason && (
+                            <div style={{ fontSize: 12, color: '#ff4d4f', marginTop: 4 }}>
+                                <CloseCircleOutlined /> {record.ngReason.length > 10 ? `${record.ngReason.substring(0, 10)}...` : record.ngReason}
+                            </div>
+                        )}
+                    </Space>
+                );
             }
         },
         {
@@ -320,19 +340,6 @@ const QuotationManagement: React.FC = () => {
                     );
                 }
 
-                // 审批中状态 - 可撤回
-                if (record.status === 'pending_sales' || record.status === 'pending_finance' || record.status === 'pending_lab') {
-                    actions.push(
-                        <Button
-                            key="recall"
-                            size="small"
-                            onClick={() => message.info('撤回审批功能开发中')}
-                        >
-                            撤回
-                        </Button>
-                    );
-                }
-
                 // 已批准状态 - 生成PDF
                 if (record.status === 'approved') {
                     actions.push(
@@ -346,32 +353,58 @@ const QuotationManagement: React.FC = () => {
                             生成PDF
                         </Button>
                     );
+                }
 
-                    // 客户反馈待处理 - OK/NG按钮
-                    if (record.clientStatus === 'pending') {
-                        actions.push(
-                            <Button
-                                key="ok"
-                                size="small"
-                                type="primary"
-                                icon={<CheckCircleOutlined />}
-                                onClick={() => handleClientFeedback(record, 'ok')}
-                            >
-                                OK
-                            </Button>
-                        );
-                        actions.push(
-                            <Button
-                                key="ng"
-                                size="small"
-                                danger
-                                icon={<CloseCircleOutlined />}
-                                onClick={() => handleClientFeedback(record, 'ng')}
-                            >
-                                NG
-                            </Button>
-                        );
-                    }
+                // 客户反馈 - 所有状态都可以进行反馈
+                if (record.clientStatus === 'pending') {
+                    actions.push(
+                        <Button
+                            key="ok"
+                            size="small"
+                            type="primary"
+                            icon={<CheckCircleOutlined />}
+                            onClick={() => handleClientFeedback(record, 'ok')}
+                        >
+                            OK
+                        </Button>
+                    );
+                    actions.push(
+                        <Button
+                            key="ng"
+                            size="small"
+                            danger
+                            icon={<CloseCircleOutlined />}
+                            onClick={() => handleClientFeedback(record, 'ng')}
+                        >
+                            NG
+                        </Button>
+                    );
+                } else if (record.clientStatus === 'ok' && record.contractFileName) {
+                    // 已OK - 显示合同查看按钮
+                    actions.push(
+                        <Button
+                            key="view-contract"
+                            size="small"
+                            icon={<FileTextOutlined />}
+                            onClick={() => message.info(`查看合同: ${record.contractFileName}`)}
+                        >
+                            查看合同
+                        </Button>
+                    );
+                } else if (record.clientStatus === 'ng' && record.ngReason) {
+                    // 已NG - 显示原因查看按钮
+                    actions.push(
+                        <Button
+                            key="view-reason"
+                            size="small"
+                            onClick={() => Modal.info({
+                                title: 'NG原因',
+                                content: record.ngReason
+                            })}
+                        >
+                            查看原因
+                        </Button>
+                    );
                 }
 
                 // 已拒绝状态 - 可重新编辑
@@ -454,42 +487,64 @@ const QuotationManagement: React.FC = () => {
             />
 
             <Modal
-                title={feedbackType === 'ok' ? '客户确认OK' : '客户拒绝(NG)'}
+                title={feedbackType === 'ok' ? '客户确认OK - 上传合同' : '客户拒绝(NG) - 填写原因'}
                 open={isFeedbackModalVisible}
                 onCancel={() => setIsFeedbackModalVisible(false)}
                 onOk={handleSubmitFeedback}
                 okText="确定"
                 cancelText="取消"
+                width={600}
             >
                 {feedbackType === 'ok' ? (
                     <Form form={feedbackForm} layout="vertical">
                         <Form.Item
-                            name="contractFile"
                             label="上传盖章合同"
-                            rules={[{ required: true, message: '请上传盖章合同' }]}
+                            required
+                            tooltip="请上传客户签字盖章后的合同文件"
                         >
                             <Upload
+                                fileList={contractFileList}
+                                beforeUpload={(file) => {
+                                    const isValidType = ['application/pdf', 'image/jpeg', 'image/png'].includes(file.type);
+                                    if (!isValidType) {
+                                        message.error('只支持 PDF/JPG/PNG 格式文件!');
+                                        return Upload.LIST_IGNORE;
+                                    }
+                                    const isLt10M = file.size / 1024 / 1024 < 10;
+                                    if (!isLt10M) {
+                                        message.error('文件大小不能超过 10MB!');
+                                        return Upload.LIST_IGNORE;
+                                    }
+                                    setContractFileList([file]);
+                                    return false;
+                                }}
+                                onRemove={() => setContractFileList([])}
                                 maxCount={1}
-                                beforeUpload={() => false}
                                 accept=".pdf,.jpg,.jpeg,.png"
                             >
-                                <Button icon={<UploadOutlined />}>选择文件</Button>
+                                <Button icon={<UploadOutlined />}>选择合同文件</Button>
                             </Upload>
+                            <div style={{ marginTop: 8, color: '#999', fontSize: 12 }}>
+                                支持 PDF、JPG、PNG 格式, 文件大小不超过 10MB
+                            </div>
                         </Form.Item>
-                        <p style={{ color: '#666', fontSize: 12 }}>
-                            支持格式: PDF, JPG, PNG
-                        </p>
                     </Form>
                 ) : (
                     <Form form={feedbackForm} layout="vertical">
                         <Form.Item
                             name="ngReason"
                             label="拒绝原因"
-                            rules={[{ required: true, message: '请填写拒绝原因' }]}
+                            rules={[
+                                { required: true, message: '请填写拒绝原因' },
+                                { min: 10, message: '原因描述不能少于10个字' },
+                                { max: 500, message: '原因描述不能超过500个字' }
+                            ]}
                         >
                             <Input.TextArea
                                 rows={4}
-                                placeholder="请输入客户拒绝的原因..."
+                                placeholder="请详细说明客户拒绝的原因,以便后续改进..."
+                                showCount
+                                maxLength={500}
                             />
                         </Form.Item>
                     </Form>
