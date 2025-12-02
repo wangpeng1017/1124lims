@@ -70,13 +70,11 @@ const items: MenuItem[] = [
     getItem('样品台账', '/sample-management/details', <FileTextOutlined />),
     getItem('我的样品', '/sample-management/my-samples', <InboxOutlined />),
   ]),
-  getItem('任务分配', '/task-assignment', <ProjectOutlined />, [
-    getItem('任务分配（样品）', '/task-assignment/sample', <ProjectOutlined />),
-    getItem('任务分配（参数）', '/task-assignment/parameter', <PartitionOutlined />),
+  getItem('任务管理', '/task-management', <ProjectOutlined />, [
+    getItem('全部任务', '/task-management/all-tasks', <CheckCircleOutlined />),
+    getItem('我的任务', '/task-management/my-tasks', <UserOutlined />),
   ]),
   getItem('试验管理', '/test-management', <ExperimentOutlined />, [
-    getItem('检测任务', '/test-management/tasks', <CheckCircleOutlined />),
-    getItem('我的任务', '/test-management/my-tasks', <UserOutlined />),
     getItem('数据录入', '/test-management/data-entry', <FormOutlined />),
     getItem('任务明细', '/test-management/task-details/TASK20231101001', <FileSearchOutlined />), // 示例链接
   ]),

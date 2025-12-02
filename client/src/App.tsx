@@ -24,14 +24,12 @@ import ELN from './pages/SystemSettings/BasicData/ELN';
 import SampleRegistration from './pages/SampleManagement/SampleRegistration';
 import SampleDetails from './pages/SampleManagement/SampleDetails';
 import MySamples from './pages/SampleManagement/MySamples';
-import SampleTaskAssignment from './pages/SampleManagement/SampleTaskAssignment';
-import ParameterTaskAssignment from './pages/SampleManagement/ParameterTaskAssignment';
 import OutsourceByOrder from './pages/OutsourcingManagement/OutsourceByOrder';
 import OutsourceByParameter from './pages/OutsourcingManagement/OutsourceByParameter';
 import OutsourceOrders from './pages/OutsourcingManagement/OutsourceOrders';
 import OutsourceCompletion from './pages/OutsourcingManagement/OutsourceCompletion';
-import TestTasks from './pages/TestManagement/TestTasks';
-import MyTasks from './pages/TestManagement/MyTasks';
+import AllTasks from './pages/TaskManagement/AllTasks';
+import MyTasks from './pages/TaskManagement/MyTasks';
 import DataEntry from './pages/TestManagement/DataEntry';
 import TaskDetails from './pages/TestManagement/TaskDetails';
 import TestReports from './pages/ReportManagement/TestReports';
@@ -110,9 +108,9 @@ const App: React.FC = () => {
             <Route path="details" element={<SampleDetails />} />
             <Route path="my-samples" element={<MySamples />} />
           </Route>
-          <Route path="task-assignment">
-            <Route path="sample" element={<SampleTaskAssignment />} />
-            <Route path="parameter" element={<ParameterTaskAssignment />} />
+          <Route path="task-management">
+            <Route path="all-tasks" element={<AllTasks />} />
+            <Route path="my-tasks" element={<MyTasks />} />
           </Route>
           <Route path="outsourcing-management">
             <Route path="supplier-info" element={<SupplierInfo />} />
@@ -122,8 +120,6 @@ const App: React.FC = () => {
             <Route path="outsource-completion" element={<OutsourceCompletion />} />
           </Route>
           <Route path="test-management">
-            <Route path="tasks" element={<TestTasks />} />
-            <Route path="my-tasks" element={<MyTasks />} />
             <Route path="data-entry" element={<DataEntry />} />
             <Route path="task-details/:taskNo" element={<TaskDetails />} />
           </Route>
