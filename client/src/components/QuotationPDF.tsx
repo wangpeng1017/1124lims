@@ -2,14 +2,23 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 import type { Quotation } from '../mock/quotationData';
 
-// 注册中文字体 - 使用微软雅黑(通过CDN)
+// 注册中文字体 - 使用思源黑体CN (更可靠的CDN源)
 Font.register({
-    family: 'Microsoft YaHei',
-    src: 'https://cdn.jsdelivr.net/gh/max32002/microsoft-yahei@1.0/Microsoft-YaHei.ttf'
+    family: 'Source Han Sans CN',
+    fonts: [
+        {
+            src: 'https://cdn.jsdelivr.net/npm/source-han-sans-cn@2.004/Regular/SourceHanSansCN-Regular.otf',
+            fontWeight: 'normal'
+        },
+        {
+            src: 'https://cdn.jsdelivr.net/npm/source-han-sans-cn@2.004/Bold/SourceHanSansCN-Bold.otf',
+            fontWeight: 'bold'
+        }
+    ]
 });
 
 const styles = StyleSheet.create({
-    page: { padding: 40, fontSize: 10, fontFamily: 'Microsoft YaHei' },
+    page: { padding: 40, fontSize: 10, fontFamily: 'Source Han Sans CN' },
     header: { marginBottom: 20, textAlign: 'center' },
     title: { fontSize: 18, fontWeight: 'bold', marginBottom: 5 },
     subtitle: { fontSize: 12, color: '#666' },
