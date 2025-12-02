@@ -2,19 +2,10 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 import type { Quotation } from '../mock/quotationData';
 
-// 注册中文字体 - 使用Noto Sans SC (Google Fonts官方)
+// 注册中文字体 - 使用Noto Sans SC (Google Fonts官方TTF格式)
 Font.register({
     family: 'Noto Sans SC',
-    fonts: [
-        {
-            src: 'https://fonts.gstatic.com/s/notosanssc/v36/k3kCo84MPvpLmixcA63oeALhL4iJ-Q7m8w.woff2',
-            fontWeight: 'normal'
-        },
-        {
-            src: 'https://fonts.gstatic.com/s/notosanssc/v36/k3k0o84MPvpLmixcA63oeALZSYqZCcqJKwx2nA.woff2',
-            fontWeight: 'bold'
-        }
-    ]
+    src: 'https://fonts.gstatic.com/ea/notosanssc/v1/NotoSansSC-Regular.ttf'
 });
 
 const styles = StyleSheet.create({
