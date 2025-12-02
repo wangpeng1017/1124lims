@@ -3,6 +3,7 @@ import { Table, Card, Button, Space, Tag, Input, Select, message, Popconfirm } f
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, SearchOutlined, FileTextOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { quotationData, STATUS_MAP, CLIENT_STATUS_MAP, type Quotation } from '../../mock/quotationData';
+import { ApprovalService } from '../../services/approvalService';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -88,7 +89,30 @@ const QuotationManagement: React.FC = () => {
             message.warning('只有草稿状态的报价单可以提交审批');
             return;
         }
-        message.info(`提交审批: ${record.quotationNo}`);
+
+        // 提交审批
+        const instance = ApprovalService.submitApproval(
+            'quotation',
+            record.id,
+            record.quotationNo,
+            record.createdBy
+        );
+
+        // 更新报价单状态
+        const newData = dataSource.map(item => {
+            if (item.id === record.id) {
+                return {
+                    ...item,
+                    status: 'pending_sales' as const,  // 进入第一级审批
+                    currentApprovalLevel: 1
+                };
+            }
+            return item;
+        });
+
+        setDataSource(newData);
+        applyFilters(newData, statusFilter, clientStatusFilter, searchText);
+        message.success(`已提交审批,审批单号: ${instance.id}`);
     };
 
     const handleViewPDF = (record: Quotation) => {

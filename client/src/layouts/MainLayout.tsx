@@ -138,6 +138,7 @@ const items: MenuItem[] = [
     getItem('部门信息', '/personnel/department', <ApartmentOutlined />),
     getItem('站点信息', '/personnel/station', <EnvironmentOutlined />),
   ]),
+  getItem('审批中心', '/approval-center', <AuditOutlined />),
   getItem('系统设置', '/system-settings', <SettingOutlined />, [
     getItem('用户管理', '/system-settings/users', <UserOutlined />),
     getItem('角色管理', '/system-settings/roles', <TeamOutlined />),

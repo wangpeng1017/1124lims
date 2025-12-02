@@ -64,6 +64,7 @@ import PermissionConfig from './pages/SystemSettings/PermissionConfig';
 import SupplierCategory from './pages/SupplierManagement/SupplierCategory';
 import EvaluationTemplate from './pages/SupplierManagement/EvaluationTemplate';
 import PerformanceEvaluation from './pages/SupplierManagement/PerformanceEvaluation';
+import ApprovalCenter from './pages/ApprovalCenter';
 
 
 const App: React.FC = () => {
@@ -161,6 +162,7 @@ const App: React.FC = () => {
             <Route path="template" element={<EvaluationTemplate />} />
             <Route path="evaluation" element={<PerformanceEvaluation />} />
           </Route>
+          <Route path="approval-center" element={<ApprovalCenter />} />
         </Route>
       </Routes>
     </BrowserRouter>
