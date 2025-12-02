@@ -2,23 +2,14 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 import type { Quotation } from '../mock/quotationData';
 
-// 注册中文字体 - 使用Google Fonts的Noto Sans SC
+// 注册中文字体 - 使用微软雅黑(通过CDN)
 Font.register({
-    family: 'Noto Sans SC',
-    fonts: [
-        {
-            src: 'https://fonts.gstatic.com/s/notosanssc/v36/k3kXo84MPvpLmixcA63oeALhL4iJ-Q7m8w.ttf',
-            fontWeight: 'normal'
-        },
-        {
-            src: 'https://fonts.gstatic.com/s/notosanssc/v36/k3k0o84MPvpLmixcA63oeALZSYqZCcqJKw.ttf',
-            fontWeight: 'bold'
-        }
-    ]
+    family: 'Microsoft YaHei',
+    src: 'https://cdn.jsdelivr.net/gh/max32002/microsoft-yahei@1.0/Microsoft-YaHei.ttf'
 });
 
 const styles = StyleSheet.create({
-    page: { padding: 40, fontSize: 10, fontFamily: 'Noto Sans SC' },
+    page: { padding: 40, fontSize: 10, fontFamily: 'Microsoft YaHei' },
     header: { marginBottom: 20, textAlign: 'center' },
     title: { fontSize: 18, fontWeight: 'bold', marginBottom: 5 },
     subtitle: { fontSize: 12, color: '#666' },
