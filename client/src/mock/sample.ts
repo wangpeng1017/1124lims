@@ -20,12 +20,19 @@ export interface ISampleDetail {
     entrustmentId: string; // 委托单号
     name: string; // 样品名称
     spec: string; // 规格型号
-    quantity: number; // 数量
+    quantity: number; // 数量(保留兼容)
+    totalQuantity: number; // 样品总量
+    unit: string; // 单位
+    remainingQuantity: number; // 剩余可用数量
     receiptDate: string; // 收样日期
     receiptPerson: string; // 收样人
     collectionDate?: string; // 领样日期
     collectionPerson?: string; // 领样人
-    status: string; // 状态：待收样、已收样、已分配、检测中、已完成、已归还、已销毁
+    status: string; // 状态：待收样、已收样、部分领用、全部领用、检测中、已完成、已外包、已归还、已销毁
+    outsourceStatus?: 'not_outsourced' | 'outsourced' | 'returned'; // 委外状态
+    outsourceSupplierId?: string; // 委外供应商ID
+    outsourceSupplierName?: string; // 委外供应商名称
+    outsourceDate?: string; // 委外日期
 }
 
 // 样品流转记录
@@ -81,6 +88,47 @@ export interface IParameterTaskAssignment {
     status: string; // 状态：待开始、进行中、已完成
 }
 
+// 样品领用记录
+export interface ISampleCollection {
+    id: string;
+    sampleNo: string; // 样品编号
+    sampleName: string; // 样品名称
+    laboratory: string; // 领用实验室/部门
+    collectionPerson: string; // 领用人
+    collectionPersonId: string; // 领用人ID
+    collectionDate: string; // 领用日期
+    collectionQuantity: number; // 领用数量
+    unit: string; // 单位
+    purpose: string; // 领用用途
+    testItems?: string[]; // 检测项目
+    expectedReturnDate: string; // 预计归还日期
+    actualReturnDate?: string; // 实际归还日期
+    returnedQuantity?: number; // 实际归还数量
+    status: 'in_use' | 'partial_returned' | 'fully_returned' | 'consumed'; // 状态
+    remark?: string;
+    createTime: string;
+}
+
+// 样品委外记录
+export interface ISampleOutsource {
+    id: string;
+    sampleNo: string; // 样品编号
+    sampleName: string; // 样品名称
+    supplierId: string; // 供应商ID
+    supplierName: string; // 供应商名称
+    quantity: number; // 委外数量
+    unit: string; // 单位
+    testItems: string[]; // 检测项目
+    assignedBy: string; // 分配人
+    assignedById: string; // 分配人ID
+    assignDate: string; // 分配日期
+    dueDate: string; // 截止日期
+    status: 'pending' | 'in_progress' | 'completed' | 'returned'; // 状态
+    outsourceOrderId?: string; // 关联的委外单ID
+    actualReturnDate?: string; // 实际归还日期
+    remark?: string;
+}
+
 // 模拟数据
 export const sampleReceiptData: ISampleReceipt[] = [
     {
@@ -113,6 +161,9 @@ export const sampleDetailData: ISampleDetail[] = [
         name: '钢筋混凝土试件',
         spec: 'C30',
         quantity: 3,
+        totalQuantity: 3,
+        unit: '个',
+        remainingQuantity: 1,
         receiptDate: '2023-11-01',
         receiptPerson: '张三',
         collectionDate: '2023-11-02',
@@ -127,6 +178,9 @@ export const sampleDetailData: ISampleDetail[] = [
         name: '水泥试样',
         spec: 'P.O 42.5',
         quantity: 5,
+        totalQuantity: 5,
+        unit: 'kg',
+        remainingQuantity: 5,
         receiptDate: '2023-11-01',
         receiptPerson: '张三',
         status: '已收样'
@@ -139,6 +193,9 @@ export const sampleDetailData: ISampleDetail[] = [
         name: '砂石料',
         spec: '中砂',
         quantity: 10,
+        totalQuantity: 10,
+        unit: 'kg',
+        remainingQuantity: 10,
         receiptDate: '2023-11-02',
         receiptPerson: '李四',
         collectionDate: '2023-11-03',
@@ -153,6 +210,9 @@ export const sampleDetailData: ISampleDetail[] = [
         name: '沥青混合料',
         spec: 'AC-13C',
         quantity: 2,
+        totalQuantity: 2,
+        unit: '个',
+        remainingQuantity: 2,
         receiptDate: '2023-11-03',
         receiptPerson: '张三',
         status: '待收样'
@@ -165,6 +225,9 @@ export const sampleDetailData: ISampleDetail[] = [
         name: '沥青混合料',
         spec: 'AC-20C',
         quantity: 2,
+        totalQuantity: 2,
+        unit: '个',
+        remainingQuantity: 2,
         receiptDate: '2023-11-03',
         receiptPerson: '张三',
         status: '待收样'
@@ -177,6 +240,9 @@ export const sampleDetailData: ISampleDetail[] = [
         name: '钢绞线',
         spec: '1x7-15.20-1860',
         quantity: 5,
+        totalQuantity: 5,
+        unit: '个',
+        remainingQuantity: 5,
         receiptDate: '2023-11-04',
         receiptPerson: '李四',
         status: '已收样'
@@ -189,6 +255,9 @@ export const sampleDetailData: ISampleDetail[] = [
         name: '土工布',
         spec: '200g/m2',
         quantity: 10,
+        totalQuantity: 10,
+        unit: '个',
+        remainingQuantity: 10,
         receiptDate: '2023-11-05',
         receiptPerson: '王五',
         status: '检测中'
@@ -201,6 +270,9 @@ export const sampleDetailData: ISampleDetail[] = [
         name: '防水卷材',
         spec: 'SBS I PY PE 3.0',
         quantity: 3,
+        totalQuantity: 3,
+        unit: '个',
+        remainingQuantity: 3,
         receiptDate: '2023-11-06',
         receiptPerson: '赵六',
         status: '已完成'
@@ -213,6 +285,9 @@ export const sampleDetailData: ISampleDetail[] = [
         name: '外加剂',
         spec: '聚羧酸减水剂',
         quantity: 1,
+        totalQuantity: 1,
+        unit: 'L',
+        remainingQuantity: 1,
         receiptDate: '2023-11-07',
         receiptPerson: '张三',
         status: '已归还'
@@ -225,6 +300,9 @@ export const sampleDetailData: ISampleDetail[] = [
         name: '粉煤灰',
         spec: 'F类 II级',
         quantity: 5,
+        totalQuantity: 5,
+        unit: 'kg',
+        remainingQuantity: 5,
         receiptDate: '2023-11-08',
         receiptPerson: '李四',
         status: '已销毁'
@@ -364,3 +442,62 @@ export const parameterTaskAssignmentData: IParameterTaskAssignment[] = [
         status: '待开始'
     }
 ];
+
+// 样品领用记录数据
+export const sampleCollectionData: ISampleCollection[] = [
+    {
+        id: 'COL001',
+        sampleNo: 'S20231101001',
+        sampleName: '钢筋混凝土试件',
+        laboratory: '物理实验室',
+        collectionPerson: '王五',
+        collectionPersonId: 'E003',
+        collectionDate: '2023-11-02',
+        collectionQuantity: 2,
+        unit: '个',
+        purpose: '抗压强度检测',
+        testItems: ['抗压强度', '抗折强度'],
+        expectedReturnDate: '2023-11-10',
+        status: 'in_use',
+        createTime: '2023-11-02T08:00:00Z'
+    },
+    {
+        id: 'COL002',
+        sampleNo: 'S20231102001',
+        sampleName: '砂石料',
+        laboratory: '化学实验室',
+        collectionPerson: '赵六',
+        collectionPersonId: 'E004',
+        collectionDate: '2023-11-03',
+        collectionQuantity: 5,
+        unit: 'kg',
+        purpose: '级配分析',
+        testItems: ['级配分析'],
+        expectedReturnDate: '2023-11-08',
+        actualReturnDate: '2023-11-07',
+        returnedQuantity: 5,
+        status: 'fully_returned',
+        createTime: '2023-11-03T09:00:00Z'
+    }
+];
+
+// 样品委外记录数据
+export const sampleOutsourceData: ISampleOutsource[] = [
+    {
+        id: 'OUT001',
+        sampleNo: 'S20231105001',
+        sampleName: '土工布',
+        supplierId: 'SUP001',
+        supplierName: '华测检测认证集团',
+        quantity: 5,
+        unit: '个',
+        testItems: ['拉伸强度', '撕裂强度'],
+        assignedBy: '张三',
+        assignedById: 'E001',
+        assignDate: '2023-11-05',
+        dueDate: '2023-11-15',
+        status: 'in_progress',
+        remark: '紧急项目'
+    }
+];
+
