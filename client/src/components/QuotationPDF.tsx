@@ -2,23 +2,23 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 import type { Quotation } from '../mock/quotationData';
 
-// 注册中文字体 - 使用思源黑体CN (更可靠的CDN源)
+// 注册中文字体 - 使用Noto Sans SC (Google Fonts官方)
 Font.register({
-    family: 'Source Han Sans CN',
+    family: 'Noto Sans SC',
     fonts: [
         {
-            src: 'https://cdn.jsdelivr.net/npm/source-han-sans-cn@2.004/Regular/SourceHanSansCN-Regular.otf',
+            src: 'https://fonts.gstatic.com/s/notosanssc/v36/k3kCo84MPvpLmixcA63oeALhL4iJ-Q7m8w.woff2',
             fontWeight: 'normal'
         },
         {
-            src: 'https://cdn.jsdelivr.net/npm/source-han-sans-cn@2.004/Bold/SourceHanSansCN-Bold.otf',
+            src: 'https://fonts.gstatic.com/s/notosanssc/v36/k3k0o84MPvpLmixcA63oeALZSYqZCcqJKwx2nA.woff2',
             fontWeight: 'bold'
         }
     ]
 });
 
 const styles = StyleSheet.create({
-    page: { padding: 40, fontSize: 10, fontFamily: 'Source Han Sans CN' },
+    page: { padding: 40, fontSize: 10, fontFamily: 'Noto Sans SC' },
     header: { marginBottom: 20, textAlign: 'center' },
     title: { fontSize: 18, fontWeight: 'bold', marginBottom: 5 },
     subtitle: { fontSize: 12, color: '#666' },
