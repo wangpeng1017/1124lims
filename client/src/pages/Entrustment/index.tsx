@@ -297,9 +297,16 @@ const Entrustment: React.FC = () => {
         },
         { title: '委托单位', dataIndex: 'clientName', key: 'clientName', width: 200 },
         { title: '样品名称', dataIndex: 'sampleName', key: 'sampleName', width: 150 },
-        { title: '送样时间', dataIndex: 'sampleDate', key: 'sampleDate', width: 120 },
         {
-            title: '检测项目摘要',
+            title: '订单时间',
+            dataIndex: 'sampleDate',
+            key: 'sampleDate',
+            width: 120,
+            defaultSortOrder: 'descend',
+            sorter: (a, b) => new Date(a.sampleDate).getTime() - new Date(b.sampleDate).getTime()
+        },
+        {
+            title: '检测项目',
             dataIndex: 'testItems',
             key: 'testItems',
             width: 120,
