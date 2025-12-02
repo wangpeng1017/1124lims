@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Table, Card, Button, Space, Tag, Input, Select, message, Popconfirm, Modal, Form, Upload } from 'antd';
+import { Table, Card, Button, Space, Tag, Input, Select, message, Popconfirm, Modal, Form, Upload, Radio } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { PlusOutlined, SearchOutlined, FileTextOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, CloseCircleOutlined, UploadOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, FileTextOutlined, EditOutlined, DeleteOutlined, CloseCircleOutlined, UploadOutlined, FormOutlined } from '@ant-design/icons';
 import { quotationData, STATUS_MAP, CLIENT_STATUS_MAP, type Quotation } from '../../mock/quotationData';
 import { ApprovalService } from '../../services/approvalService';
 import QuotationForm from './QuotationForm';
@@ -149,9 +149,9 @@ const QuotationManagement: React.FC = () => {
         }
     };
 
-    const handleClientFeedback = (record: Quotation, status: 'ok' | 'ng') => {
+    const handleClientFeedback = (record: Quotation) => {
         setFeedbackQuotation(record);
-        setFeedbackType(status);
+        setFeedbackType('ok');
         feedbackForm.resetFields();
         setContractFileList([]);
         setIsFeedbackModalVisible(true);
@@ -359,24 +359,13 @@ const QuotationManagement: React.FC = () => {
                 if (record.clientStatus === 'pending') {
                     actions.push(
                         <Button
-                            key="ok"
+                            key="feedback"
                             size="small"
                             type="primary"
-                            icon={<CheckCircleOutlined />}
-                            onClick={() => handleClientFeedback(record, 'ok')}
+                            icon={<FormOutlined />}
+                            onClick={() => handleClientFeedback(record)}
                         >
-                            OK
-                        </Button>
-                    );
-                    actions.push(
-                        <Button
-                            key="ng"
-                            size="small"
-                            danger
-                            icon={<CloseCircleOutlined />}
-                            onClick={() => handleClientFeedback(record, 'ng')}
-                        >
-                            NG
+                            客户反馈
                         </Button>
                     );
                 } else if (record.clientStatus === 'ok' && record.contractFileName) {
@@ -476,7 +465,7 @@ const QuotationManagement: React.FC = () => {
                 dataSource={filteredData}
                 rowKey="id"
                 pagination={{ pageSize: 10 }}
-                scroll={{ x: 1500 }}
+                scroll={{ x: 'max-content' }}
             />
 
             <QuotationForm
@@ -487,7 +476,7 @@ const QuotationManagement: React.FC = () => {
             />
 
             <Modal
-                title={feedbackType === 'ok' ? '客户确认OK - 上传合同' : '客户拒绝(NG) - 填写原因'}
+                title="客户反馈处理"
                 open={isFeedbackModalVisible}
                 onCancel={() => setIsFeedbackModalVisible(false)}
                 onOk={handleSubmitFeedback}
@@ -495,8 +484,22 @@ const QuotationManagement: React.FC = () => {
                 cancelText="取消"
                 width={600}
             >
-                {feedbackType === 'ok' ? (
-                    <Form form={feedbackForm} layout="vertical">
+                <Form form={feedbackForm} layout="vertical">
+                    <Form.Item label="反馈结果" required>
+                        <Radio.Group
+                            value={feedbackType}
+                            onChange={e => {
+                                setFeedbackType(e.target.value);
+                                setContractFileList([]);
+                                feedbackForm.resetFields(['contractFile', 'ngReason']);
+                            }}
+                        >
+                            <Radio value="ok">客户确认OK</Radio>
+                            <Radio value="ng">客户拒绝(NG)</Radio>
+                        </Radio.Group>
+                    </Form.Item>
+
+                    {feedbackType === 'ok' ? (
                         <Form.Item
                             label="上传盖章合同"
                             required
@@ -528,9 +531,7 @@ const QuotationManagement: React.FC = () => {
                                 支持 PDF、JPG、PNG 格式, 文件大小不超过 10MB
                             </div>
                         </Form.Item>
-                    </Form>
-                ) : (
-                    <Form form={feedbackForm} layout="vertical">
+                    ) : (
                         <Form.Item
                             name="ngReason"
                             label="拒绝原因"
@@ -547,8 +548,8 @@ const QuotationManagement: React.FC = () => {
                                 maxLength={500}
                             />
                         </Form.Item>
-                    </Form>
-                )}
+                    )}
+                </Form>
             </Modal>
         </Card>
     );
