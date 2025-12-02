@@ -5,6 +5,9 @@ import { PlusOutlined, SearchOutlined, FileTextOutlined, EditOutlined, DeleteOut
 import { quotationData, STATUS_MAP, CLIENT_STATUS_MAP, type Quotation } from '../../mock/quotationData';
 import { ApprovalService } from '../../services/approvalService';
 import QuotationForm from './QuotationForm';
+import { pdf } from '@react-pdf/renderer';
+import { saveAs } from 'file-saver';
+import QuotationPDF from '../../components/QuotationPDF';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -128,12 +131,21 @@ const QuotationManagement: React.FC = () => {
         message.success(`已提交审批,审批单号: ${instance.id}`);
     };
 
-    const handleViewPDF = (record: Quotation) => {
-        if (!record.pdfUrl) {
-            message.warning('PDF尚未生成');
-            return;
+    const handleViewPDF = async (record: Quotation) => {
+        try {
+            message.loading({ content: '正在生成PDF...', key: 'pdf' });
+
+            // 生成PDF
+            const blob = await pdf(<QuotationPDF quotation={record} />).toBlob();
+
+            // 下载PDF
+            saveAs(blob, `${record.quotationNo}_报价单.pdf`);
+
+            message.success({ content: 'PDF已生成并下载', key: 'pdf' });
+        } catch (error) {
+            console.error('PDF生成失败:', error);
+            message.error({ content: 'PDF生成失败', key: 'pdf' });
         }
-        message.info(`查看PDF: ${record.pdfUrl}`);
     };
 
     const handleClientFeedback = (record: Quotation, status: 'ok' | 'ng') => {
