@@ -60,6 +60,7 @@ function getItem(
 const items: MenuItem[] = [
   getItem('业务管理', '/entrustment', <ExperimentOutlined />, [
     getItem('委托咨询', '/entrustment/consultation', <AuditOutlined />),
+    getItem('报价单', '/entrustment/quotation', <FileTextOutlined />),
     getItem('委托合同', '/entrustment/contract', <AuditOutlined />),
     getItem('委托单', '/entrustment/order', <FileProtectOutlined />),
     getItem('委托单位', '/entrustment/client', <ApartmentOutlined />),

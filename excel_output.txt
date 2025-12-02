@@ -1,0 +1,28 @@
+Sheet names: ['Sheet1']
+
+
+============================================================
+Sheet: Sheet1
+============================================================
+Max row: 30, Max col: 9
+
+Row  1: ('报  价  单  (Quotation)', None, None, None, None, None, None, None, None)
+Row  2: ('委托方Company：', None, None, None, None, '服务方Company：', None, '江苏国轻检测技术有限公司', None)
+Row  3: ('发件人From：', None, None, None, None, '发件人From：', None, '张馨', None)
+Row  4: ('电话Tel：', None, None, None, None, '电话Tel：', None, 15952575002, None)
+Row  5: ('邮箱Email：', None, None, None, None, '邮箱Email：', None, 'zhangxin@sae-china.org', None)
+Row  6: ('地址Adress：', None, None, None, None, '地址Adress：', None, '扬州市邗江区金山路99号', None)
+Row  8: ('样品名称（Sample Name）', None, None, '莱尼 K01', None, None, None, None, None)
+Row  9: ('序号', '检测项目（Service Item）', None, '检测标准(Method Standard)', None, None, '数量（Quantity）', '单价(Price)', '总价（Total Coat）')
+Row 10: (1, None, None, None, None, None, None, None, None)
+Row 11: (2, None, None, None, None, None, None, None, None)
+Row 12: (3, None, None, None, None, None, None, None, None)
+Row 13: (4, None, None, None, None, None, None, None, None)
+Row 14: ('以上测试费用为人民币含税报价 ', None, None, None, None, '报价合计', None, None, None)
+Row 15: (None, None, None, None, None, '含税合计（含税 6%）', None, None, None)
+Row 16: (None, None, None, None, None, '优惠后合计（含税 6%）', None, None, None)
+Row 17: ('客户要求备注：', None, None, None, None, None, None, None, None)
+Row 19: ('\n★委托方签字（盖章）\n                           \n                          \n\n\n   \n                            日期: ', None, None, None, None, '\n★服务方签字（盖章）\n                           \n                          \n\n\n   \n                               日期: ', None, None, None)
+Row 23: ('★Additional Information 附加说明：\n收到此报价单后，请按以下流程操作（Upon receiving this quotation, please proceed according to the following steps:）：\n1、此报价依据贵公司提供的资料而估算，有效期为一个月。若提供的资料有改动，此报价单将随之更新。如贵公司同意以上报价，请签名盖章后将此件回传本公司，以便执行订单。本报价单经双方签字确认并盖章后，等同双方的检测委托合同。非常感谢您的支持！\n\n2、请按要求仔细填写测试申请表并确认，内容可根据贵公司需要填写，测试及报告内容都将以贵司提供的资料进行。测试报告完成后，提供报告。若有任何修改，每份报告需支付 RMB100 元修改费； \n\n3、付款条件： 客户方在检测方出具报告之日起 30 天内付款。如客户方未在上述期限内付款，逾期每天加收千分之一的滞纳金，直至客户方支付拖欠的所有款项。', None, None, None, None, None, None, None, None)
+Row 25: ('寄样信息(Sample Delivery Information)', None, None, None, None, '收款方信息（Payee Information）', None, None, None)
+Row 26: ('地 址：江苏省扬州市邗江区金山路号99号B座\n电 话：15952575002 \n收件人：张 馨 ', None, None, None, None, '户 名：江苏国轻检测技术有限公司\n开户行：中国工商银行股份有限公司扬州开发支行\n行 号: 102312002133\n账号：1108021309100289674', None, None, None)
