@@ -82,7 +82,8 @@ const items: MenuItem[] = [
     getItem('任务明细', '/test-management/task-details/TASK20231101001', <FileSearchOutlined />), // 示例链接
   ]),
   getItem('报告管理', '/report-management', <FileDoneOutlined />, [
-    getItem('样品检测报告', '/report-management/test-reports', <FileTextOutlined />),
+    getItem('任务报告', '/report-management/test-reports', <FileTextOutlined />),
+    getItem('项目报告', '/report-management/project-reports', <FileDoneOutlined />),
     getItem('报告审核/批准', '/report-management/review', <ReportAuditOutlined />),
     getItem('审核记录', '/report-management/review-records', <HistoryOutlined />),
     getItem('原始记录（委托单）', '/report-management/raw-records', <FolderOutlined />),
