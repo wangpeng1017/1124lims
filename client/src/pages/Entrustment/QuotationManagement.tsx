@@ -30,6 +30,19 @@ const QuotationManagement: React.FC = () => {
     const [feedbackForm] = Form.useForm();
     const [contractFileList, setContractFileList] = useState<any[]>([]);
 
+    // 行选择状态
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const [selectedRows, setSelectedRows] = useState<Quotation[]>([]);
+
+    const rowSelection = {
+        type: 'radio' as const,
+        selectedRowKeys,
+        onChange: (keys: React.Key[], rows: Quotation[]) => {
+            setSelectedRowKeys(keys);
+            setSelectedRows(rows);
+        },
+    };
+
     // 筛选逻辑
     const applyFilters = (
         data: Quotation[],
@@ -155,6 +168,19 @@ const QuotationManagement: React.FC = () => {
         feedbackForm.resetFields();
         setContractFileList([]);
         setIsFeedbackModalVisible(true);
+    };
+
+    const handleTopClientFeedback = () => {
+        if (selectedRows.length !== 1) {
+            message.warning('请选择一个报价单');
+            return;
+        }
+        const record = selectedRows[0];
+        if (record.clientStatus !== 'pending') {
+            // 如果需要限制只有pending状态才能反馈，可以在这里添加逻辑
+            // 目前允许所有状态修改反馈
+        }
+        handleClientFeedback(record);
     };
 
     const handleSaveQuotation = (values: Partial<Quotation>) => {
@@ -355,46 +381,7 @@ const QuotationManagement: React.FC = () => {
                     );
                 }
 
-                // 客户反馈 - 所有状态都可以进行反馈
-                if (record.clientStatus === 'pending') {
-                    actions.push(
-                        <Button
-                            key="feedback"
-                            size="small"
-                            type="primary"
-                            icon={<FormOutlined />}
-                            onClick={() => handleClientFeedback(record)}
-                        >
-                            客户反馈
-                        </Button>
-                    );
-                } else if (record.clientStatus === 'ok' && record.contractFileName) {
-                    // 已OK - 显示合同查看按钮
-                    actions.push(
-                        <Button
-                            key="view-contract"
-                            size="small"
-                            icon={<FileTextOutlined />}
-                            onClick={() => message.info(`查看合同: ${record.contractFileName}`)}
-                        >
-                            查看合同
-                        </Button>
-                    );
-                } else if (record.clientStatus === 'ng' && record.ngReason) {
-                    // 已NG - 显示原因查看按钮
-                    actions.push(
-                        <Button
-                            key="view-reason"
-                            size="small"
-                            onClick={() => Modal.info({
-                                title: 'NG原因',
-                                content: record.ngReason
-                            })}
-                        >
-                            查看原因
-                        </Button>
-                    );
-                }
+
 
                 // 已拒绝状态 - 可重新编辑
                 if (record.status === 'rejected') {
@@ -420,9 +407,18 @@ const QuotationManagement: React.FC = () => {
         <Card
             title="报价单管理"
             extra={
-                <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-                    新建报价单
-                </Button>
+                <Space>
+                    <Button
+                        icon={<FormOutlined />}
+                        onClick={handleTopClientFeedback}
+                        disabled={selectedRows.length === 0}
+                    >
+                        客户反馈
+                    </Button>
+                    <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+                        新建报价单
+                    </Button>
+                </Space>
             }
         >
             <Space style={{ marginBottom: 16 }} wrap>
@@ -461,6 +457,7 @@ const QuotationManagement: React.FC = () => {
             </Space>
 
             <Table
+                rowSelection={rowSelection}
                 columns={columns}
                 dataSource={filteredData}
                 rowKey="id"
