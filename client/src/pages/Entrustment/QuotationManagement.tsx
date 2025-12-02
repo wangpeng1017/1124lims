@@ -268,55 +268,90 @@ const QuotationManagement: React.FC = () => {
         {
             title: '操作',
             key: 'action',
-            width: 280,
+            width: 320,
             fixed: 'right',
-            render: (_, record) => (
-                <Space size="small">
+            render: (_, record) => {
+                const actions = [];
+
+                // 查看详情 - 所有状态都可以查看
+                actions.push(
                     <Button
+                        key="view"
                         size="small"
                         icon={<FileTextOutlined />}
                         onClick={() => message.info(`查看详情: ${record.quotationNo}`)}
                     >
                         查看
                     </Button>
-                    {record.status === 'draft' && (
-                        <>
-                            <Button
-                                size="small"
-                                icon={<EditOutlined />}
-                                onClick={() => handleEdit(record)}
-                            >
-                                编辑
-                            </Button>
-                            <Button
-                                size="small"
-                                type="primary"
-                                onClick={() => handleSubmitApproval(record)}
-                            >
-                                提交审批
-                            </Button>
-                            <Popconfirm
-                                title="确定删除吗?"
-                                onConfirm={() => handleDelete(record.id)}
-                            >
-                                <Button size="small" danger icon={<DeleteOutlined />}>
-                                    删除
-                                </Button>
-                            </Popconfirm>
-                        </>
-                    )}
-                    {record.pdfUrl && (
+                );
+
+                // 草稿状态 - 可编辑、提交审批、删除
+                if (record.status === 'draft') {
+                    actions.push(
                         <Button
+                            key="edit"
                             size="small"
+                            icon={<EditOutlined />}
+                            onClick={() => handleEdit(record)}
+                        >
+                            编辑
+                        </Button>
+                    );
+                    actions.push(
+                        <Button
+                            key="submit"
+                            size="small"
+                            type="primary"
+                            onClick={() => handleSubmitApproval(record)}
+                        >
+                            提交审批
+                        </Button>
+                    );
+                    actions.push(
+                        <Popconfirm
+                            key="delete"
+                            title="确定删除吗?"
+                            onConfirm={() => handleDelete(record.id)}
+                        >
+                            <Button size="small" danger icon={<DeleteOutlined />}>
+                                删除
+                            </Button>
+                        </Popconfirm>
+                    );
+                }
+
+                // 审批中状态 - 可撤回
+                if (record.status === 'pending_sales' || record.status === 'pending_finance' || record.status === 'pending_lab') {
+                    actions.push(
+                        <Button
+                            key="recall"
+                            size="small"
+                            onClick={() => message.info('撤回审批功能开发中')}
+                        >
+                            撤回
+                        </Button>
+                    );
+                }
+
+                // 已批准状态 - 生成PDF
+                if (record.status === 'approved') {
+                    actions.push(
+                        <Button
+                            key="pdf"
+                            size="small"
+                            type="primary"
                             icon={<FileTextOutlined />}
                             onClick={() => handleViewPDF(record)}
                         >
-                            PDF
+                            生成PDF
                         </Button>
-                    )}
-                    {record.status === 'approved' && record.clientStatus === 'pending' && (
-                        <>
+                    );
+
+                    // 客户反馈待处理 - OK/NG按钮
+                    if (record.clientStatus === 'pending') {
+                        actions.push(
                             <Button
+                                key="ok"
                                 size="small"
                                 type="primary"
                                 icon={<CheckCircleOutlined />}
@@ -324,7 +359,10 @@ const QuotationManagement: React.FC = () => {
                             >
                                 OK
                             </Button>
+                        );
+                        actions.push(
                             <Button
+                                key="ng"
                                 size="small"
                                 danger
                                 icon={<CloseCircleOutlined />}
@@ -332,10 +370,27 @@ const QuotationManagement: React.FC = () => {
                             >
                                 NG
                             </Button>
-                        </>
-                    )}
-                </Space>
-            )
+                        );
+                    }
+                }
+
+                // 已拒绝状态 - 可重新编辑
+                if (record.status === 'rejected') {
+                    actions.push(
+                        <Button
+                            key="reedit"
+                            size="small"
+                            type="primary"
+                            icon={<EditOutlined />}
+                            onClick={() => handleEdit(record)}
+                        >
+                            重新编辑
+                        </Button>
+                    );
+                }
+
+                return <Space size="small">{actions}</Space>;
+            }
         }
     ];
 
