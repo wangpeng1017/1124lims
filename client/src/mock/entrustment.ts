@@ -27,12 +27,44 @@ export interface IEntrustmentRecord {
     assignmentMode?: 'manual' | 'auto';
 }
 
+export interface IClientUnit {
+    id: number;
+    name: string;
+    contactPerson: string;
+    contactPhone: string;
+    entrustmentInfo?: string;
+    address?: string;
+    remark?: string;
+    creator: string;
+    createTime: string;
+    // Invoice Info
+    taxId?: string;
+    invoiceAddress?: string;
+    invoicePhone?: string;
+    bankName?: string;
+    bankAccount?: string;
+    // Approval Info
+    status: 'draft' | 'pending' | 'approved' | 'rejected';
+    approvalComment?: string;
+}
+
+export interface IEntrustmentContract {
+    id: number;
+    contractNo: string;
+    name: string;
+    clientName: string;
+    amount: number;
+    signDate: string;
+    status: 'signed' | 'pending' | 'terminated';
+    attachment?: string;
+}
+
 export const entrustmentData: IEntrustmentRecord[] = [
     {
         id: 1,
         entrustmentId: 'WT20231101001',
         contractNo: 'HT20231101',
-        clientName: '某某建设集团有限公司',
+        clientName: '奇瑞汽车股份有限公司',
         contactPerson: '张经理',
         sampleDate: '2023-11-01',
         follower: '李四',
@@ -57,7 +89,7 @@ export const entrustmentData: IEntrustmentRecord[] = [
     {
         id: 2,
         entrustmentId: 'WT20231102002',
-        clientName: '某某工程检测有限公司',
+        clientName: '上海汽车集团股份有限公司',
         sampleDate: '2023-11-02',
         follower: '王五',
         sampleName: 'HRB400E钢筋',
@@ -85,7 +117,7 @@ export const entrustmentData: IEntrustmentRecord[] = [
     {
         id: 3,
         entrustmentId: 'WT20231103003',
-        clientName: '某某建材有限公司',
+        clientName: '比亚迪汽车工业有限公司',
         sampleDate: '2023-11-03',
         follower: '赵六',
         sampleName: '水泥',
@@ -105,7 +137,7 @@ export const entrustmentData: IEntrustmentRecord[] = [
     {
         id: 4,
         entrustmentId: 'WT20231104004',
-        clientName: '新城建设开发部',
+        clientName: '长城汽车股份有限公司',
         sampleDate: '2023-11-04',
         follower: '张三',
         sampleName: '砂石料',
@@ -115,7 +147,7 @@ export const entrustmentData: IEntrustmentRecord[] = [
     {
         id: 5,
         entrustmentId: 'WT20231105005',
-        clientName: '市政路桥公司',
+        clientName: '奇瑞汽车股份有限公司',
         sampleDate: '2023-11-05',
         follower: '李四',
         sampleName: '沥青混合料',
@@ -130,5 +162,90 @@ export const entrustmentData: IEntrustmentRecord[] = [
                 status: 'pending'
             }
         ]
+    }
+];
+
+export const clientData: IClientUnit[] = [
+    {
+        id: 1,
+        name: '奇瑞汽车股份有限公司',
+        contactPerson: '王经理',
+        contactPhone: '13800138001',
+        address: '安徽省芜湖市经济技术开发区长春路8号',
+        creator: 'Admin',
+        createTime: '2023-01-01',
+        taxId: '91340200713920435C',
+        invoiceAddress: '安徽省芜湖市经济技术开发区长春路8号',
+        invoicePhone: '0553-5961111',
+        bankName: '中国工商银行芜湖分行',
+        bankAccount: '1307023009022100123',
+        status: 'approved'
+    },
+    {
+        id: 2,
+        name: '上海汽车集团股份有限公司',
+        contactPerson: '李主管',
+        contactPhone: '13900139002',
+        address: '上海市静安区威海路489号',
+        creator: 'Admin',
+        createTime: '2023-01-15',
+        taxId: '91310000132260250X',
+        invoiceAddress: '上海市静安区威海路489号',
+        invoicePhone: '021-22011888',
+        bankName: '上海银行总行营业部',
+        bankAccount: '31628800003029888',
+        status: 'approved'
+    },
+    {
+        id: 3,
+        name: '比亚迪汽车工业有限公司',
+        contactPerson: '赵工',
+        contactPhone: '13700137003',
+        address: '深圳市坪山区比亚迪路3009号',
+        creator: 'Admin',
+        createTime: '2023-02-01',
+        taxId: '91440300791705886F',
+        invoiceAddress: '深圳市坪山区比亚迪路3009号',
+        invoicePhone: '0755-89888888',
+        bankName: '中国建设银行深圳坪山支行',
+        bankAccount: '44201583400052500888',
+        status: 'approved'
+    },
+    {
+        id: 4,
+        name: '长城汽车股份有限公司',
+        contactPerson: '孙经理',
+        contactPhone: '13600136004',
+        address: '河北省保定市朝阳南大街2266号',
+        creator: 'Admin',
+        createTime: '2023-03-10',
+        taxId: '91130600726236824F',
+        invoiceAddress: '河北省保定市朝阳南大街2266号',
+        invoicePhone: '0312-2196666',
+        bankName: '中国银行保定分行',
+        bankAccount: '100147896325',
+        status: 'approved'
+    }
+];
+
+export const contractData: IEntrustmentContract[] = [
+    {
+        id: 1,
+        contractNo: 'HT20231101',
+        name: '年度检测服务合同',
+        clientName: '奇瑞汽车股份有限公司',
+        amount: 500000,
+        signDate: '2023-01-01',
+        status: 'signed',
+        attachment: 'contract_v1.pdf'
+    },
+    {
+        id: 2,
+        contractNo: 'HT20231102',
+        name: '专项检测合同',
+        clientName: '上海汽车集团股份有限公司',
+        amount: 200000,
+        signDate: '2023-06-15',
+        status: 'pending'
     }
 ];
