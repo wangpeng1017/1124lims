@@ -82,7 +82,6 @@ const items: MenuItem[] = [
     getItem('委外分配（委托单）', '/outsourcing-management/outsource-by-order', <FileProtectOutlined />),
     getItem('委外分配（参数）', '/outsourcing-management/outsource-by-parameter', <PartitionOutlined />),
     getItem('委外单信息', '/outsourcing-management/outsource-orders', <FileSearchOutlined />),
-    getItem('委外任务完成', '/outsourcing-management/outsource-completion', <CheckCircleOutlined />),
   ]),
   getItem('报告管理', '/report-management', <FileDoneOutlined />, [
     getItem('任务报告', '/report-management/test-reports', <FileTextOutlined />),

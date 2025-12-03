@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Select, Input, InputNumber, Button, Row, Col, Divider, message, Modal, Descriptions, Space } from 'antd';
+import { Card, Form, Select, Input, InputNumber, Button, Row, Col, Divider, message, Modal, Descriptions, Space, Alert } from 'antd';
 import { SaveOutlined, FilePdfOutlined, PrinterOutlined } from '@ant-design/icons';
 import { useLocation } from 'react-router-dom';
 import { testTaskData, type ITestTask } from '../../mock/test';
@@ -131,6 +131,16 @@ const DataEntry: React.FC = () => {
                         </Form.Item>
                     </Col>
                 </Row>
+
+                {selectedTask?.isOutsourced && selectedTask.outsourceInfo && (
+                    <Alert
+                        type="info"
+                        message="委外任务"
+                        description={`该任务为委外检测,供应商: ${selectedTask.outsourceInfo.supplierName},请根据供应商提供的试验报告录入数据。`}
+                        showIcon
+                        style={{ marginBottom: 16 }}
+                    />
+                )}
 
                 <Divider>环境条件</Divider>
                 <Row gutter={24}>
