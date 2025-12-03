@@ -6,6 +6,8 @@ import { outsourceOrderData, type IOutsourceOrder } from '../../mock/outsourcing
 import { supplierData } from '../../mock/supplier';
 import { entrustmentData } from '../../mock/entrustment';
 import { sampleDetailData } from '../../mock/sample';
+import { employeeData } from '../../mock/personnel';
+import PersonSelector from '../../components/PersonSelector';
 
 const OutsourceByOrder: React.FC = () => {
     const [dataSource, setDataSource] = useState<IOutsourceOrder[]>(outsourceOrderData);
@@ -61,12 +63,16 @@ const OutsourceByOrder: React.FC = () => {
                 const today = new Date();
                 const outsourceNo = `WW-${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}-${String(newId).padStart(3, '0')}`;
 
+                // 获取内部责任人信息
+                const internalManagerEmployee = employeeData.find(e => e.id === values.internalManagerId);
+
                 setDataSource([...dataSource, {
                     id: newId,
                     outsourceNo,
                     ...values,
                     entrustmentId: selectedEntrustment,
                     supplierName: supplier?.name || '',
+                    internalManager: internalManagerEmployee?.name || '',
                     approvalStatus: '待审批',
                     status: '待确认',
                     assignedBy: '当前用户',
@@ -215,6 +221,20 @@ const OutsourceByOrder: React.FC = () => {
                                         </Select.Option>
                                     ))}
                                 </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                                name="internalManagerId"
+                                label="内部责任人"
+                                rules={[{ required: true, message: '请选择内部责任人' }]}
+                            >
+                                <PersonSelector
+                                    employees={employeeData.map(emp => ({
+                                        id: emp.id,
+                                        name: emp.name,
+                                        position: emp.position
+                                    }))}
+                                />
                             </Form.Item>
 
                             <Form.Item name="testItems" label="委外检测项目" rules={[{ required: true }]}>

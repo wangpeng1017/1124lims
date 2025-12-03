@@ -12,6 +12,13 @@ export interface ITestTask {
     progress: number;            // 完成进度百分比 (0-100)
     createdDate: string;         // 创建日期
     priority: 'Normal' | 'Urgent'; // 优先级
+    isOutsourced?: boolean;      // 新增: 是否委外
+    outsourceInfo?: {            // 新增: 委外信息
+        outsourceNo: string;     // 委外单号
+        supplierId: string;      // 供应商ID
+        supplierName: string;    // 供应商名称
+        status: string;          // 委外状态
+    };
 }
 
 // 数据录入记录接口
@@ -115,6 +122,48 @@ export const testTaskData: ITestTask[] = [
         progress: 0,
         createdDate: '2023-11-26',
         priority: 'Urgent'
+    },
+    {
+        id: 6,
+        taskNo: 'TASK20231115001',
+        sampleNo: 'S2023110101',
+        sampleName: '金属材料A',
+        entrustmentId: '202311001',
+        parameters: ['拉伸强度'],
+        assignedTo: '张三',
+        dueDate: '2023-11-30',
+        status: '进行中',
+        progress: 30,
+        createdDate: '2023-11-15',
+        priority: 'Normal',
+        isOutsourced: true,
+        outsourceInfo: {
+            outsourceNo: 'WW-20231115-001',
+            supplierId: 'SUP001',
+            supplierName: '华测检测认证集团',
+            status: '检测中'
+        }
+    },
+    {
+        id: 7,
+        taskNo: 'TASK20231118001',
+        sampleNo: 'S2023110301',
+        sampleName: '涂层样品',
+        entrustmentId: '202311003',
+        parameters: ['中性盐雾'],
+        assignedTo: '王五',
+        dueDate: '2023-12-01',
+        status: '待开始',
+        progress: 0,
+        createdDate: '2023-11-18',
+        priority: 'Normal',
+        isOutsourced: true,
+        outsourceInfo: {
+            outsourceNo: 'WW-20231118-002',
+            supplierId: 'SUP001',
+            supplierName: '华测检测认证集团',
+            status: '已发送'
+        }
     }
 ];
 

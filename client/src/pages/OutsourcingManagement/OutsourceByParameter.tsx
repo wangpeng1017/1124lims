@@ -7,6 +7,8 @@ import { supplierData } from '../../mock/supplier';
 import type { ISupplier, ISupplierCapability } from '../../mock/supplier';
 import { sampleDetailData } from '../../mock/sample';
 import { detectionParametersData } from '../../mock/basicParameters';
+import { employeeData } from '../../mock/personnel';
+import PersonSelector from '../../components/PersonSelector';
 
 const OutsourceByParameter: React.FC = () => {
     const [dataSource, setDataSource] = useState<IOutsourceParameter[]>(outsourceParameterData);
@@ -78,12 +80,16 @@ const OutsourceByParameter: React.FC = () => {
                 const today = new Date();
                 const outsourceNo = `WW-${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}-${String(newId).padStart(3, '0')}`;
 
+                // 获取内部责任人信息
+                const internalManagerEmployee = employeeData.find(e => e.id === values.internalManagerId);
+
                 setDataSource([...dataSource, {
                     id: newId,
                     outsourceNo,
                     ...values,
                     parameterName: parameter?.name || '',
                     supplierName: supplier?.name || '',
+                    internalManager: internalManagerEmployee?.name || '',
                     qualifiedSuppliers,
                     approvalStatus: '待审批',
                     status: '待确认',
@@ -275,6 +281,20 @@ const OutsourceByParameter: React.FC = () => {
                                         </Select.Option>
                                     ))}
                                 </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                                name="internalManagerId"
+                                label="内部责任人"
+                                rules={[{ required: true, message: '请选择内部责任人' }]}
+                            >
+                                <PersonSelector
+                                    employees={employeeData.map(emp => ({
+                                        id: emp.id,
+                                        name: emp.name,
+                                        position: emp.position
+                                    }))}
+                                />
                             </Form.Item>
 
                             <Form.Item
