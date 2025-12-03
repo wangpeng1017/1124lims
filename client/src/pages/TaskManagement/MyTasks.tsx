@@ -133,37 +133,6 @@ const MyTasks: React.FC = () => {
                             </Popconfirm>
                         </>
                     )}
-                    {record.status !== '已完成' && (
-                        <Button
-                            type="text"
-                            size="small"
-                            icon={<SwapOutlined />}
-                                <span>{currentTask?.taskNo} - {currentTask?.sampleName}</span>
-                            </Form.Item>
-                            <Form.Item
-                                name="toPerson"
-                                label="转交给"
-                                rules={[{ required: true, message: '请选择接收人' }]}
-                            >
-                                <PersonSelector
-                                    employees={employeeData.filter(e => e.name !== '当前用户').map(emp => ({
-                                        id: emp.id,
-                                        name: emp.name,
-                                        position: emp.position
-                                    }))}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                name="deviceId"
-                                label="使用设备"
-                            >
-                                <Select placeholder="选择设备" allowClear showSearch>
-                                    {deviceData.map(device => (
-                                        <Select.Option key={device.id} value={device.id}>
-                                            {device.name} ({device.code})
-                                        </Select.Option>
-                                    ))}
-                                </Select>
                             </Form.Item>
                             <Row gutter={16}>
                                 <Col span={12}>
