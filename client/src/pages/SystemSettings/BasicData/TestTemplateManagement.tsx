@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { Card, Table, Button, Space, Modal, Form, Input, Select, Tag, Popconfirm, message, Tabs, Row, Col, Divider, Upload } from 'antd';
+import { Card, Table, Button, Space, Modal, Form, Input, Select, Tag, Popconfirm, message, Row, Col, Divider, Upload } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, UploadOutlined, FileExcelOutlined } from '@ant-design/icons';
 import { testTemplatesData, type TestTemplate } from '../../../mock/testTemplates';
 import { inspectionStandardsData } from '../../../mock/basicParameters';
 import DynamicFormRenderer from '../../../components/DynamicFormRenderer';
 
-const { TextArea } = Input;
-const { TabPane } = Tabs;
+
 
 const TestTemplateManagement: React.FC = () => {
     const [dataSource, setDataSource] = useState<TestTemplate[]>(testTemplatesData);
@@ -178,7 +177,7 @@ const TestTemplateManagement: React.FC = () => {
                         <Input placeholder="如：MPa" />
                     </Form.Item>
 
-                    <Divider orientation="left">表单结构配置</Divider>
+                    <Divider orientation={"left" as const}>表单结构配置</Divider>
                     <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '4px', textAlign: 'center' }}>
                         <p style={{ color: '#999' }}>表单结构配置功能开发中，目前请使用JSON导入或联系管理员配置</p>
                         <Button icon={<FileExcelOutlined />}>导入Excel模版结构</Button>

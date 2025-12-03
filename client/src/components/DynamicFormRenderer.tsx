@@ -47,7 +47,7 @@ const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({ template, ini
             dataIndex: col.dataIndex,
             key: col.dataIndex,
             width: col.width,
-            render: (text: any, record: any, index: number) => {
+            render: (text: any, _: any, index: number) => {
                 if (readOnly) return text;
 
                 // 序号列不可编辑
@@ -157,7 +157,7 @@ const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({ template, ini
 
         return (
             <>
-                <Divider orientation="left" plain>环境条件</Divider>
+                <Divider orientation={"left" as const} plain>环境条件</Divider>
                 <Row gutter={24}>
                     <Col span={8}>
                         <Form.Item name="envTemperature" label="环境温度 (°C)">
