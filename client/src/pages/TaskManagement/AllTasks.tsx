@@ -33,6 +33,9 @@ const AllTasks: React.FC = () => {
 
     // 过滤数据
     const filteredData = dataSource.filter(item => {
+        // 只显示内部任务(非委外)
+        const matchInternal = !item.isOutsourced;
+
         const matchSearch =
             item.taskNo.toLowerCase().includes(searchText.toLowerCase()) ||
             item.sampleName.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -48,7 +51,7 @@ const AllTasks: React.FC = () => {
             matchAssignmentStatus = !!item.assignedTo && item.assignedTo !== '';
         }
 
-        return matchSearch && matchStatus && matchPerson && matchAssignmentStatus;
+        return matchInternal && matchSearch && matchStatus && matchPerson && matchAssignmentStatus;
     });
 
     const getStatusColor = (status: string) => {

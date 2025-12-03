@@ -1,124 +1,153 @@
 import React, { useState } from 'react';
-import { Card, Table, Tag, Button, Space, Statistic, Row, Col, Descriptions, Modal } from 'antd';
+import { Card, Table, Tag, Button, Space, Statistic, Row, Col, Modal, Form, Input, message, Popconfirm } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { EyeOutlined } from '@ant-design/icons';
-import { outsourceTaskData, type IOutsourceTask } from '../../mock/outsourcing';
+import { EyeOutlined, PlayCircleOutlined, FormOutlined, CheckCircleOutlined, SwapOutlined, ExportOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import { testTaskData, type ITestTask } from '../../mock/test';
+import { employeeData } from '../../mock/personnel';
+import PersonSelector from '../../components/PersonSelector';
+import TaskDetailDrawer from '../../components/TaskDetailDrawer';
 
 const MyOutsourcing: React.FC = () => {
+    const navigate = useNavigate();
     const currentUser = '当前用户'; // 从全局状态获取
 
-    // 只显示我负责的委外任务
-    const [dataSource] = useState<IOutsourceTask[]>(
-        outsourceTaskData.filter(t => t.assignedTo === currentUser)
+    // 使用 ITestTask,筛选委外任务
+    const [dataSource, setDataSource] = useState<ITestTask[]>(
+        testTaskData.filter(t => t.isOutsourced && t.assignedTo === currentUser)
     );
 
-    // 详情 Modal
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const [detailTask, setDetailTask] = useState<IOutsourceTask | null>(null);
+    // 转交 Modal
+    const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+    const [currentTask, setCurrentTask] = useState<ITestTask | null>(null);
+    const [form] = Form.useForm();
+
+    // 详情抽屉状态
+    const [detailVisible, setDetailVisible] = useState(false);
+    const [detailTask, setDetailTask] = useState<ITestTask | null>(null);
 
     // 统计
     const stats = {
-        pending: dataSource.filter(t => t.status === '待确认').length,
-        inProgress: dataSource.filter(t => t.status === '检测中').length,
+        pending: dataSource.filter(t => t.status === '待开始').length,
+        inProgress: dataSource.filter(t => t.status === '进行中').length,
         completed: dataSource.filter(t => t.status === '已完成').length,
     };
 
+    // 开始任务
+    const handleStart = (record: ITestTask) => {
+        const newData = dataSource.map(item =>
+            item.id === record.id ? { ...item, status: '进行中' as const } : item
+        );
+        setDataSource(newData);
+        message.success('任务已开始');
+    };
+
+    // 完成任务
+    const handleComplete = (record: ITestTask) => {
+        const newData = dataSource.map(item =>
+            item.id === record.id ? { ...item, status: '已完成' as const, progress: 100 } : item
+        );
+        setDataSource(newData);
+        message.success('任务已完成');
+    };
+
+    // 转交任务
+    const handleTransferClick = (record: ITestTask) => {
+        setCurrentTask(record);
+        form.resetFields();
+        setIsTransferModalOpen(true);
+    };
+
+    const handleTransferOk = () => {
+        form.validateFields().then(values => {
+            if (currentTask) {
+                // 模拟转交：从当前列表移除
+                const newData = dataSource.filter(item => item.id !== currentTask.id);
+                setDataSource(newData);
+                message.success(`任务已转交给 ${values.toPerson}`);
+                setIsTransferModalOpen(false);
+            }
+        });
+    };
+
     // 查看详情
-    const handleViewDetail = (record: IOutsourceTask) => {
+    const handleViewDetail = (record: ITestTask) => {
         setDetailTask(record);
-        setIsDetailModalOpen(true);
+        setDetailVisible(true);
+    };
+
+    // 数据录入
+    const handleDataEntry = (record: ITestTask) => {
+        navigate('/test-management/data-entry', { state: { task: record } });
     };
 
     // 获取状态颜色
-    const getStatusColor = (status: IOutsourceTask['status']) => {
+    const getStatusColor = (status: ITestTask['status']) => {
         const colorMap = {
-            '待确认': 'default',
-            '已发送': 'processing',
-            '检测中': 'warning',
+            '待开始': 'default',
+            '进行中': 'processing',
             '已完成': 'success',
-            '已终止': 'error',
-        };
-        return colorMap[status];
-    };
-
-    // 获取审批状态颜色
-    const getApprovalStatusColor = (status: IOutsourceTask['approvalStatus']) => {
-        const colorMap = {
-            '待审批': 'processing',
-            '已通过': 'success',
-            '已拒绝': 'error',
+            '已转交': 'warning',
         };
         return colorMap[status];
     };
 
     // 列定义
-    const columns: ColumnsType<IOutsourceTask> = [
+    const columns: ColumnsType<ITestTask> = [
         {
-            title: '委外单号',
-            dataIndex: 'outsourceNo',
-            key: 'outsourceNo',
+            title: '任务编号',
+            dataIndex: 'taskNo',
+            key: 'taskNo',
+            width: 150,
+            render: (text, record) => <a onClick={() => handleViewDetail(record)}>{text}</a>,
+        },
+        {
+            title: '样品名称',
+            dataIndex: 'sampleName',
+            key: 'sampleName',
             width: 150,
         },
         {
-            title: '委托单号',
-            dataIndex: 'entrustmentId',
-            key: 'entrustmentId',
-            width: 130,
-        },
-        {
-            title: '项目名称',
-            dataIndex: 'projectName',
-            key: 'projectName',
+            title: '检测参数',
+            dataIndex: 'parameters',
+            key: 'parameters',
             width: 200,
+            render: (params: string[]) => params.join(', '),
         },
         {
-            title: '样品',
-            key: 'samples',
-            width: 100,
-            render: (_, record) => `${record.sampleCount}个`,
-        },
-        {
-            title: '供应商',
-            dataIndex: 'supplierName',
-            key: 'supplierName',
-            width: 180,
-        },
-        {
-            title: '总金额',
-            dataIndex: 'totalPrice',
-            key: 'totalPrice',
-            width: 100,
-            render: (price: number) => `¥${price}`,
-        },
-        {
-            title: '审批状态',
-            dataIndex: 'approvalStatus',
-            key: 'approvalStatus',
-            width: 100,
-            render: (status: IOutsourceTask['approvalStatus']) => (
-                <Tag color={getApprovalStatusColor(status)}>{status}</Tag>
+            title: '委外供应商',
+            key: 'supplier',
+            width: 200,
+            render: (_, record) => (
+                <div>
+                    <Tag icon={<ExportOutlined />} color="blue">委外</Tag>
+                    {record.outsourceInfo && (
+                        <div style={{ fontSize: '12px', color: '#666', marginTop: 4 }}>
+                            {record.outsourceInfo.supplierName}
+                        </div>
+                    )}
+                </div>
             ),
         },
         {
-            title: '执行状态',
+            title: '状态',
             dataIndex: 'status',
             key: 'status',
             width: 100,
-            render: (status: IOutsourceTask['status']) => (
+            render: (status: ITestTask['status']) => (
                 <Tag color={getStatusColor(status)}>{status}</Tag>
             ),
         },
         {
-            title: '预计返回',
-            dataIndex: 'expectedReturnDate',
-            key: 'expectedReturnDate',
+            title: '截止日期',
+            dataIndex: 'dueDate',
+            key: 'dueDate',
             width: 110,
-            render: (date?: string) => date || '-',
         },
         {
             title: '操作',
             key: 'action',
-            width: 120,
+            width: 280,
             fixed: 'right',
             render: (_, record) => (
                 <Space size="small">
@@ -130,6 +159,50 @@ const MyOutsourcing: React.FC = () => {
                     >
                         详情
                     </Button>
+                    {record.status === '待开始' && (
+                        <Button
+                            type="link"
+                            size="small"
+                            icon={<PlayCircleOutlined />}
+                            onClick={() => handleStart(record)}
+                        >
+                            开始
+                        </Button>
+                    )}
+                    {(record.status === '待开始' || record.status === '进行中') && (
+                        <Button
+                            type="link"
+                            size="small"
+                            icon={<FormOutlined />}
+                            onClick={() => handleDataEntry(record)}
+                        >
+                            录入
+                        </Button>
+                    )}
+                    {record.status === '进行中' && (
+                        <Popconfirm
+                            title="确定完成此任务吗?"
+                            onConfirm={() => handleComplete(record)}
+                        >
+                            <Button
+                                type="link"
+                                size="small"
+                                icon={<CheckCircleOutlined />}
+                            >
+                                完成
+                            </Button>
+                        </Popconfirm>
+                    )}
+                    {(record.status === '待开始' || record.status === '进行中') && (
+                        <Button
+                            type="link"
+                            size="small"
+                            icon={<SwapOutlined />}
+                            onClick={() => handleTransferClick(record)}
+                        >
+                            转交
+                        </Button>
+                    )}
                 </Space>
             ),
         },
@@ -142,7 +215,7 @@ const MyOutsourcing: React.FC = () => {
                 <Col span={8}>
                     <Card>
                         <Statistic
-                            title="待确认"
+                            title="待开始"
                             value={stats.pending}
                             valueStyle={{ color: '#1890ff' }}
                             suffix="个"
@@ -152,7 +225,7 @@ const MyOutsourcing: React.FC = () => {
                 <Col span={8}>
                     <Card>
                         <Statistic
-                            title="检测中"
+                            title="进行中"
                             value={stats.inProgress}
                             valueStyle={{ color: '#faad14' }}
                             suffix="个"
@@ -180,48 +253,37 @@ const MyOutsourcing: React.FC = () => {
                 scroll={{ x: 1200 }}
             />
 
-            {/* 详情 Modal */}
+            {/* 转交 Modal */}
             <Modal
-                title="委外任务详情"
-                open={isDetailModalOpen}
-                onCancel={() => setIsDetailModalOpen(false)}
-                footer={[
-                    <Button key="close" onClick={() => setIsDetailModalOpen(false)}>
-                        关闭
-                    </Button>,
-                ]}
-                width={800}
+                title="转交任务"
+                open={isTransferModalOpen}
+                onOk={handleTransferOk}
+                onCancel={() => setIsTransferModalOpen(false)}
             >
-                {detailTask && (
-                    <Descriptions bordered column={2}>
-                        <Descriptions.Item label="委外单号">{detailTask.outsourceNo}</Descriptions.Item>
-                        <Descriptions.Item label="委托单号">{detailTask.entrustmentId}</Descriptions.Item>
-                        <Descriptions.Item label="项目名称" span={2}>{detailTask.projectName}</Descriptions.Item>
-                        <Descriptions.Item label="样品数量">{detailTask.sampleCount}个</Descriptions.Item>
-                        <Descriptions.Item label="样品编号">{detailTask.sampleIds.join(', ')}</Descriptions.Item>
-                        <Descriptions.Item label="样品名称" span={2}>{detailTask.sampleNames}</Descriptions.Item>
-                        <Descriptions.Item label="检测参数" span={2}>{detailTask.parameters.join(', ')}</Descriptions.Item>
-                        <Descriptions.Item label="供应商" span={2}>{detailTask.supplierName}</Descriptions.Item>
-                        <Descriptions.Item label="单价">¥{detailTask.pricePerSample}</Descriptions.Item>
-                        <Descriptions.Item label="总金额">¥{detailTask.totalPrice}</Descriptions.Item>
-                        <Descriptions.Item label="创建人">{detailTask.createdBy}</Descriptions.Item>
-                        <Descriptions.Item label="创建日期">{detailTask.createdDate}</Descriptions.Item>
-                        <Descriptions.Item label="预计返回日期">{detailTask.expectedReturnDate || '-'}</Descriptions.Item>
-                        <Descriptions.Item label="发送日期">{detailTask.sendDate || '-'}</Descriptions.Item>
-                        <Descriptions.Item label="物流单号">{detailTask.trackingNo || '-'}</Descriptions.Item>
-                        <Descriptions.Item label="接收日期">{detailTask.receivedDate || '-'}</Descriptions.Item>
-                        <Descriptions.Item label="优先级">{detailTask.priority === 'Urgent' ? '紧急' : '普通'}</Descriptions.Item>
-                        <Descriptions.Item label="审批状态">
-                            <Tag color={getApprovalStatusColor(detailTask.approvalStatus)}>{detailTask.approvalStatus}</Tag>
-                        </Descriptions.Item>
-                        <Descriptions.Item label="执行状态">
-                            <Tag color={getStatusColor(detailTask.status)}>{detailTask.status}</Tag>
-                        </Descriptions.Item>
-                        <Descriptions.Item label="完成进度">{detailTask.progress}%</Descriptions.Item>
-                        <Descriptions.Item label="备注" span={2}>{detailTask.remark || '-'}</Descriptions.Item>
-                    </Descriptions>
-                )}
+                <Form form={form} layout="vertical">
+                    <Form.Item
+                        label="转交给"
+                        name="toPerson"
+                        rules={[{ required: true, message: '请选择转交对象' }]}
+                    >
+                        <PersonSelector employees={employeeData} />
+                    </Form.Item>
+                    <Form.Item
+                        label="转交原因"
+                        name="reason"
+                        rules={[{ required: true, message: '请输入转交原因' }]}
+                    >
+                        <Input.TextArea rows={3} placeholder="请输入转交原因" />
+                    </Form.Item>
+                </Form>
             </Modal>
+
+            {/* 详情抽屉 */}
+            <TaskDetailDrawer
+                open={detailVisible}
+                task={detailTask}
+                onClose={() => setDetailVisible(false)}
+            />
         </Card>
     );
 };

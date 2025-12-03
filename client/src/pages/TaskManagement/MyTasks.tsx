@@ -8,11 +8,12 @@ import { employeeData } from '../../mock/personnel';
 import PersonSelector from '../../components/PersonSelector';
 import TaskDetailDrawer from '../../components/TaskDetailDrawer';
 
+
 const MyTasks: React.FC = () => {
     const navigate = useNavigate();
-    // 模拟只显示分配给"当前用户"的任务
+    // 模拟只显示分配给"当前用户"的内部任务(非委外)
     const [dataSource, setDataSource] = useState<ITestTask[]>(
-        testTaskData.filter(t => t.assignedTo === '当前用户')
+        testTaskData.filter(t => t.assignedTo === '当前用户' && !t.isOutsourced)
     );
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
     const [currentTask, setCurrentTask] = useState<ITestTask | null>(null);
