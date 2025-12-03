@@ -138,19 +138,6 @@ const MyTasks: React.FC = () => {
                             type="text"
                             size="small"
                             icon={<SwapOutlined />}
-                            onClick={() => handleTransferClick(record)}
-                        >
-                            转交
-                        </Button>
-                    )}
-                    <Modal
-                        title="转交任务"
-                        open={isTransferModalOpen}
-                        onOk={handleTransferOk}
-                        onCancel={() => setIsTransferModalOpen(false)}
-                    >
-                        <Form form={form} layout="vertical">
-                            <Form.Item label="当前任务">
                                 <span>{currentTask?.taskNo} - {currentTask?.sampleName}</span>
                             </Form.Item>
                             <Form.Item
@@ -204,10 +191,10 @@ const MyTasks: React.FC = () => {
                             >
                                 <Input.TextArea rows={3} />
                             </Form.Item>
-                        </Form>
-                    </Modal>
-                </Card>
+                        </Form >
+                    </Modal >
+                </Card >
             );
         };
 
-    export default MyTasks;
+export default MyTasks;
