@@ -117,6 +117,7 @@ const OutsourceOrders: React.FC = () => {
             }
         },
         { title: '供应商', dataIndex: 'supplierName', key: 'supplierName', width: 180, ellipsis: true },
+        { title: '内部责任人', dataIndex: 'internalManager', key: 'internalManager', width: 120 },
         {
             title: '总价',
             dataIndex: 'totalPrice',
@@ -204,7 +205,7 @@ const OutsourceOrders: React.FC = () => {
                 columns={columns}
                 dataSource={mergedData}
                 rowKey={(record) => `${record.type}-${record.id}`}
-                scroll={{ x: 1600 }}
+                scroll={{ x: 1700 }}
                 pagination={{ pageSize: 10 }}
             />
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Table, Tag, Button, Space, Modal, Form, Select, Input, message, Popconfirm, Badge, Row, Col, DatePicker } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { PlayCircleOutlined, FormOutlined, CheckCircleOutlined, SwapOutlined } from '@ant-design/icons';
+import { PlayCircleOutlined, FormOutlined, CheckCircleOutlined, SwapOutlined, ExportOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { testTaskData, type ITestTask } from '../../mock/test';
 import { employeeData } from '../../mock/personnel';
@@ -63,6 +63,27 @@ const MyTasks: React.FC = () => {
             title: '样品名称',
             dataIndex: 'sampleName',
             key: 'sampleName',
+        },
+        {
+            title: '任务类型',
+            key: 'taskType',
+            width: 120,
+            render: (_, record) => (
+                <>
+                    {record.isOutsourced ? (
+                        <Tag icon={<ExportOutlined />} color="blue">
+                            委外
+                        </Tag>
+                    ) : (
+                        <Tag color="green">内部</Tag>
+                    )}
+                    {record.isOutsourced && record.outsourceInfo && (
+                        <div style={{ fontSize: '12px', color: '#666', marginTop: 4 }}>
+                            {record.outsourceInfo.supplierName}
+                        </div>
+                    )}
+                </>
+            ),
         },
         {
             title: '检测参数',
