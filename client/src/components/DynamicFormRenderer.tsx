@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Table, InputNumber, DatePicker, Select, Upload, Button, Row, Col, Card, Space, Typography, Divider } from 'antd';
+import { Form, Input, Table, InputNumber, Select, Upload, Button, Row, Col, Card, Space, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import type { TestTemplate } from '../mock/testTemplates';
 
@@ -151,34 +151,6 @@ const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({ template, ini
         );
     };
 
-    // 渲染环境条件
-    const renderEnvironment = () => {
-        if (!schema.environment) return null;
-
-        return (
-            <>
-                <Divider plain>环境条件</Divider>
-                <Row gutter={24}>
-                    <Col span={8}>
-                        <Form.Item name="envTemperature" label="环境温度 (°C)">
-                            <InputNumber style={{ width: '100%' }} />
-                        </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                        <Form.Item name="envHumidity" label="相对湿度 (%)">
-                            <InputNumber style={{ width: '100%' }} />
-                        </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                        <Form.Item name="testDate" label="检测日期">
-                            <DatePicker style={{ width: '100%' }} />
-                        </Form.Item>
-                    </Col>
-                </Row>
-            </>
-        );
-    };
-
     return (
         <div className="dynamic-form-renderer">
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -190,8 +162,6 @@ const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({ template, ini
             {/* 优先渲染表格(数值型)，然后渲染字段(描述型) */}
             {renderTable()}
             {renderFields()}
-
-            {renderEnvironment()}
 
             <Form.Item name="remarks" label="备注">
                 <TextArea rows={2} />

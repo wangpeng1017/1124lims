@@ -4,7 +4,6 @@ import { SaveOutlined, FilePdfOutlined, PrinterOutlined } from '@ant-design/icon
 import { useLocation } from 'react-router-dom';
 import { testTaskData, type ITestTask } from '../../mock/test';
 import { deviceData } from '../../mock/devices';
-import { environmentData } from '../../mock/environment';
 import { testTemplatesData, type TestTemplate } from '../../mock/testTemplates';
 import DynamicFormRenderer from '../../components/DynamicFormRenderer';
 
@@ -43,17 +42,6 @@ const DataEntry: React.FC = () => {
         const taskNo = form.getFieldValue('taskNo');
         form.resetFields();
         form.setFieldsValue({ taskNo, templateId });
-    };
-
-    const handleEnvironmentChange = (envId: number) => {
-        const env = environmentData.find(e => e.id === envId);
-        if (env) {
-            form.setFieldsValue({
-                envTemperature: env.temperature,
-                envHumidity: env.humidity
-            });
-            message.success(`已加载 ${env.room} 环境数据`);
-        }
     };
 
     const handleSave = () => {
@@ -113,18 +101,6 @@ const DataEntry: React.FC = () => {
                             <Select placeholder="选择检测设备">
                                 {deviceData.map(d => (
                                     <Select.Option key={d.id} value={d.id}>{d.name} ({d.code})</Select.Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                    </Col>
-                </Row>
-
-                <Row gutter={24}>
-                    <Col span={8}>
-                        <Form.Item name="envId" label="环境数据来源">
-                            <Select placeholder="从环境监控系统加载" onChange={handleEnvironmentChange}>
-                                {environmentData.map(e => (
-                                    <Select.Option key={e.id} value={e.id}>{e.room}</Select.Option>
                                 ))}
                             </Select>
                         </Form.Item>
