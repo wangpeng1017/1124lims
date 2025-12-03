@@ -84,7 +84,11 @@ const DataEntry: React.FC = () => {
     };
 
     return (
-        <Card title="试验数据录入" bordered={false}>
+        <Card
+            title="试验数据录入"
+            bordered={false}
+            extra={<span style={{ fontSize: '14px', color: '#666', fontWeight: 'normal' }}>数据录入工作台 - 快速录入试验数据</span>}
+        >
             <Form form={form} layout="vertical" initialValues={{ temperature: 23.5, humidity: 45, envTemperature: 23.5, envHumidity: 45 }}>
                 <Row gutter={24}>
                     <Col span={8}>

@@ -8,6 +8,7 @@ import { detectionParametersData } from '../../mock/basicParameters';
 import { deviceData } from '../../mock/devices';
 import { supplierData } from '../../mock/supplier';
 import dayjs from 'dayjs';
+import PersonSelector from '../../components/PersonSelector';
 
 const orgUsers = [
     {
@@ -509,22 +510,15 @@ const Entrustment: React.FC = () => {
                         <>
                             <Divider>内部分配</Divider>
                             <Form.Item name="assignTo" label="分配给(组织架构人员)">
-                                <Select
-                                    allowClear
-                                    placeholder="请选择内部分配人员"
-                                    showSearch
-                                    optionFilterProp="children"
-                                >
-                                    {orgUsers.map(group => (
-                                        <Select.OptGroup key={group.department} label={group.department}>
-                                            {group.users.map(user => (
-                                                <Select.Option key={user.id} value={user.name}>
-                                                    {user.name}
-                                                </Select.Option>
-                                            ))}
-                                        </Select.OptGroup>
-                                    ))}
-                                </Select>
+                                <PersonSelector
+                                    employees={orgUsers.flatMap(group =>
+                                        group.users.map(user => ({
+                                            id: user.id,
+                                            name: user.name,
+                                            position: group.department
+                                        }))
+                                    )}
+                                />
                             </Form.Item>
                             <Form.Item name="deviceId" label="分配设备">
                                 <Select

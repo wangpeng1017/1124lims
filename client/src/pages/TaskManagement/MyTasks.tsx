@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Card, Table, Tag, Button, Space, Modal, Form, Select, Input, message, Popconfirm, Badge } from 'antd';
+import { Card, Table, Tag, Button, Space, Modal, Form, Select, Input, message, Popconfirm, Badge, Row, Col, DatePicker } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlayCircleOutlined, FormOutlined, CheckCircleOutlined, SwapOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { testTaskData, type ITestTask } from '../../mock/test';
 import { employeeData } from '../../mock/personnel';
+import { deviceData } from '../../mock/devices';
+import PersonSelector from '../../components/PersonSelector';
+import dayjs from 'dayjs';
 
 const MyTasks: React.FC = () => {
     const navigate = useNavigate();
@@ -140,51 +143,71 @@ const MyTasks: React.FC = () => {
                             转交
                         </Button>
                     )}
-                </Space>
-            ),
-        },
-    ];
-
-    return (
-        <Card title="我的检测任务" bordered={false}>
-            <Table
-                columns={columns}
-                dataSource={dataSource}
-                rowKey="id"
-            />
-
-            <Modal
-                title="转交任务"
-                open={isTransferModalOpen}
-                onOk={handleTransferOk}
-                onCancel={() => setIsTransferModalOpen(false)}
-            >
-                <Form form={form} layout="vertical">
-                    <Form.Item label="当前任务">
-                        <span>{currentTask?.taskNo} - {currentTask?.sampleName}</span>
-                    </Form.Item>
-                    <Form.Item
-                        name="toPerson"
-                        label="转交给"
-                        rules={[{ required: true, message: '请选择接收人' }]}
+                    <Modal
+                        title="转交任务"
+                        open={isTransferModalOpen}
+                        onOk={handleTransferOk}
+                        onCancel={() => setIsTransferModalOpen(false)}
                     >
-                        <Select placeholder="选择人员">
-                            {employeeData.filter(e => e.name !== '当前用户').map(emp => (
-                                <Select.Option key={emp.id} value={emp.name}>{emp.name}</Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item
-                        name="reason"
-                        label="转交原因"
-                        rules={[{ required: true, message: '请填写原因' }]}
-                    >
-                        <Input.TextArea rows={3} />
-                    </Form.Item>
-                </Form>
-            </Modal>
-        </Card>
-    );
-};
+                        <Form form={form} layout="vertical">
+                            <Form.Item label="当前任务">
+                                <span>{currentTask?.taskNo} - {currentTask?.sampleName}</span>
+                            </Form.Item>
+                            <Form.Item
+                                name="toPerson"
+                                label="转交给"
+                                rules={[{ required: true, message: '请选择接收人' }]}
+                            >
+                                <PersonSelector
+                                    employees={employeeData.filter(e => e.name !== '当前用户').map(emp => ({
+                                        id: emp.id,
+                                        name: emp.name,
+                                        position: emp.position
+                                    }))}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                name="deviceId"
+                                label="使用设备"
+                            >
+                                <Select placeholder="选择设备" allowClear showSearch>
+                                    {deviceData.map(device => (
+                                        <Select.Option key={device.id} value={device.id}>
+                                            {device.name} ({device.code})
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item
+                                        name="assignDate"
+                                        label="改派时间"
+                                        initialValue={dayjs()}
+                                    >
+                                        <DatePicker style={{ width: '100%' }} />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item
+                                        name="deadline"
+                                        label="截止时间"
+                                    >
+                                        <DatePicker style={{ width: '100%' }} />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Form.Item
+                                name="reason"
+                                label="转交原因"
+                                rules={[{ required: true, message: '请填写原因' }]}
+                            >
+                                <Input.TextArea rows={3} />
+                            </Form.Item>
+                        </Form>
+                    </Modal>
+                </Card>
+            );
+        };
 
-export default MyTasks;
+    export default MyTasks;

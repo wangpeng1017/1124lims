@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { testTaskData, type ITestTask } from '../../mock/test';
 import { employeeData } from '../../mock/personnel';
 import dayjs from 'dayjs';
+import { deviceData } from '../../mock/devices';
+import PersonSelector from '../../components/PersonSelector';
 
 
 const { Option } = Select;
@@ -330,10 +332,23 @@ const AllTasks: React.FC = () => {
                         label="分配给"
                         rules={[{ required: true, message: '请选择负责人' }]}
                     >
-                        <Select placeholder="选择负责人" showSearch>
-                            {employeeData.map(emp => (
-                                <Option key={emp.id} value={emp.name}>
-                                    {emp.name} - {emp.position}
+                        <PersonSelector
+                            employees={employeeData.map(emp => ({
+                                id: emp.id,
+                                name: emp.name,
+                                position: emp.position
+                            }))}
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="deviceId"
+                        label="使用设备"
+                    >
+                        <Select placeholder="选择设备" allowClear showSearch>
+                            {deviceData.map(device => (
+                                <Option key={device.id} value={device.id}>
+                                    {device.name} ({device.code})
                                 </Option>
                             ))}
                         </Select>
