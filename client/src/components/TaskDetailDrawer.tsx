@@ -1,6 +1,6 @@
 import React from 'react';
 import { Drawer, Descriptions, Tag, Badge, Timeline, Space, Divider } from 'antd';
-import { ITestTask } from '../mock/test';
+import type { ITestTask } from '../mock/test';
 import { ExportOutlined } from '@ant-design/icons';
 
 interface TaskDetailDrawerProps {
