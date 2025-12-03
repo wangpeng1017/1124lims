@@ -123,9 +123,7 @@ const DataEntry: React.FC = () => {
                         <Button icon={<FilePdfOutlined />} onClick={handleGenerateReport} size="large" style={{ marginRight: 16 }}>
                             生成原始记录单
                         </Button>
-                        <Button icon={<PrinterOutlined />} size="large">
-                            打印条码
-                        </Button>
+
                     </Col>
                 </Row>
             </Form>
