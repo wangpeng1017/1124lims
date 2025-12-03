@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Table, Tag, Progress, Space, Input, Select, Button, Tooltip, Modal, Form, DatePicker, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { SearchOutlined, EyeOutlined, UserAddOutlined } from '@ant-design/icons';
+import { SearchOutlined, EyeOutlined, UserAddOutlined, ExportOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { testTaskData, type ITestTask } from '../../mock/test';
 import { employeeData } from '../../mock/personnel';
@@ -141,6 +141,27 @@ const AllTasks: React.FC = () => {
                     <span style={{ fontSize: '12px', color: '#888' }}>{record.sampleNo}</span>
                 </Space>
             )
+        },
+        {
+            title: '任务类型',
+            key: 'taskType',
+            width: 120,
+            render: (_, record) => (
+                <>
+                    {record.isOutsourced ? (
+                        <Tag icon={<ExportOutlined />} color="blue">
+                            委外
+                        </Tag>
+                    ) : (
+                        <Tag color="green">内部</Tag>
+                    )}
+                    {record.isOutsourced && record.outsourceInfo && (
+                        <div style={{ fontSize: '12px', color: '#666', marginTop: 4 }}>
+                            {record.outsourceInfo.supplierName}
+                        </div>
+                    )}
+                </>
+            ),
         },
         {
             title: '检测参数',
