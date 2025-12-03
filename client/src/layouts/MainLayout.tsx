@@ -78,6 +78,12 @@ const items: MenuItem[] = [
     getItem('数据录入', '/test-management/data-entry', <FormOutlined />),
     getItem('任务明细', '/test-management/task-details/TASK20231101001', <FileSearchOutlined />), // 示例链接
   ]),
+  getItem('委外管理', '/outsourcing-management', <SupplierOutlined />, [
+    getItem('委外分配（委托单）', '/outsourcing-management/outsource-by-order', <FileProtectOutlined />),
+    getItem('委外分配（参数）', '/outsourcing-management/outsource-by-parameter', <PartitionOutlined />),
+    getItem('委外单信息', '/outsourcing-management/outsource-orders', <FileSearchOutlined />),
+    getItem('委外任务完成', '/outsourcing-management/outsource-completion', <CheckCircleOutlined />),
+  ]),
   getItem('报告管理', '/report-management', <FileDoneOutlined />, [
     getItem('任务报告', '/report-management/test-reports', <FileTextOutlined />),
     getItem('项目报告', '/report-management/project-reports', <FileDoneOutlined />),
@@ -98,12 +104,6 @@ const items: MenuItem[] = [
     getItem('出入库管理', '/consumables-management/transactions', <SwapOutlined />),
   ]),
 
-  getItem('委外/分包管理', '/outsourcing-management', <SupplierOutlined />, [
-    getItem('委外分配（委托单）', '/outsourcing-management/outsource-by-order', <FileProtectOutlined />),
-    getItem('委外分配（参数）', '/outsourcing-management/outsource-by-parameter', <PartitionOutlined />),
-    getItem('委外单信息', '/outsourcing-management/outsource-orders', <FileSearchOutlined />),
-    getItem('委外任务完成', '/outsourcing-management/outsource-completion', <CheckCircleOutlined />),
-  ]),
   getItem('供应商管理', '/supplier-management', <ApartmentOutlined />, [
     getItem('供应商分类', '/supplier-management/category', <AppstoreOutlined />),
     getItem('供应商信息', '/supplier-management/info', <ProfileOutlined />),
