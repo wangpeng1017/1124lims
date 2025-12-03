@@ -10,13 +10,11 @@ import {
   SafetyCertificateOutlined,
   AuditOutlined,
   ProfileOutlined,
-  FileProtectOutlined,
   DollarOutlined,
   FileTextOutlined,
   SwapOutlined,
   InboxOutlined,
   ProjectOutlined,
-  PartitionOutlined,
   TeamOutlined as SupplierOutlined,
   CheckCircleOutlined,
   FileSearchOutlined,
@@ -60,7 +58,7 @@ const items: MenuItem[] = [
     getItem('委托咨询', '/entrustment/consultation', <AuditOutlined />),
     getItem('报价单', '/entrustment/quotation', <FileTextOutlined />),
     getItem('委托合同', '/entrustment/contract', <AuditOutlined />),
-    getItem('委托单', '/entrustment/order', <FileProtectOutlined />),
+    getItem('委托单', '/entrustment/order', <FileTextOutlined />),
     getItem('委托单位', '/entrustment/client', <ApartmentOutlined />),
   ]),
   getItem('样品管理', '/sample-management', <ExperimentOutlined />, [
@@ -76,9 +74,8 @@ const items: MenuItem[] = [
     getItem('数据录入', '/test-management/data-entry', <FormOutlined />),
   ]),
   getItem('委外管理', '/outsourcing-management', <SupplierOutlined />, [
-    getItem('委外分配（委托单）', '/outsourcing-management/outsource-by-order', <FileProtectOutlined />),
-    getItem('委外分配（参数）', '/outsourcing-management/outsource-by-parameter', <PartitionOutlined />),
-    getItem('委外单信息', '/outsourcing-management/outsource-orders', <FileSearchOutlined />),
+    getItem('全部委外', '/outsourcing-management/all', <FileSearchOutlined />),
+    getItem('我的委外', '/outsourcing-management/my', <UserOutlined />),
   ]),
   getItem('报告管理', '/report-management', <FileDoneOutlined />, [
     getItem('任务报告', '/report-management/test-reports', <FileTextOutlined />),
@@ -108,7 +105,7 @@ const items: MenuItem[] = [
   getItem('财务管理', '/finance-management', <AccountBookOutlined />, [
     getItem('委托应收', '/finance-management/receivables', <DollarOutlined />),
     getItem('收款记录', '/finance-management/payment-records', <TransactionOutlined />),
-    getItem('开票管理', '/finance-management/invoices', <FileProtectOutlined />),
+    getItem('开票管理', '/finance-management/invoices', <FileTextOutlined />),
   ]),
   getItem('统计报表', '/statistics-report', <BarChartOutlined />, [
     getItem('委托单统计', '/statistics-report/entrustment', <FileTextOutlined />),
@@ -118,7 +115,7 @@ const items: MenuItem[] = [
   getItem('体系文件', '/system-documents', <FileTextOutlined />),
   getItem('基础数据配置', '/basic-params', <ProfileOutlined />, [
     getItem('检测模版管理', '/basic-params/test-templates', <FormOutlined />),
-    getItem('检查标准/依据', '/basic-params/standards', <FileProtectOutlined />),
+    getItem('检查标准/依据', '/basic-params/standards', <FileTextOutlined />),
     getItem('样品报告分类', '/report-management/categories', <AppstoreOutlined />),
 
     getItem('资质管理', '/basic-params/qualification', <SafetyCertificateOutlined />, [
