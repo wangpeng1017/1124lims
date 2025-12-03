@@ -287,7 +287,6 @@ const Entrustment: React.FC = () => {
     };
 
     const columns: ColumnsType<IEntrustmentRecord> = [
-        { title: '序号', dataIndex: 'id', key: 'id', width: 70 },
         {
             title: '委托编号',
             dataIndex: 'entrustmentId',
