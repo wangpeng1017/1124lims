@@ -143,60 +143,71 @@ const MyTasks: React.FC = () => {
                             转交
                         </Button>
                     )}
-                </Space>
-            ),
-        },
-    ];
-
-    return (
-        title = "转交任务"
-                        open = { isTransferModalOpen }
-    onOk = { handleTransferOk }
-    onCancel = {() => setIsTransferModalOpen(false)}
+                    <Modal
+                        title="转交任务"
+                        open={isTransferModalOpen}
+                        onOk={handleTransferOk}
+                        onCancel={() => setIsTransferModalOpen(false)}
                     >
-    <Form form={form} layout="vertical">
-        <Form.Item label="当前任务">
-            <span>{currentTask?.taskNo} - {currentTask?.sampleName}</span>
-        </Form.Item>
-        <Form.Item
-            name="toPerson"
-            label="转交给"
-            rules={[{ required: true, message: '请选择接收人' }]}
-        >
-            <PersonSelector
-                employees={employeeData.filter(e => e.name !== '当前用户').map(emp => ({
-                    id: emp.id,
-                    name: emp.name,
-                    position: emp.position
-                }))}
-            />
-        </Form.Item>
-        <Form.Item
-            name="deviceId"
-            label="使用设备"
-        >
-            <Select placeholder="选择设备" allowClear showSearch>
-                {deviceData.map(device => (
-                    <Col span={12}>
-                        <Form.Item
-                            name="deadline"
-                            label="截止时间"
-                        >
-                            <DatePicker style={{ width: '100%' }} />
-                        </Form.Item>
-                    </Col>
+                        <Form form={form} layout="vertical">
+                            <Form.Item label="当前任务">
+                                <span>{currentTask?.taskNo} - {currentTask?.sampleName}</span>
+                            </Form.Item>
+                            <Form.Item
+                                name="toPerson"
+                                label="转交给"
+                                rules={[{ required: true, message: '请选择接收人' }]}
+                            >
+                                <PersonSelector
+                                    employees={employeeData.filter(e => e.name !== '当前用户').map(emp => ({
+                                        id: emp.id,
+                                        name: emp.name,
+                                        position: emp.position
+                                    }))}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                name="deviceId"
+                                label="使用设备"
+                            >
+                                <Select placeholder="选择设备" allowClear showSearch>
+                                    {deviceData.map(device => (
+                                        <Select.Option key={device.id} value={device.id}>
+                                            {device.name} ({device.code})
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item
+                                        name="assignDate"
+                                        label="改派时间"
+                                        initialValue={dayjs()}
+                                    >
+                                        <DatePicker style={{ width: '100%' }} />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item
+                                        name="deadline"
+                                        label="截止时间"
+                                    >
+                                        <DatePicker style={{ width: '100%' }} />
+                                    </Form.Item>
+                                </Col>
                             </Row>
-            <Form.Item
-                name="reason"
-                label="转交原因"
-                rules={[{ required: true, message: '请填写原因' }]}
-            >
-                <Input.TextArea rows={3} />
-            </Form.Item>
-    </Form>
-                    </Modal >
-                </Card >
+                            <Form.Item
+                                name="reason"
+                                label="转交原因"
+                                rules={[{ required: true, message: '请填写原因' }]}
+                            >
+                                <Input.TextArea rows={3} />
+                            </Form.Item>
+                        </Form>
+                    </Modal>
+                </Card>
             );
         };
 
-export default MyTasks;
+    export default MyTasks;
