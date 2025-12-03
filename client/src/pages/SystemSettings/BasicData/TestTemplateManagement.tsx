@@ -177,7 +177,7 @@ const TestTemplateManagement: React.FC = () => {
                         <Input placeholder="如：MPa" />
                     </Form.Item>
 
-                    <Divider orientation={"left" as const}>表单结构配置</Divider>
+                    <Divider>表单结构配置</Divider>
                     <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '4px', textAlign: 'center' }}>
                         <p style={{ color: '#999' }}>表单结构配置功能开发中，目前请使用JSON导入或联系管理员配置</p>
                         <Button icon={<FileExcelOutlined />}>导入Excel模版结构</Button>

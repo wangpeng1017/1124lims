@@ -157,7 +157,7 @@ const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({ template, ini
 
         return (
             <>
-                <Divider orientation={"left" as const} plain>环境条件</Divider>
+                <Divider plain>环境条件</Divider>
                 <Row gutter={24}>
                     <Col span={8}>
                         <Form.Item name="envTemperature" label="环境温度 (°C)">
