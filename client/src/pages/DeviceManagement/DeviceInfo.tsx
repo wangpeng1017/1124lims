@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, Card, Tag, Row, Col, Statistic, Button, Modal, Form, Input, Select, InputNumber, Space, Popconfirm, message, Drawer, Descriptions, Tabs } from 'antd';
+import { Table, Card, Tag, Row, Col, Button, Modal, Form, Input, Select, InputNumber, Space, Popconfirm, message, Drawer, Descriptions, Tabs } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { SearchOutlined, PlusOutlined } from '@ant-design/icons';
 import { deviceData } from '../../mock/devices';
@@ -129,27 +129,7 @@ const DeviceInfo: React.FC = () => {
             key: 'model',
             width: 150,
         },
-        {
-            title: '状态',
-            dataIndex: 'status',
-            key: 'status',
-            width: 100,
-            filters: [
-                { text: '运行', value: 'Running' },
-                { text: '维修', value: 'Maintenance' },
-                { text: '闲置', value: 'Idle' },
-                { text: '报废', value: 'Scrapped' },
-            ],
-            onFilter: (value, record) => record.status === value,
-            render: (status) => {
-                let color = 'green';
-                if (status === 'Maintenance') color = 'red';
-                if (status === 'Idle') color = 'orange';
-                if (status === 'Scrapped') color = 'default';
-                const textMap: any = { 'Running': '运行', 'Maintenance': '维修', 'Idle': '闲置', 'Scrapped': '报废' };
-                return <Tag color={color}>{textMap[status] || status}</Tag>;
-            },
-        },
+
         {
             title: '存放区域',
             dataIndex: 'location',
@@ -243,12 +223,7 @@ const DeviceInfo: React.FC = () => {
 
     return (
         <div>
-            <Row gutter={16} style={{ marginBottom: 24 }}>
-                <Col span={6}><Card><Statistic title="设备总数" value={dataSource.length} /></Card></Col>
-                <Col span={6}><Card><Statistic title="运行中" value={dataSource.filter(d => d.status === 'Running').length} valueStyle={{ color: '#3f8600' }} /></Card></Col>
-                <Col span={6}><Card><Statistic title="维修中" value={dataSource.filter(d => d.status === 'Maintenance').length} valueStyle={{ color: '#cf1322' }} /></Card></Col>
-                <Col span={6}><Card><Statistic title="平均利用率" value={dataSource.length ? (dataSource.reduce((acc, cur) => acc + cur.utilization, 0) / dataSource.length).toFixed(1) : 0} suffix="%" /></Card></Col>
-            </Row>
+
 
             <Card title="设备档案列表" extra={<Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增设备</Button>}>
                 <Table columns={columns} dataSource={dataSource} rowKey="id" scroll={{ x: 1300 }} pagination={{ pageSize: 10 }} />
