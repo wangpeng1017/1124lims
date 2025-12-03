@@ -2,18 +2,16 @@ import React, { useState } from 'react';
 import { Card, Table, Tag, Progress, Space, Input, Select, Button, Tooltip, Modal, Form, DatePicker, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { SearchOutlined, EyeOutlined, UserAddOutlined, ExportOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
 import { testTaskData, type ITestTask } from '../../mock/test';
 import { employeeData } from '../../mock/personnel';
 import dayjs from 'dayjs';
 import { deviceData } from '../../mock/devices';
 import PersonSelector from '../../components/PersonSelector';
-
+import TaskDetailDrawer from '../../components/TaskDetailDrawer';
 
 const { Option } = Select;
 
 const AllTasks: React.FC = () => {
-    const navigate = useNavigate();
     const [dataSource, setDataSource] = useState<ITestTask[]>(testTaskData);
     const [searchText, setSearchText] = useState('');
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
@@ -28,6 +26,10 @@ const AllTasks: React.FC = () => {
     const [isBatchAssign, setIsBatchAssign] = useState(false);
 
     const [assignForm] = Form.useForm();
+
+    // 详情抽屉状态
+    const [detailVisible, setDetailVisible] = useState(false);
+    const [detailTask, setDetailTask] = useState<ITestTask | null>(null);
 
     // 过滤数据
     const filteredData = dataSource.filter(item => {
@@ -111,6 +113,11 @@ const AllTasks: React.FC = () => {
         });
     };
 
+    const handleViewDetail = (record: ITestTask) => {
+        setDetailTask(record);
+        setDetailVisible(true);
+    };
+
     const rowSelection = {
         selectedRowKeys,
         onChange: (newSelectedRowKeys: React.Key[], selectedRows: ITestTask[]) => {
@@ -128,7 +135,7 @@ const AllTasks: React.FC = () => {
             dataIndex: 'taskNo',
             key: 'taskNo',
             width: 150,
-            render: (text) => <a>{text}</a>,
+            render: (text, record) => <a onClick={() => handleViewDetail(record)}>{text}</a>,
         },
         {
             title: '样品名称',
@@ -232,7 +239,7 @@ const AllTasks: React.FC = () => {
                             type="link"
                             size="small"
                             icon={<EyeOutlined />}
-                            onClick={() => navigate(`/test-management/task-details/${record.taskNo}`)}
+                            onClick={() => handleViewDetail(record)}
                         />
                     </Tooltip>
                 </Space>
@@ -388,6 +395,12 @@ const AllTasks: React.FC = () => {
                     </Form.Item>
                 </Form>
             </Modal>
+
+            <TaskDetailDrawer
+                open={detailVisible}
+                task={detailTask}
+                onClose={() => setDetailVisible(false)}
+            />
         </Card>
     );
 };

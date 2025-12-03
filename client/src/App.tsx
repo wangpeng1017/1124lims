@@ -30,7 +30,6 @@ import OutsourceOrders from './pages/OutsourcingManagement/OutsourceOrders';
 import AllTasks from './pages/TaskManagement/AllTasks';
 import MyTasks from './pages/TaskManagement/MyTasks';
 import DataEntry from './pages/TestManagement/DataEntry';
-import TaskDetails from './pages/TestManagement/TaskDetails';
 import TestReports from './pages/ReportManagement/TestReports';
 import ProjectReports from './pages/ReportManagement/ProjectReports';
 import ReportReview from './pages/ReportManagement/ReportReview';
@@ -119,7 +118,6 @@ const App: React.FC = () => {
           </Route>
           <Route path="test-management">
             <Route path="data-entry" element={<DataEntry />} />
-            <Route path="task-details/:taskNo" element={<TaskDetails />} />
           </Route>
           <Route path="report-management">
             <Route path="test-reports" element={<TestReports />} />

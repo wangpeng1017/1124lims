@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { Card, Table, Tag, Button, Space, Modal, Form, Select, Input, message, Popconfirm, Badge, Row, Col, DatePicker } from 'antd';
+import { Card, Table, Tag, Button, Space, Modal, Form, Input, message, Popconfirm, Badge, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { PlayCircleOutlined, FormOutlined, CheckCircleOutlined, SwapOutlined, ExportOutlined } from '@ant-design/icons';
+import { PlayCircleOutlined, FormOutlined, CheckCircleOutlined, SwapOutlined, ExportOutlined, EyeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { testTaskData, type ITestTask } from '../../mock/test';
 import { employeeData } from '../../mock/personnel';
-import { deviceData } from '../../mock/devices';
 import PersonSelector from '../../components/PersonSelector';
-import dayjs from 'dayjs';
+import TaskDetailDrawer from '../../components/TaskDetailDrawer';
 
 const MyTasks: React.FC = () => {
     const navigate = useNavigate();
@@ -18,6 +17,10 @@ const MyTasks: React.FC = () => {
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
     const [currentTask, setCurrentTask] = useState<ITestTask | null>(null);
     const [form] = Form.useForm();
+
+    // 详情抽屉状态
+    const [detailVisible, setDetailVisible] = useState(false);
+    const [detailTask, setDetailTask] = useState<ITestTask | null>(null);
 
     const handleStart = (record: ITestTask) => {
         const newData = dataSource.map(item =>
@@ -53,11 +56,17 @@ const MyTasks: React.FC = () => {
         });
     };
 
+    const handleViewDetail = (record: ITestTask) => {
+        setDetailTask(record);
+        setDetailVisible(true);
+    };
+
     const columns: ColumnsType<ITestTask> = [
         {
             title: '任务编号',
             dataIndex: 'taskNo',
             key: 'taskNo',
+            render: (text, record) => <a onClick={() => handleViewDetail(record)}>{text}</a>,
         },
         {
             title: '样品名称',
@@ -122,6 +131,16 @@ const MyTasks: React.FC = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="small">
+                    <Tooltip title="查看明细">
+                        <Button
+                            type="text"
+                            size="small"
+                            icon={<EyeOutlined />}
+                            onClick={() => handleViewDetail(record)}
+                        >
+                            查看
+                        </Button>
+                    </Tooltip>
                     {record.status === '待开始' && (
                         <Button
                             type="primary"
@@ -204,46 +223,17 @@ const MyTasks: React.FC = () => {
                             }))}
                         />
                     </Form.Item>
-                    <Form.Item
-                        name="deviceId"
-                        label="使用设备"
-                    >
-                        <Select placeholder="选择设备" allowClear showSearch>
-                            {deviceData.map(device => (
-                                <Select.Option key={device.id} value={device.id}>
-                                    {device.name} ({device.code})
-                                </Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Row gutter={16}>
-                        <Col span={12}>
-                            <Form.Item
-                                name="assignDate"
-                                label="改派时间"
-                                initialValue={dayjs()}
-                            >
-                                <DatePicker style={{ width: '100%' }} />
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item
-                                name="deadline"
-                                label="截止时间"
-                            >
-                                <DatePicker style={{ width: '100%' }} />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <Form.Item
-                        name="reason"
-                        label="转交原因"
-                        rules={[{ required: true, message: '请填写原因' }]}
-                    >
+                    <Form.Item name="reason" label="转交原因">
                         <Input.TextArea rows={3} />
                     </Form.Item>
                 </Form>
             </Modal>
+
+            <TaskDetailDrawer
+                open={detailVisible}
+                task={detailTask}
+                onClose={() => setDetailVisible(false)}
+            />
         </Card>
     );
 };

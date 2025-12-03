@@ -76,7 +76,6 @@ const items: MenuItem[] = [
   ]),
   getItem('试验管理', '/test-management', <ExperimentOutlined />, [
     getItem('数据录入', '/test-management/data-entry', <FormOutlined />),
-    getItem('任务明细', '/test-management/task-details/TASK20231101001', <FileSearchOutlined />), // 示例链接
   ]),
   getItem('委外管理', '/outsourcing-management', <SupplierOutlined />, [
     getItem('委外分配（委托单）', '/outsourcing-management/outsource-by-order', <FileProtectOutlined />),
