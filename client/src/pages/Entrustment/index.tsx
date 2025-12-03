@@ -8,6 +8,7 @@ import { detectionParametersData } from '../../mock/basicParameters';
 import { deviceData } from '../../mock/devices';
 import { supplierData } from '../../mock/supplier';
 import dayjs from 'dayjs';
+import { employeeData } from '../../mock/personnel';
 import PersonSelector from '../../components/PersonSelector';
 
 const orgUsers = [
@@ -563,6 +564,19 @@ const Entrustment: React.FC = () => {
                                         </Select.Option>
                                     ))}
                                 </Select>
+                            </Form.Item>
+                            <Form.Item
+                                name="internalManagerId"
+                                label="内部责任人"
+                                rules={[{ required: true, message: '请选择内部责任人' }]}
+                            >
+                                <PersonSelector
+                                    employees={employeeData.map(emp => ({
+                                        id: emp.id,
+                                        name: emp.name,
+                                        position: emp.position
+                                    }))}
+                                />
                             </Form.Item>
                             <Row gutter={16}>
                                 <Col span={12}>

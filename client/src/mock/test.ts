@@ -148,21 +148,42 @@ export const testTaskData: ITestTask[] = [
         id: 7,
         taskNo: 'TASK20231118001',
         sampleNo: 'S2023110301',
-        sampleName: '涂层样品',
+        sampleName: '土壤样品',
         entrustmentId: '202311003',
-        parameters: ['中性盐雾'],
-        assignedTo: '王五',
-        dueDate: '2023-12-01',
-        status: '待开始',
+        parameters: ['重金属含量'],
+        assignedTo: '李四',
+        dueDate: '2023-12-05',
+        status: '进行中',
         progress: 0,
         createdDate: '2023-11-18',
         priority: 'Normal',
         isOutsourced: true,
         outsourceInfo: {
             outsourceNo: 'WW-20231118-002',
-            supplierId: 'SUP001',
-            supplierName: '华测检测认证集团',
+            supplierId: 'SUP002',
+            supplierName: 'SGS通标标准技术服务有限公司',
             status: '已发送'
+        }
+    },
+    {
+        id: 8,
+        taskNo: 'TASK20231201001',
+        sampleNo: 'S2023120101',
+        sampleName: '空气采样',
+        entrustmentId: '202312001',
+        parameters: ['PM2.5', '甲醛'],
+        assignedTo: '当前用户',
+        dueDate: '2023-12-10',
+        status: '进行中',
+        progress: 0,
+        createdDate: '2023-12-01',
+        priority: 'Urgent',
+        isOutsourced: true,
+        outsourceInfo: {
+            outsourceNo: 'WW-20231201-001',
+            supplierId: 'SUP003',
+            supplierName: '谱尼测试',
+            status: '待确认'
         }
     }
 ];
