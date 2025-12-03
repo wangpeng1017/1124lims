@@ -30,10 +30,9 @@ import AllTasks from './pages/TaskManagement/AllTasks';
 import MyTasks from './pages/TaskManagement/MyTasks';
 import DataEntry from './pages/TestManagement/DataEntry';
 import TestReports from './pages/ReportManagement/TestReports';
-import ProjectReports from './pages/ReportManagement/ProjectReports';
-import ReportReview from './pages/ReportManagement/ReportReview';
-import ReviewRecords from './pages/ReportManagement/ReviewRecords';
-import RawRecords from './pages/ReportManagement/RawRecords';
+import ClientReports from './pages/ReportManagement/ClientReports';
+import ReportApproval from './pages/ReportManagement/ReportApproval';
+import ReportRecords from './pages/ReportManagement/ReportRecords';
 import ReportCategories from './pages/SystemSettings/BasicData/ReportCategories';
 import Receivables from './pages/FinanceManagement/Receivables';
 import PaymentRecords from './pages/FinanceManagement/PaymentRecords';
@@ -119,10 +118,9 @@ const App: React.FC = () => {
           </Route>
           <Route path="report-management">
             <Route path="test-reports" element={<TestReports />} />
-            <Route path="project-reports" element={<ProjectReports />} />
-            <Route path="review" element={<ReportReview />} />
-            <Route path="review-records" element={<ReviewRecords />} />
-            <Route path="raw-records" element={<RawRecords />} />
+            <Route path="client-reports" element={<ClientReports />} />
+            <Route path="approval" element={<ReportApproval />} />
+            <Route path="records" element={<ReportRecords />} />
             <Route path="report-templates" element={<ReportTemplates />} />
             <Route path="categories" element={<ReportCategories />} />
           </Route>

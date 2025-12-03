@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { Card, Table, Button, Space, Modal, Form, Input, Radio, message, Tag, Badge } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { CheckCircleOutlined, CloseCircleOutlined, FileTextOutlined } from '@ant-design/icons';
-import { testReportData, type ITestReport } from '../../mock/report';
+import { clientReportData, type IClientReport } from '../../mock/report';
 
-const ReportReview: React.FC = () => {
-    const [dataSource, setDataSource] = useState<ITestReport[]>(
-        testReportData.filter(r => r.status === '待审核' || r.status === '已审核')
+const ReportApproval: React.FC = () => {
+    const [dataSource, setDataSource] = useState<IClientReport[]>(
+        clientReportData.filter(r => r.status === '待审核' || r.status === '待批准')
     );
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [currentReport, setCurrentReport] = useState<ITestReport | null>(null);
+    const [currentReport, setCurrentReport] = useState<IClientReport | null>(null);
     const [form] = Form.useForm();
 
-    const handleReview = (record: ITestReport) => {
+    const handleReview = (record: IClientReport) => {
         setCurrentReport(record);
         form.resetFields();
         setIsModalOpen(true);
@@ -26,7 +26,7 @@ const ReportReview: React.FC = () => {
             const isReviewStep = currentReport.status === '待审核';
 
             if (isApprove) {
-                const newStatus = isReviewStep ? '已审核' : '已批准';
+                const newStatus = isReviewStep ? '待批准' : '已批准';
                 const updatedData = dataSource.map(item =>
                     item.id === currentReport.id
                         ? {
@@ -58,9 +58,9 @@ const ReportReview: React.FC = () => {
         });
     };
 
-    const columns: ColumnsType<ITestReport> = [
+    const columns: ColumnsType<IClientReport> = [
         { title: '报告编号', dataIndex: 'reportNo', key: 'reportNo' },
-        { title: '样品名称', dataIndex: 'sampleName', key: 'sampleName' },
+        { title: '项目名称', dataIndex: 'projectName', key: 'projectName' },
         { title: '委托单位', dataIndex: 'clientName', key: 'clientName' },
         {
             title: '当前状态',
@@ -69,7 +69,7 @@ const ReportReview: React.FC = () => {
             render: (status) => {
                 const colorMap: Record<string, string> = {
                     '待审核': 'processing',
-                    '已审核': 'warning'
+                    '待批准': 'warning'
                 };
                 return <Badge status={colorMap[status] as any} text={status} />;
             }
@@ -83,7 +83,7 @@ const ReportReview: React.FC = () => {
                 </Tag>
             )
         },
-        { title: '检测人员', dataIndex: 'tester', key: 'tester' },
+        { title: '编制人员', dataIndex: 'preparer', key: 'preparer' },
         { title: '生成日期', dataIndex: 'generatedDate', key: 'generatedDate' },
         {
             title: '操作',
@@ -103,7 +103,7 @@ const ReportReview: React.FC = () => {
     ];
 
     return (
-        <Card title="报告审核/批准">
+        <Card title="报告审批">
             <Table
                 columns={columns}
                 dataSource={dataSource}
@@ -127,9 +127,9 @@ const ReportReview: React.FC = () => {
                     <>
                         <div style={{ marginBottom: 20, padding: 15, background: '#f5f5f5', borderRadius: 4 }}>
                             <p><strong>报告编号:</strong> {currentReport.reportNo}</p>
-                            <p><strong>样品名称:</strong> {currentReport.sampleName}</p>
+                            <p><strong>项目名称:</strong> {currentReport.projectName}</p>
                             <p><strong>委托单位:</strong> {currentReport.clientName}</p>
-                            <p><strong>检测人员:</strong> {currentReport.tester}</p>
+                            <p><strong>编制人员:</strong> {currentReport.preparer}</p>
                         </div>
 
                         <Form form={form} layout="vertical">
@@ -167,4 +167,4 @@ const ReportReview: React.FC = () => {
     );
 };
 
-export default ReportReview;
+export default ReportApproval;

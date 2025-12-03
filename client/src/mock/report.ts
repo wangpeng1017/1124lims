@@ -30,36 +30,54 @@ export interface ITestReport {
     approvedDate?: string;      // 批准日期
 }
 
-// 项目报告接口 (合并多个任务报告)
-export interface IProjectReport {
+// 客户报告接口 (原项目报告，合并多个任务报告)
+export interface IClientReport {
     id: number;
-    projectReportNo: string;        // 项目报告编号 (auto-generated: RPT-[Date]-[Seq])
-    entrustmentId: string;          // 委托单号
-    projectId: string;              // 项目ID
-    projectName: string;            // 项目名称
-    clientName: string;             // 委托单位
-    taskReportNos: string[];        // 关联的任务报告编号列表
-    coverInfo: {                    // 封面信息
-        reportTitle: string;
-        clientName: string;
-        clientAddress?: string;
-        clientContact?: string;
-        reportNo: string;
-        testDate: string;
-        issueDate: string;
+    reportNo: string;              // 报告编号：如 ALTC-TC-JR-002-2/II
+    entrustmentId: string;         // 委托单号
+    projectId: string;             // 项目ID
+    projectName: string;           // 项目名称
+    clientName: string;            // 委托单位
+    clientAddress?: string;        // 委托单位地址
+
+    // 样品信息
+    sampleName: string;            // 样品名称
+    sampleNo: string;              // 样品编号
+    specification?: string;        // 型号规格
+    sampleQuantity?: string;       // 样品数量
+    sampleStatus?: string;         // 样品状态
+    receivedDate?: string;         // 接样日期
+    testCategory?: string;         // 检验类别
+
+    // 关联的任务报告
+    taskReportNos: string[];       // 任务报告编号列表
+
+    // 汇总信息
+    testItems: string[];           // 检测项目列表
+    testStandards: string[];       // 检测依据列表
+    testDateRange: {               // 检测日期范围
+        start: string;
+        end: string;
     };
-    summaryInfo: {                  // 总结页信息
-        projectName: string;
-        sampleInfo: string;
-        testStandard: string;
-        conclusion: string;         // 综合判定结论
-        remarks?: string;
-    };
-    mergedTestResults: any[];       // 合并后的检测结果 (from all tasks)
-    status: 'draft' | 'pending' | 'approved' | 'issued';
-    templateId: number;
+
+    // 结论与备注
+    overallConclusion?: string;    // 总体结论
+    remarks?: string;              // 备注
+
+    // 审批信息
+    preparer: string;              // 编制人
+    reviewer?: string;             // 审核人
+    approver?: string;             // 批准人
+
+    // 状态管理
+    status: '草稿' | '待审核' | '待批准' | '已批准' | '已发布';
     generatedDate: string;
+    reviewedDate?: string;
+    approvedDate?: string;
     issuedDate?: string;
+
+    // 模板关联
+    templateId: number;
 }
 
 // 报告审核记录接口
@@ -74,20 +92,7 @@ export interface IReportReview {
     dingTalkProcessId?: string; // 钉钉审批流程ID（模拟）
 }
 
-// 原始记录接口（委托单维度）
-export interface IRawRecord {
-    id: number;
-    recordNo: string;           // 原始记录编号
-    entrustmentId: string;      // 委托单号
-    clientName: string;         // 委托单位
-    samples: {                  // 包含的样品
-        sampleNo: string;
-        sampleName: string;
-        parameters: string[];
-    }[];
-    testDataSummary: any[];     // 检测数据汇总
-    generatedDate: string;
-}
+
 
 // 报告模板接口
 export interface IReportTemplate {
@@ -413,76 +418,90 @@ export const testReportData: ITestReport[] = [
     }
 ];
 
-// 项目报告数据 (合并后的报告)
-export const projectReportData: IProjectReport[] = [
+// 客户报告数据 (合并后的报告)
+export const clientReportData: IClientReport[] = [
     // 奇瑞汽车 - 复合材料力学性能 (合并3个任务)
     {
         id: 1,
-        projectReportNo: 'RPT-20231203-P001',
+        reportNo: 'ALTC-TC-JR-002-2/II',
         entrustmentId: 'WT20231101001',
         projectId: 'P001',
         projectName: '复合材料力学性能检测',
         clientName: '奇瑞汽车股份有限公司',
+        clientAddress: '安徽省芜湖市经济技术开发区长春路8号',
+
+        sampleName: '复合材料试件',
+        sampleNo: 'ALTC2509034',
+        specification: '100x20x5mm',
+        sampleQuantity: '5',
+        sampleStatus: '完好',
+        receivedDate: '2023-11-28',
+        testCategory: '委托检验',
+
         taskReportNos: ['RPT-20231201-001', 'RPT-20231201-002', 'RPT-20231201-003'],
-        coverInfo: {
-            reportTitle: '复合材料力学性能检测报告',
-            clientName: '奇瑞汽车股份有限公司',
-            clientAddress: '安徽省芜湖市经济技术开发区长春路8号',
-            clientContact: '王经理 / 13800138001',
-            reportNo: 'RPT-20231203-P001',
-            testDate: '2023-12-01',
-            issueDate: '2023-12-03'
+
+        testItems: ['抗拉强度', '抗压强度', '弯曲强度'],
+        testStandards: ['GB/T 1040.1-2018', 'GB/T 1041-2008', 'GB/T 9341-2008'],
+        testDateRange: {
+            start: '2023-12-01',
+            end: '2023-12-01'
         },
-        summaryInfo: {
-            projectName: '复合材料力学性能检测',
-            sampleInfo: '样品编号：ALTC2509034，样品名称：复合材料试件',
-            testStandard: 'GB/T 1040.1-2018, GB/T 1041-2008, GB/T 9341-2008',
-            conclusion: '经检测，送检样品的抗拉强度、抗压强度、弯曲强度均符合相关标准要求，综合判定：合格。',
-            remarks: '本次检测样品由委托方提供，检测结果仅对送检样品负责。'
-        },
-        mergedTestResults: [
-            { taskNo: 'TASK001', parameter: '抗拉强度', result: '520', unit: 'MPa', conclusion: '合格' },
-            { taskNo: 'TASK002', parameter: '抗压强度', result: '450', unit: 'MPa', conclusion: '合格' },
-            { taskNo: 'TASK003', parameter: '弯曲强度', result: '380', unit: 'MPa', conclusion: '合格' }
-        ],
-        status: 'approved',
-        templateId: 1,
+
+        overallConclusion: '经检测，送检样品的抗拉强度、抗压强度、弯曲强度均符合相关标准要求，综合判定：合格。',
+        remarks: '本次检测样品由委托方提供，检测结果仅对送检样品负责。',
+
+        preparer: '张三',
+        reviewer: '李四',
+        approver: '王五',
+
+        status: '已批准',
         generatedDate: '2023-12-03',
-        issuedDate: '2023-12-03'
+        reviewedDate: '2023-12-03',
+        approvedDate: '2023-12-03',
+        issuedDate: '2023-12-03',
+
+        templateId: 1
     },
     // 上汽集团 - 钢材力学性能 (合并2个任务)
     {
         id: 2,
-        projectReportNo: 'RPT-20231204-P004',
+        reportNo: 'ALTC-TC-JR-003-1/I',
         entrustmentId: 'WT20231102002',
         projectId: 'P004',
         projectName: '钢材力学性能',
         clientName: '上海汽车集团股份有限公司',
+        clientAddress: '上海市静安区威海路489号',
+
+        sampleName: 'Q235钢板',
+        sampleNo: 'S20231102001',
+        specification: '200x200x10mm',
+        sampleQuantity: '3',
+        sampleStatus: '完好',
+        receivedDate: '2023-11-30',
+        testCategory: '委托检验',
+
         taskReportNos: ['RPT-20231202-002', 'RPT-20231202-003'],
-        coverInfo: {
-            reportTitle: '钢材力学性能检测报告',
-            clientName: '上海汽车集团股份有限公司',
-            clientAddress: '上海市静安区威海路489号',
-            clientContact: '李主管 / 13900139002',
-            reportNo: 'RPT-20231204-P004',
-            testDate: '2023-12-02',
-            issueDate: '2023-12-04'
+
+        testItems: ['屈服强度', '抗拉强度', '伸长率'],
+        testStandards: ['GB/T 228.1-2021'],
+        testDateRange: {
+            start: '2023-12-02',
+            end: '2023-12-02'
         },
-        summaryInfo: {
-            projectName: '钢材力学性能',
-            sampleInfo: '样品编号：S20231102001，样品名称：Q235钢板',
-            testStandard: 'GB/T 228.1-2021',
-            conclusion: '经检测，送检样品的屈服强度、抗拉强度、伸长率均符合GB/T 700-2006标准要求，综合判定：合格。'
-        },
-        mergedTestResults: [
-            { taskNo: 'TASK006', parameter: '屈服强度', result: '245', unit: 'MPa', conclusion: '合格' },
-            { taskNo: 'TASK007', parameter: '抗拉强度', result: '420', unit: 'MPa', conclusion: '合格' },
-            { taskNo: 'TASK007', parameter: '伸长率', result: '28', unit: '%', conclusion: '合格' }
-        ],
-        status: 'issued',
-        templateId: 1,
+
+        overallConclusion: '经检测，送检样品的屈服强度、抗拉强度、伸长率均符合GB/T 700-2006标准要求，综合判定：合格。',
+
+        preparer: '李四',
+        reviewer: '张三',
+        approver: '王五',
+
+        status: '已发布',
         generatedDate: '2023-12-04',
-        issuedDate: '2023-12-04'
+        reviewedDate: '2023-12-04',
+        approvedDate: '2023-12-04',
+        issuedDate: '2023-12-04',
+
+        templateId: 1
     }
 ];
 
@@ -510,26 +529,7 @@ export const reportReviewData: IReportReview[] = [
     }
 ];
 
-// 模拟原始记录数据
-export const rawRecordData: IRawRecord[] = [
-    {
-        id: 1,
-        recordNo: 'RAW-20231201-001',
-        entrustmentId: 'WT20231101001',
-        clientName: '奇瑞汽车股份有限公司',
-        samples: [
-            {
-                sampleNo: 'ALTC2509034',
-                sampleName: '复合材料试件',
-                parameters: ['抗拉强度', '抗压强度', '弯曲强度']
-            }
-        ],
-        testDataSummary: [
-            { sampleNo: 'ALTC2509034', parameter: '抗拉强度', value1: '521', value2: '519', result: '520', unit: 'MPa' }
-        ],
-        generatedDate: '2023-12-01'
-    }
-];
+
 
 // 模拟报告分类数据
 export const reportCategoryData: IReportCategory[] = [

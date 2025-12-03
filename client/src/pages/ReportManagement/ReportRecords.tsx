@@ -3,7 +3,7 @@ import { Card, Input, Timeline, Tag, Empty, Space, Select } from 'antd';
 import { ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, SearchOutlined } from '@ant-design/icons';
 import { reportReviewData } from '../../mock/report';
 
-const ReviewRecords: React.FC = () => {
+const ReportRecords: React.FC = () => {
     const [searchText, setSearchText] = useState('');
     const [typeFilter, setTypeFilter] = useState<string | null>(null);
 
@@ -92,4 +92,4 @@ const ReviewRecords: React.FC = () => {
     );
 };
 
-export default ReviewRecords;
+export default ReportRecords;
