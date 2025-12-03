@@ -1,146 +1,200 @@
 import React from 'react';
-import { Card, Form, Input, Table, Row, Col, Typography } from 'antd';
-import type { ELNTemplate } from '../mock/basicParameters';
+import { Form, Input, Table, InputNumber, DatePicker, Select, Upload, Button, Row, Col, Card, Space, Typography, Divider } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import type { TestTemplate } from '../mock/testTemplates';
 
 const { Title, Text } = Typography;
+const { TextArea } = Input;
 
 interface DynamicFormRendererProps {
-    template: ELNTemplate;
-    form?: any;
+    template: TestTemplate; // 使用新的TestTemplate接口
+    initialValues?: any;
+    readOnly?: boolean;
 }
 
-/**
- * 动态表单渲染器 - 根据 ELN 模板的 schema 渲染不同的表单布局
- */
-const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({ template }) => {
-    if (!template.schema) {
-        // 如果没有 schema，显示默认的简单表单
-        return (
-            <>
-                <Form.Item name="value1" label="数值1">
-                    <Input />
-                </Form.Item>
-                <Form.Item name="value2" label="数值2">
-                    <Input />
-                </Form.Item>
-                <Form.Item name="result" label="结果">
-                    <Input />
-                </Form.Item>
-            </>
-        );
-    }
-
+const DynamicFormRenderer: React.FC<DynamicFormRendererProps> = ({ template, initialValues, readOnly = false }) => {
     const { schema } = template;
 
-    // 渲染表格列
-    const renderColumns = (columns: any[]): any[] => {
-        return columns.map((col: any) => {
-            if (col.children) {
-                // 如果有子列，创建列组
-                return {
-                    title: col.title,
-                    children: renderColumns(col.children)
-                };
-            }
-            return {
-                title: col.title,
-                dataIndex: col.dataIndex,
-                key: col.dataIndex,
-                width: col.width,
-                render: (_: any, __: any, index: number) => (
-                    <Form.Item
-                        name={[index, col.dataIndex]}
-                        rules={[{ required: col.dataIndex === 'sampleName' }]}
-                        style={{ margin: 0 }}
-                    >
-                        <Input placeholder={`请输入${col.title}`} />
+    // 渲染表头信息
+    const renderHeader = () => {
+        if (!schema.header) return null;
+
+        return (
+            <Card size="small" style={{ marginBottom: 16, background: '#fafafa' }}>
+                <Row gutter={[24, 12]}>
+                    {Object.entries(schema.header).map(([key, value]) => (
+                        <Col span={8} key={key}>
+                            <Text type="secondary" style={{ marginRight: 8 }}>
+                                {key === 'methodBasis' ? '检测依据' :
+                                    key === 'device' ? '检测设备' :
+                                        key === 'testConditions' ? '试验条件' :
+                                            key === 'preparation' ? '样品制备' : key}:
+                            </Text>
+                            <Text strong>{value}</Text>
+                        </Col>
+                    ))}
+                </Row>
+            </Card>
+        );
+    };
+
+    // 渲染数值型表格
+    const renderTable = () => {
+        if (!schema.columns || schema.columns.length === 0) return null;
+
+        const columns = schema.columns.map((col: any) => ({
+            title: col.title + (col.unit ? ` (${col.unit})` : ''),
+            dataIndex: col.dataIndex,
+            key: col.dataIndex,
+            width: col.width,
+            render: (text: any, record: any, index: number) => {
+                if (readOnly) return text;
+
+                // 序号列不可编辑
+                if (col.dataIndex === 'index') return index + 1;
+
+                // 根据类型渲染输入控件
+                if (col.type === 'select' || col.dataIndex === 'failureMode') { // 特殊处理失效模式
+                    return (
+                        <Form.Item name={['dataRows', index, col.dataIndex]} noStyle>
+                            <Select style={{ width: '100%' }} placeholder="选择">
+                                {col.options ? col.options.map((opt: string) => (
+                                    <Select.Option key={opt} value={opt}>{opt}</Select.Option>
+                                )) : (
+                                    // 默认失效模式选项
+                                    ['LGM', 'AGM', 'MGM', 'BAB', 'BAM', 'LAT', 'GAT'].map(opt => (
+                                        <Select.Option key={opt} value={opt}>{opt}</Select.Option>
+                                    ))
+                                )}
+                            </Select>
+                        </Form.Item>
+                    );
+                }
+
+                return (
+                    <Form.Item name={['dataRows', index, col.dataIndex]} noStyle>
+                        <Input />
                     </Form.Item>
-                )
-            };
-        });
+                );
+            }
+        }));
+
+        // 生成初始行数据
+        const initialData = initialValues?.dataRows || Array.from({ length: 5 }, (_, i) => ({ key: i, index: i + 1 }));
+
+        return (
+            <div style={{ marginBottom: 24 }}>
+                <Table
+                    dataSource={initialData}
+                    columns={columns}
+                    pagination={false}
+                    size="small"
+                    bordered
+                    footer={() => (
+                        <Space>
+                            <Button type="dashed" icon={<PlusOutlined />} size="small">添加行</Button>
+                            {schema.statistics && (
+                                <Text type="secondary" style={{ marginLeft: 16 }}>
+                                    自动计算: {schema.statistics.join(', ')}
+                                </Text>
+                            )}
+                        </Space>
+                    )}
+                />
+            </div>
+        );
+    };
+
+    // 渲染描述型表单字段
+    const renderFields = () => {
+        if (!schema.fields || schema.fields.length === 0) return null;
+
+        return (
+            <Row gutter={24}>
+                {schema.fields.map((field: any) => (
+                    <Col span={field.type === 'textarea' || field.type === 'image-upload' ? 24 : 12} key={field.name}>
+                        <Form.Item
+                            name={field.name}
+                            label={field.label}
+                            rules={[{ required: field.required, message: `请输入${field.label}` }]}
+                        >
+                            {field.type === 'textarea' ? (
+                                <TextArea rows={4} placeholder={field.placeholder} />
+                            ) : field.type === 'select' ? (
+                                <Select placeholder={`请选择${field.label}`}>
+                                    {field.options?.map((opt: string) => (
+                                        <Select.Option key={opt} value={opt}>{opt}</Select.Option>
+                                    ))}
+                                </Select>
+                            ) : field.type === 'number' ? (
+                                <InputNumber style={{ width: '100%' }} min={field.min} max={field.max} />
+                            ) : field.type === 'image-upload' ? (
+                                <Upload
+                                    listType="picture-card"
+                                    fileList={initialValues?.[field.name] || []}
+                                    multiple={field.multiple}
+                                    accept={field.accept}
+                                    beforeUpload={() => false} // 阻止自动上传
+                                >
+                                    <div>
+                                        <PlusOutlined />
+                                        <div style={{ marginTop: 8 }}>上传图片</div>
+                                    </div>
+                                </Upload>
+                            ) : (
+                                <Input placeholder={field.placeholder} />
+                            )}
+                        </Form.Item>
+                    </Col>
+                ))}
+            </Row>
+        );
+    };
+
+    // 渲染环境条件
+    const renderEnvironment = () => {
+        if (!schema.environment) return null;
+
+        return (
+            <>
+                <Divider orientation="left" plain>环境条件</Divider>
+                <Row gutter={24}>
+                    <Col span={8}>
+                        <Form.Item name="envTemperature" label="环境温度 (°C)">
+                            <InputNumber style={{ width: '100%' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                        <Form.Item name="envHumidity" label="相对湿度 (%)">
+                            <InputNumber style={{ width: '100%' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                        <Form.Item name="testDate" label="检测日期">
+                            <DatePicker style={{ width: '100%' }} />
+                        </Form.Item>
+                    </Col>
+                </Row>
+            </>
+        );
     };
 
     return (
-        <div>
-            {/* 标题区域 */}
-            {schema.title && (
-                <Title level={4} style={{ textAlign: 'center', marginBottom: 16 }}>
-                    {schema.title}
-                    {schema.subtitle && <div style={{ fontSize: '14px', fontWeight: 'normal' }}>{schema.subtitle}</div>}
-                </Title>
-            )}
+        <div className="dynamic-form-renderer">
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                <Title level={3}>{schema.title}</Title>
+            </div>
 
-            {/* 头部信息 */}
-            {schema.header && (
-                <Card size="small" style={{ marginBottom: 16, backgroundColor: '#fafafa' }}>
-                    <Row gutter={16}>
-                        {schema.header.methodBasis && (
-                            <Col span={12}>
-                                <Text strong>方法依据：</Text>
-                                <Text>{schema.header.methodBasis}</Text>
-                            </Col>
-                        )}
-                        {schema.header.instrument && (
-                            <Col span={12}>
-                                <Text strong>使用仪器：</Text>
-                                <Form.Item name="instrument" noStyle>
-                                    <Input
-                                        placeholder={schema.header.instrument}
-                                        style={{ width: 200, marginLeft: 8 }}
-                                    />
-                                </Form.Item>
-                            </Col>
-                        )}
-                    </Row>
-                </Card>
-            )}
+            {renderHeader()}
 
-            {/* 环境条件 */}
-            {schema.environment && (
-                <Card size="small" style={{ marginBottom: 16 }}>
-                    <Row gutter={16}>
-                        <Col span={8}>
-                            <Form.Item label="环境温度 (°C)" name="envTemperature">
-                                <Input />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item label="环境湿度 (%)" name="envHumidity">
-                                <Input />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item label="检测日期" name="testDate">
-                                <Input placeholder="YYYY-MM-DD" />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                </Card>
-            )}
+            {/* 优先渲染表格(数值型)，然后渲染字段(描述型) */}
+            {renderTable()}
+            {renderFields()}
 
-            {/* 数据表格 */}
-            {schema.columns && (
-                <Form.List name="dataRows">
-                    {(fields, { add }) => (
-                        <>
-                            <Table
-                                columns={renderColumns(schema.columns)}
-                                dataSource={fields.map((field, index) => ({ key: field.key, index }))}
-                                pagination={false}
-                                bordered
-                                size="small"
-                                footer={() => (
-                                    <a onClick={() => add()}>+ 添加数据行</a>
-                                )}
-                            />
-                        </>
-                    )}
-                </Form.List>
-            )}
+            {renderEnvironment()}
 
-            {/* 备注 */}
-            <Form.Item label="备注" name="remarks" style={{ marginTop: 16 }}>
-                <Input.TextArea rows={4} placeholder="请输入备注信息" />
+            <Form.Item name="remarks" label="备注">
+                <TextArea rows={2} />
             </Form.Item>
         </div>
     );

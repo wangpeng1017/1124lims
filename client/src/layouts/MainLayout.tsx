@@ -10,7 +10,6 @@ import {
   SafetyCertificateOutlined,
   AuditOutlined,
   ProfileOutlined,
-  ReadOutlined,
   FileProtectOutlined,
   DollarOutlined,
   FileTextOutlined,
@@ -120,8 +119,7 @@ const items: MenuItem[] = [
   ]),
   getItem('体系文件', '/system-documents', <FileTextOutlined />),
   getItem('基础数据配置', '/basic-params', <ProfileOutlined />, [
-    getItem('电子试验记录本 (ELN)', '/basic-params/eln', <ReadOutlined />),
-    getItem('检测参数/项目', '/basic-params/detection', <ExperimentOutlined />),
+    getItem('检测模版管理', '/basic-params/test-templates', <FormOutlined />),
     getItem('检查标准/依据', '/basic-params/standards', <FileProtectOutlined />),
     getItem('样品报告分类', '/report-management/categories', <AppstoreOutlined />),
 

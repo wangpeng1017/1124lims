@@ -19,8 +19,7 @@ import StationInfo from './pages/PersonnelManagement/StationInfo';
 import CapabilityValue from './pages/PersonnelManagement/CapabilityValue';
 import CapabilityReview from './pages/PersonnelManagement/CapabilityReview';
 import InspectionStandards from './pages/SystemSettings/BasicData/InspectionStandards';
-import DetectionParameters from './pages/SystemSettings/BasicData/DetectionParameters';
-import ELN from './pages/SystemSettings/BasicData/ELN';
+import TestTemplateManagement from './pages/SystemSettings/BasicData/TestTemplateManagement';
 import SampleRegistration from './pages/SampleManagement/SampleRegistration';
 import SampleDetails from './pages/SampleManagement/SampleDetails';
 import MySamples from './pages/SampleManagement/MySamples';
@@ -93,8 +92,7 @@ const App: React.FC = () => {
             <Route path="station" element={<StationInfo />} />
           </Route>
           <Route path="basic-params">
-            <Route path="eln" element={<ELN />} />
-            <Route path="detection" element={<DetectionParameters />} />
+            <Route path="test-templates" element={<TestTemplateManagement />} />
             <Route path="standards" element={<InspectionStandards />} />
             <Route path="qualification">
               <Route path="value" element={<CapabilityValue />} />

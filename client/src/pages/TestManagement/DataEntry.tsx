@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Select, Input, InputNumber, Button, Row, Col, Divider, message, Modal, Descriptions, Space, Alert } from 'antd';
+import { Card, Form, Select, Button, Row, Col, message, Modal, Alert } from 'antd';
 import { SaveOutlined, FilePdfOutlined, PrinterOutlined } from '@ant-design/icons';
 import { useLocation } from 'react-router-dom';
 import { testTaskData, type ITestTask } from '../../mock/test';
 import { deviceData } from '../../mock/devices';
 import { environmentData } from '../../mock/environment';
-import { elnTemplatesData } from '../../mock/basicParameters';
+import { testTemplatesData, type TestTemplate } from '../../mock/testTemplates';
 import DynamicFormRenderer from '../../components/DynamicFormRenderer';
 
 const DataEntry: React.FC = () => {
     const location = useLocation();
     const [form] = Form.useForm();
     const [selectedTask, setSelectedTask] = useState<ITestTask | null>(null);
+    const [currentTemplate, setCurrentTemplate] = useState<TestTemplate | null>(null);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [reportData, setReportData] = useState<any>(null);
-    const [currentTemplate, setCurrentTemplate] = useState<any>(null);
 
     // 获取进行中的任务
     const activeTasks = testTaskData.filter(t => t.status === '进行中');
@@ -33,31 +33,25 @@ const DataEntry: React.FC = () => {
         const task = activeTasks.find(t => t.taskNo === taskNo);
         setSelectedTask(task || null);
         setCurrentTemplate(null);
-        form.resetFields(['parameterName', 'value1', 'value2', 'result', 'unit', 'conclusion', 'dataRows', 'envTemperature', 'envHumidity', 'testDate', 'remarks']);
+        form.resetFields(['templateId', 'dataRows', 'envTemperature', 'envHumidity', 'testDate', 'remarks']);
     };
 
-    const handleParameterChange = (value: string) => {
-        const template = elnTemplatesData.find(t => t.parameterName === value);
+    const handleTemplateChange = (templateId: number) => {
+        const template = testTemplatesData.find(t => t.id === templateId);
         setCurrentTemplate(template || null);
-        form.resetFields(['value1', 'value2', 'result', 'unit', 'conclusion', 'dataRows', 'envTemperature', 'envHumidity', 'testDate', 'remarks']);
+        // 重置表单数据，保留任务信息
+        const taskNo = form.getFieldValue('taskNo');
+        form.resetFields();
+        form.setFieldsValue({ taskNo, templateId });
     };
 
     const handleEnvironmentChange = (envId: number) => {
         const env = environmentData.find(e => e.id === envId);
         if (env) {
-            // Check if we are using dynamic form (fields might be named differently or nested)
-            // For now, assume standard names or map them
-            if (currentTemplate) {
-                form.setFieldsValue({
-                    envTemperature: env.temperature,
-                    envHumidity: env.humidity
-                });
-            } else {
-                form.setFieldsValue({
-                    temperature: env.temperature,
-                    humidity: env.humidity
-                });
-            }
+            form.setFieldsValue({
+                envTemperature: env.temperature,
+                envHumidity: env.humidity
+            });
             message.success(`已加载 ${env.room} 环境数据`);
         }
     };
@@ -75,6 +69,7 @@ const DataEntry: React.FC = () => {
             const data = {
                 ...values,
                 task: selectedTask,
+                template: currentTemplate,
                 device: deviceData.find(d => d.id === values.deviceId),
                 date: new Date().toLocaleDateString(),
             };
@@ -89,7 +84,7 @@ const DataEntry: React.FC = () => {
             bordered={false}
             extra={<span style={{ fontSize: '14px', color: '#666', fontWeight: 'normal' }}>数据录入工作台 - 快速录入试验数据</span>}
         >
-            <Form form={form} layout="vertical" initialValues={{ temperature: 23.5, humidity: 45, envTemperature: 23.5, envHumidity: 45 }}>
+            <Form form={form} layout="vertical" initialValues={{ envTemperature: 23.5, envHumidity: 45 }}>
                 <Row gutter={24}>
                     <Col span={8}>
                         <Form.Item name="taskNo" label="选择任务" rules={[{ required: true }]}>
@@ -97,180 +92,87 @@ const DataEntry: React.FC = () => {
                                 placeholder="选择进行中的任务"
                                 onChange={handleTaskChange}
                                 showSearch
-                            >
-                                {activeTasks.map(t => (
-                                    <Select.Option key={t.taskNo} value={t.taskNo}>
-                                        {t.taskNo} - {t.sampleName}
-                                    </Select.Option>
-                                ))}
-                            </Select>
+                                optionFilterProp="label"
+                                options={activeTasks.map(t => ({ label: `${t.taskNo} - ${t.sampleName}`, value: t.taskNo }))}
+                            />
                         </Form.Item>
                     </Col>
                     <Col span={8}>
-                        <Form.Item name="parameterName" label="检测参数" rules={[{ required: true }]}>
+                        <Form.Item name="templateId" label="选择检测模版" rules={[{ required: true }]}>
                             <Select
-                                placeholder="选择参数"
-                                disabled={!selectedTask}
-                                onChange={handleParameterChange}
-                            >
-                                {selectedTask?.parameters.map(p => (
-                                    <Select.Option key={p} value={p}>{p}</Select.Option>
-                                ))}
-                            </Select>
+                                placeholder="选择检测模版"
+                                onChange={handleTemplateChange}
+                                showSearch
+                                optionFilterProp="label"
+                                options={testTemplatesData.map(t => ({ label: t.name, value: t.id }))}
+                            />
                         </Form.Item>
                     </Col>
                     <Col span={8}>
-                        <Form.Item name="deviceId" label="使用设备" rules={[{ required: true }]}>
-                            <Select placeholder="选择设备" showSearch optionFilterProp="children">
+                        <Form.Item name="deviceId" label="关联设备">
+                            <Select placeholder="选择检测设备">
                                 {deviceData.map(d => (
-                                    <Select.Option key={d.id} value={d.id}>
-                                        {d.name} ({d.code})
-                                    </Select.Option>
+                                    <Select.Option key={d.id} value={d.id}>{d.name} ({d.code})</Select.Option>
                                 ))}
                             </Select>
                         </Form.Item>
                     </Col>
                 </Row>
 
-                {selectedTask?.isOutsourced && selectedTask.outsourceInfo && (
-                    <Alert
-                        type="info"
-                        message="委外任务"
-                        description={`该任务为委外检测,供应商: ${selectedTask.outsourceInfo.supplierName},请根据供应商提供的试验报告录入数据。`}
-                        showIcon
-                        style={{ marginBottom: 16 }}
-                    />
-                )}
-
-                <Divider>环境条件</Divider>
                 <Row gutter={24}>
                     <Col span={8}>
-                        <Form.Item label="快速选择环境记录">
-                            <Select placeholder="选择实验室环境记录" onChange={handleEnvironmentChange}>
+                        <Form.Item name="envId" label="环境数据来源">
+                            <Select placeholder="从环境监控系统加载" onChange={handleEnvironmentChange}>
                                 {environmentData.map(e => (
-                                    <Select.Option key={e.id} value={e.id}>
-                                        {e.location} - {e.room}
-                                    </Select.Option>
+                                    <Select.Option key={e.id} value={e.id}>{e.room}</Select.Option>
                                 ))}
                             </Select>
                         </Form.Item>
                     </Col>
-                    {/* If using dynamic template, environment fields are inside the renderer or handled differently. 
-                        For hybrid approach, we can keep them here if the template doesn't have 'environment' section, 
-                        OR hide them if the template handles it. 
-                        Based on our schema, the template HAS an environment section. 
-                        So we should hide these if currentTemplate is set and has environment: true 
-                    */}
-                    {!currentTemplate?.schema?.environment && (
-                        <>
-                            <Col span={6}>
-                                <Form.Item name="temperature" label="温度 (°C)">
-                                    <InputNumber style={{ width: '100%' }} />
-                                </Form.Item>
-                            </Col>
-                            <Col span={6}>
-                                <Form.Item name="humidity" label="湿度 (%)">
-                                    <InputNumber style={{ width: '100%' }} />
-                                </Form.Item>
-                            </Col>
-                        </>
-                    )}
                 </Row>
 
-                <Divider>测试数据</Divider>
-
                 {currentTemplate ? (
-                    <DynamicFormRenderer template={currentTemplate} form={form} />
+                    <div style={{ border: '1px solid #f0f0f0', padding: '24px', borderRadius: '8px', marginBottom: '24px' }}>
+                        <DynamicFormRenderer template={currentTemplate} />
+                    </div>
                 ) : (
-                    <>
-                        <Row gutter={24}>
-                            <Col span={6}>
-                                <Form.Item name="value1" label="观测值 1" rules={[{ required: true }]}>
-                                    <Input />
-                                </Form.Item>
-                            </Col>
-                            <Col span={6}>
-                                <Form.Item name="value2" label="观测值 2">
-                                    <Input />
-                                </Form.Item>
-                            </Col>
-                            <Col span={6}>
-                                <Form.Item name="result" label="计算结果" rules={[{ required: true }]}>
-                                    <Input />
-                                </Form.Item>
-                            </Col>
-                            <Col span={6}>
-                                <Form.Item name="unit" label="单位" rules={[{ required: true }]}>
-                                    <Input />
-                                </Form.Item>
-                            </Col>
-                        </Row>
-                        <Row gutter={24}>
-                            <Col span={6}>
-                                <Form.Item name="conclusion" label="判定结论" rules={[{ required: true }]}>
-                                    <Select>
-                                        <Select.Option value="合格">合格</Select.Option>
-                                        <Select.Option value="不合格">不合格</Select.Option>
-                                    </Select>
-                                </Form.Item>
-                            </Col>
-                        </Row>
-                    </>
+                    <Alert message="请选择检测模版以加载录入表单" type="info" showIcon style={{ marginBottom: 24 }} />
                 )}
 
-                <Divider />
-                <Space>
-                    <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>
-                        保存记录
-                    </Button>
-                    <Button icon={<FilePdfOutlined />} onClick={handleGenerateReport}>
-                        生成报告预览
-                    </Button>
-                </Space>
+                <Row justify="center">
+                    <Col>
+                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSave} size="large" style={{ marginRight: 16 }}>
+                            保存数据
+                        </Button>
+                        <Button icon={<FilePdfOutlined />} onClick={handleGenerateReport} size="large" style={{ marginRight: 16 }}>
+                            生成原始记录单
+                        </Button>
+                        <Button icon={<PrinterOutlined />} size="large">
+                            打印条码
+                        </Button>
+                    </Col>
+                </Row>
             </Form>
 
             <Modal
-                title="检测报告预览"
+                title="原始记录单预览"
                 open={isReportModalOpen}
                 onCancel={() => setIsReportModalOpen(false)}
                 width={800}
                 footer={[
-                    <Button key="print" type="primary" icon={<PrinterOutlined />} onClick={() => window.print()}>
-                        打印
-                    </Button>,
-                    <Button key="close" onClick={() => setIsReportModalOpen(false)}>
-                        关闭
-                    </Button>
+                    <Button key="close" onClick={() => setIsReportModalOpen(false)}>关闭</Button>,
+                    <Button key="print" type="primary" icon={<PrinterOutlined />}>打印</Button>
                 ]}
             >
                 {reportData && (
-                    <div style={{ padding: '20px', border: '1px solid #ddd' }} id="report-content">
-                        <h2 style={{ textAlign: 'center' }}>检测报告</h2>
-                        <Divider />
-                        <Descriptions bordered column={2}>
-                            <Descriptions.Item label="报告编号">RPT{new Date().getTime()}</Descriptions.Item>
-                            <Descriptions.Item label="检测日期">{reportData.date}</Descriptions.Item>
-                            <Descriptions.Item label="委托单号">{reportData.task.entrustmentId}</Descriptions.Item>
-                            <Descriptions.Item label="样品名称">{reportData.task.sampleName}</Descriptions.Item>
-                            <Descriptions.Item label="检测项目">{reportData.parameterName}</Descriptions.Item>
-                            <Descriptions.Item label="检测设备">{reportData.device?.name} ({reportData.device?.model})</Descriptions.Item>
-                            <Descriptions.Item label="环境条件">温度:{reportData.temperature}°C, 湿度:{reportData.humidity}%</Descriptions.Item>
-                        </Descriptions>
-                        <br />
-                        <Descriptions bordered column={1} title="检测结果">
-                            <Descriptions.Item label="观测值">{reportData.value1} {reportData.value2 ? `, ${reportData.value2}` : ''}</Descriptions.Item>
-                            <Descriptions.Item label="计算结果"><strong>{reportData.result} {reportData.unit}</strong></Descriptions.Item>
-                            <Descriptions.Item label="判定结论">
-                                <span style={{ color: reportData.conclusion === '合格' ? 'green' : 'red', fontWeight: 'bold' }}>
-                                    {reportData.conclusion}
-                                </span>
-                            </Descriptions.Item>
-                        </Descriptions>
-                        <br />
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '40px' }}>
-                            <span>检测人: {reportData.task.assignedTo}</span>
-                            <span>审核人: ____________</span>
-                            <span>批准人: ____________</span>
+                    <div style={{ padding: '20px' }}>
+                        <h3 style={{ textAlign: 'center' }}>{reportData.template?.schema.title}</h3>
+                        <p><strong>任务编号:</strong> {reportData.task?.taskNo}</p>
+                        <p><strong>样品名称:</strong> {reportData.task?.sampleName}</p>
+                        <p><strong>检测设备:</strong> {reportData.device?.name}</p>
+                        <p><strong>检测日期:</strong> {reportData.date}</p>
+                        <div style={{ marginTop: 20, border: '1px solid #eee', padding: 10 }}>
+                            <p style={{ color: '#999', textAlign: 'center' }}>[此处显示详细检测数据]</p>
                         </div>
                     </div>
                 )}
