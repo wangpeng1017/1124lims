@@ -152,12 +152,18 @@ const QuotationManagement: React.FC = () => {
             return;
         }
 
-        // 提交审批
+        // 提交审批，传递业务数据
         const instance = ApprovalService.submitApproval(
             'quotation',
             record.id,
             record.quotationNo,
-            record.createdBy
+            record.createdBy,
+            {
+                clientCompany: record.clientCompany,
+                sampleName: record.sampleName,
+                discountTotal: record.discountTotal,
+                clientContact: record.clientContact
+            }
         );
 
         // 更新报价单状态

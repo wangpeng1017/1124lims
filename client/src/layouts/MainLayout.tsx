@@ -125,16 +125,13 @@ const items: MenuItem[] = [
       getItem('能力评审', '/basic-params/qualification/review', <AuditOutlined />),
     ]),
   ]),
-  getItem('人事管理', '/personnel', <TeamOutlined />, [
-    getItem('员工列表', '/personnel/employee', <UserOutlined />),
-    getItem('部门信息', '/personnel/department', <ApartmentOutlined />),
-    getItem('站点信息', '/personnel/station', <EnvironmentOutlined />),
-  ]),
   getItem('审批中心', '/approval-center', <AuditOutlined />),
   getItem('系统设置', '/system-settings', <SettingOutlined />, [
     getItem('用户管理', '/system-settings/users', <UserOutlined />),
     getItem('角色管理', '/system-settings/roles', <TeamOutlined />),
+    getItem('部门管理', '/system-settings/departments', <ApartmentOutlined />),
     getItem('权限配置', '/system-settings/permission', <SafetyCertificateOutlined />),
+    getItem('审批流程配置', '/system-settings/approval-workflow', <AuditOutlined />),
   ]),
 ];
 const MainLayout: React.FC = () => {

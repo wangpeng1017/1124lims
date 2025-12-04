@@ -57,6 +57,7 @@ import SystemSettings from './pages/SystemSettings';
 import UserManagement from './pages/SystemSettings/UserManagement';
 import RoleManagement from './pages/SystemSettings/RoleManagement';
 import PermissionConfig from './pages/SystemSettings/PermissionConfig';
+import ApprovalWorkflowConfig from './pages/SystemSettings/ApprovalWorkflowConfig';
 import SupplierCategory from './pages/SupplierManagement/SupplierCategory';
 import EvaluationTemplate from './pages/SupplierManagement/EvaluationTemplate';
 import PerformanceEvaluation from './pages/SupplierManagement/PerformanceEvaluation';
@@ -85,11 +86,6 @@ const App: React.FC = () => {
             <Route path="order" element={<EntrustmentOrder />} />
             <Route path="contract" element={<ContractManagement />} />
             <Route path="client" element={<ClientUnit />} />
-          </Route>
-          <Route path="personnel">
-            <Route path="employee" element={<EmployeeList />} />
-            <Route path="department" element={<DepartmentInfo />} />
-            <Route path="station" element={<StationInfo />} />
           </Route>
           <Route path="basic-params">
             <Route path="test-templates" element={<TestTemplateManagement />} />
@@ -143,7 +139,9 @@ const App: React.FC = () => {
             <Route index element={<SystemSettings />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="roles" element={<RoleManagement />} />
+            <Route path="departments" element={<DepartmentInfo />} />
             <Route path="permission" element={<PermissionConfig />} />
+            <Route path="approval-workflow" element={<ApprovalWorkflowConfig />} />
           </Route>
           <Route path="supplier-management">
             {/* 供应商管理 */}
