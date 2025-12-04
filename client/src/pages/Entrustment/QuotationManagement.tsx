@@ -39,6 +39,12 @@ const QuotationManagement: React.FC = () => {
     const [feedbackForm] = Form.useForm();
     const [contractFileList, setContractFileList] = useState<any[]>([]);
 
+    // 归档Modal状态
+    const [isArchiveModalVisible, setIsArchiveModalVisible] = useState(false);
+    const [archivingQuotation, setArchivingQuotation] = useState<Quotation | null>(null);
+    const [archiveForm] = Form.useForm();
+    const [archiveFileList, setArchiveFileList] = useState<any[]>([]);
+
     // 行选择状态
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [selectedRows, setSelectedRows] = useState<Quotation[]>([]);
@@ -262,6 +268,53 @@ const QuotationManagement: React.FC = () => {
         });
     };
 
+    const handleArchive = (record: Quotation) => {
+        // 只有已批准且客户反馈OK的报价单可以归档
+        if (record.status !== 'approved' || record.clientStatus !== 'ok') {
+            message.warning('只有已批准且客户反馈OK的报价单可以归档');
+            return;
+        }
+        setArchivingQuotation(record);
+        archiveForm.resetFields();
+        setArchiveFileList([]);
+        setIsArchiveModalVisible(true);
+    };
+
+    const handleSubmitArchive = () => {
+        archiveForm.validateFields().then(() => {
+            if (!archivingQuotation) return;
+
+            const contractFile = archiveFileList[0];
+            if (!contractFile) {
+                message.error('请上传盖章合同文件');
+                return;
+            }
+
+            const now = new Date().toISOString();
+            const newData = dataSource.map(item => {
+                if (item.id === archivingQuotation.id) {
+                    return {
+                        ...item,
+                        status: 'archived' as const,
+                        isArchived: true,
+                        archivedAt: now,
+                        archivedBy: '当前用户',
+                        archivedContractFile: `/uploads/contracts/archived/${contractFile.name}`,
+                        archivedContractFileName: contractFile.name,
+                        updatedAt: now
+                    };
+                }
+                return item;
+            });
+
+            setDataSource(newData);
+            applyFilters(newData, statusFilter, clientStatusFilter, searchText);
+            message.success('报价单已归档');
+            setIsArchiveModalVisible(false);
+            setArchiveFileList([]);
+        });
+    };
+
     const columns: ColumnsType<Quotation> = [
         {
             title: '报价单号',
@@ -392,7 +445,7 @@ const QuotationManagement: React.FC = () => {
                     );
                 }
 
-                // 已批准状态 - 生成PDF
+                // 已批准状态 - 生成PDF、归档
                 if (record.status === 'approved') {
                     actions.push(
                         <Button
@@ -405,6 +458,20 @@ const QuotationManagement: React.FC = () => {
                             生成PDF
                         </Button>
                     );
+
+                    // 只有客户反馈OK的才能归档
+                    if (record.clientStatus === 'ok') {
+                        actions.push(
+                            <Button
+                                key="archive"
+                                size="small"
+                                icon={<UploadOutlined />}
+                                onClick={() => handleArchive(record)}
+                            >
+                                归档
+                            </Button>
+                        );
+                    }
                 }
 
 
@@ -582,6 +649,73 @@ const QuotationManagement: React.FC = () => {
                             />
                         </Form.Item>
                     )}
+                </Form>
+            </Modal>
+
+            {/* 归档Modal */}
+            <Modal
+                title="归档报价单"
+                open={isArchiveModalVisible}
+                onCancel={() => {
+                    setIsArchiveModalVisible(false);
+                    setArchiveFileList([]);
+                }}
+                onOk={handleSubmitArchive}
+                okText="确定归档"
+                cancelText="取消"
+                width={600}
+            >
+                {archivingQuotation && (
+                    <div style={{ marginBottom: 16, padding: 12, background: '#f5f5f5', borderRadius: 4 }}>
+                        <div><strong>报价单号:</strong> {archivingQuotation.quotationNo}</div>
+                        <div><strong>客户公司:</strong> {archivingQuotation.clientCompany}</div>
+                        <div><strong>合同金额:</strong> ¥{archivingQuotation.discountTotal.toFixed(2)}</div>
+                    </div>
+                )}
+
+                <Form form={archiveForm} layout="vertical">
+                    <Form.Item
+                        label="上传盖章合同"
+                        required
+                        tooltip="请上传客户签字盖章后的合同文件，归档后报价单将不可修改"
+                    >
+                        <Upload
+                            fileList={archiveFileList}
+                            beforeUpload={(file) => {
+                                const isValidType = ['application/pdf', 'image/jpeg', 'image/png'].includes(file.type);
+                                if (!isValidType) {
+                                    message.error('只支持 PDF/JPG/PNG 格式文件!');
+                                    return Upload.LIST_IGNORE;
+                                }
+                                const isLt10M = file.size / 1024 / 1024 < 10;
+                                if (!isLt10M) {
+                                    message.error('文件大小不能超过 10MB!');
+                                    return Upload.LIST_IGNORE;
+                                }
+                                setArchiveFileList([file]);
+                                return false;
+                            }}
+                            onRemove={() => setArchiveFileList([])}
+                            maxCount={1}
+                            accept=".pdf,.jpg,.jpeg,.png"
+                        >
+                            <Button icon={<UploadOutlined />}>选择合同文件</Button>
+                        </Upload>
+                        <div style={{ marginTop: 8, color: '#999', fontSize: 12 }}>
+                            支持 PDF、JPG、PNG 格式, 文件大小不超过 10MB
+                        </div>
+                    </Form.Item>
+
+                    <div style={{ padding: 12, background: '#fff7e6', border: '1px solid #ffd591', borderRadius: 4 }}>
+                        <div style={{ color: '#fa8c16', marginBottom: 8 }}>
+                            <strong>归档说明：</strong>
+                        </div>
+                        <div style={{ fontSize: 12, color: '#666' }}>
+                            1. 归档后报价单状态将变更为"已归档"<br />
+                            2. 归档后可以生成委托合同<br />
+                            3. 归档操作不可撤销，请确认无误后操作
+                        </div>
+                    </div>
                 </Form>
             </Modal>
         </Card>
