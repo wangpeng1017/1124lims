@@ -1,6 +1,6 @@
 // 委托合同相关类型定义
 
-import { QuotationItem } from './quotationData';
+import type { QuotationItem } from './quotationData';
 
 export interface IContract {
     id: string;
