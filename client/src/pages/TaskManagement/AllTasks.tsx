@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Table, Tag, Progress, Space, Input, Select, Button, Tooltip, Modal, Form, DatePicker, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { SearchOutlined, EyeOutlined, UserAddOutlined, ExportOutlined } from '@ant-design/icons';
+import { SearchOutlined, EyeOutlined, ExportOutlined } from '@ant-design/icons';
 import { testTaskData, type ITestTask } from '../../mock/test';
 import { employeeData } from '../../mock/personnel';
 import dayjs from 'dayjs';
@@ -18,12 +18,8 @@ const AllTasks: React.FC = () => {
     const [personFilter, setPersonFilter] = useState<string | null>(null);
     const [assignmentStatusFilter, setAssignmentStatusFilter] = useState<string | null>(null);
 
-    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-    const [selectedTasks, setSelectedTasks] = useState<ITestTask[]>([]);
-
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
     const [assigningTask, setAssigningTask] = useState<ITestTask | null>(null);
-    const [isBatchAssign, setIsBatchAssign] = useState(false);
 
     const [assignForm] = Form.useForm();
 
@@ -64,23 +60,12 @@ const AllTasks: React.FC = () => {
         }
     };
 
-    const handleOpenAssign = (task?: ITestTask) => {
-        if (task) {
-            // 单个任务分配
-            setAssigningTask(task);
-            setIsBatchAssign(false);
-            assignForm.setFieldsValue({
-                assignedTo: task.assignedTo || undefined,
-                dueDate: task.dueDate ? dayjs(task.dueDate) : dayjs().add(7, 'day')
-            });
-        } else {
-            // 批量分配
-            setIsBatchAssign(true);
-            assignForm.resetFields();
-            assignForm.setFieldsValue({
-                dueDate: dayjs().add(7, 'day')
-            });
-        }
+    const handleOpenAssign = (task: ITestTask) => {
+        setAssigningTask(task);
+        assignForm.setFieldsValue({
+            assignedTo: task.assignedTo || undefined,
+            dueDate: task.dueDate ? dayjs(task.dueDate) : dayjs().add(7, 'day')
+        });
         setIsAssignModalOpen(true);
     };
 
@@ -90,19 +75,7 @@ const AllTasks: React.FC = () => {
             const dueDate = values.dueDate.format('YYYY-MM-DD');
             const remark = values.remark || '';
 
-            if (isBatchAssign) {
-                // 批量分配
-                const taskIds = selectedTasks.map(t => t.id);
-                setDataSource(dataSource.map(task =>
-                    taskIds.includes(task.id)
-                        ? { ...task, assignedTo, dueDate, status: '待开始', remark }
-                        : task
-                ));
-                message.success(`成功分配 ${selectedTasks.length} 个任务给 ${assignedTo}`);
-                setSelectedRowKeys([]);
-                setSelectedTasks([]);
-            } else if (assigningTask) {
-                // 单个任务分配
+            if (assigningTask) {
                 setDataSource(dataSource.map(task =>
                     task.id === assigningTask.id
                         ? { ...task, assignedTo, dueDate, status: '待开始', remark }
@@ -119,17 +92,6 @@ const AllTasks: React.FC = () => {
     const handleViewDetail = (record: ITestTask) => {
         setDetailTask(record);
         setDetailVisible(true);
-    };
-
-    const rowSelection = {
-        selectedRowKeys,
-        onChange: (newSelectedRowKeys: React.Key[], selectedRows: ITestTask[]) => {
-            setSelectedRowKeys(newSelectedRowKeys);
-            setSelectedTasks(selectedRows);
-        },
-        getCheckboxProps: (record: ITestTask) => ({
-            disabled: record.status === '已完成', // 已完成的任务不能重新分配
-        }),
     };
 
     const columns: ColumnsType<ITestTask> = [
@@ -305,18 +267,9 @@ const AllTasks: React.FC = () => {
                         <Option key={emp.id} value={emp.name}>{emp.name}</Option>
                     ))}
                 </Select>
-                <Button
-                    type="primary"
-                    icon={<UserAddOutlined />}
-                    disabled={selectedTasks.length === 0}
-                    onClick={() => handleOpenAssign()}
-                >
-                    批量分配 ({selectedTasks.length})
-                </Button>
             </Space>
 
             <Table
-                rowSelection={rowSelection}
                 columns={columns}
                 dataSource={filteredData}
                 rowKey="id"
@@ -329,7 +282,7 @@ const AllTasks: React.FC = () => {
 
             {/* 任务分配对话框 */}
             <Modal
-                title={isBatchAssign ? `批量分配任务 (${selectedTasks.length}个)` : '任务分配'}
+                title="任务分配"
                 open={isAssignModalOpen}
                 onOk={handleAssignOk}
                 onCancel={() => {
@@ -338,18 +291,7 @@ const AllTasks: React.FC = () => {
                 }}
                 width={500}
             >
-                {isBatchAssign && selectedTasks.length > 0 && (
-                    <div style={{ marginBottom: 16, padding: 12, background: '#f5f5f5', borderRadius: 4 }}>
-                        <div style={{ fontWeight: 'bold', marginBottom: 8 }}>待分配任务:</div>
-                        {selectedTasks.map(task => (
-                            <div key={task.id} style={{ fontSize: '12px', color: '#666' }}>
-                                • {task.taskNo} - {task.sampleName}
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {!isBatchAssign && assigningTask && (
+                {assigningTask && (
                     <div style={{ marginBottom: 16, padding: 12, background: '#f5f5f5', borderRadius: 4 }}>
                         <div><strong>任务编号:</strong> {assigningTask.taskNo}</div>
                         <div><strong>样品名称:</strong> {assigningTask.sampleName}</div>
