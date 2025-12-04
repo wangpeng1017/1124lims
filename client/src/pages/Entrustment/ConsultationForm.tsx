@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Select, DatePicker, InputNumber, Row, Col, message } from 'antd';
+import { Modal, Form, Input, Select, DatePicker, InputNumber, Row, Col } from 'antd';
 import { TEST_PURPOSE_MAP, type IConsultation } from '../../mock/consultation';
 import { clientData } from '../../mock/entrustment';
 import dayjs from 'dayjs';
