@@ -16,7 +16,6 @@ import { testTaskData } from '../mock/test';
 import { quotationData } from '../mock/quotationData';
 import { contractData } from '../mock/contract';
 import { useNavigate } from 'react-router-dom';
-import ReactECharts from 'echarts-for-react';
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
@@ -54,72 +53,6 @@ const Dashboard: React.FC = () => {
             return priorityOrder[a.priority] - priorityOrder[b.priority];
         })
         .slice(0, 5);
-
-    // 任务进度图表
-    const taskProgressOption = {
-        title: {
-            text: '任务进度统计',
-            left: 'center',
-        },
-        tooltip: {
-            trigger: 'item',
-        },
-        legend: {
-            orient: 'vertical',
-            left: 'left',
-        },
-        series: [
-            {
-                name: '任务状态',
-                type: 'pie',
-                radius: '50%',
-                data: [
-                    { value: taskStats.pending, name: '待开始' },
-                    { value: taskStats.inProgress, name: '进行中' },
-                    { value: taskStats.completed, name: '已完成' },
-                ],
-                emphasis: {
-                    itemStyle: {
-                        shadowBlur: 10,
-                        shadowOffsetX: 0,
-                        shadowColor: 'rgba(0, 0, 0, 0.5)',
-                    },
-                },
-            },
-        ],
-    };
-
-    // 报价单趋势图表
-    const quotationTrendOption = {
-        title: {
-            text: '报价单审批趋势',
-            left: 'center',
-        },
-        tooltip: {
-            trigger: 'axis',
-        },
-        xAxis: {
-            type: 'category',
-            data: ['12-01', '12-02', '12-03', '12-04', '12-05'],
-        },
-        yAxis: {
-            type: 'value',
-        },
-        series: [
-            {
-                name: '新增报价单',
-                type: 'line',
-                data: [2, 3, 1, 2, 1],
-                smooth: true,
-            },
-            {
-                name: '已批准',
-                type: 'line',
-                data: [1, 2, 1, 1, 2],
-                smooth: true,
-            },
-        ],
-    };
 
     const todoColumns: ColumnsType<ITodo> = [
         {
@@ -250,7 +183,7 @@ const Dashboard: React.FC = () => {
                                 <Badge count={urgentTodos.length} />
                             </Space>
                         }
-                        extra={<a onClick={() => navigate('/my-todos')}>查看全部</a>}
+                        extra={null}
                     >
                         <Table
                             columns={todoColumns}
@@ -295,20 +228,6 @@ const Dashboard: React.FC = () => {
                                 </List.Item>
                             )}
                         />
-                    </Card>
-                </Col>
-            </Row>
-
-            {/* 底部图表区 */}
-            <Row gutter={16}>
-                <Col span={12}>
-                    <Card>
-                        <ReactECharts option={taskProgressOption} style={{ height: 300 }} />
-                    </Card>
-                </Col>
-                <Col span={12}>
-                    <Card>
-                        <ReactECharts option={quotationTrendOption} style={{ height: 300 }} />
                     </Card>
                 </Col>
             </Row>

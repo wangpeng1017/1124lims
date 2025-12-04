@@ -29,8 +29,7 @@ import {
   SettingOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  HomeOutlined,
-  BellOutlined
+  HomeOutlined
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme, Avatar, Typography } from 'antd';
@@ -57,7 +56,6 @@ function getItem(
 
 const items: MenuItem[] = [
   getItem('首页', '/dashboard', <HomeOutlined />),
-  getItem('我的待办', '/my-todos', <BellOutlined />),
   getItem('业务管理', '/entrustment', <ExperimentOutlined />, [
     getItem('委托咨询', '/entrustment/consultation', <AuditOutlined />),
     getItem('报价单', '/entrustment/quotation', <FileTextOutlined />),
