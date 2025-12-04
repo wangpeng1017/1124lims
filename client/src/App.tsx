@@ -139,8 +139,8 @@ const App: React.FC = () => {
             <Route path="roles" element={<RoleManagement />} />
             <Route path="departments" element={<DepartmentInfo />} />
             <Route path="permission" element={<PermissionConfig />} />
-            <Route path="approval-workflow" element={<ApprovalWorkflowConfig />} />
           </Route>
+          <Route path="approval-workflow" element={<ApprovalWorkflowConfig />} />
           <Route path="supplier-management">
             {/* 供应商管理 */}
             <Route path="info" element={<SupplierInfo />} />
