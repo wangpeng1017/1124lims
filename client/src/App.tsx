@@ -50,6 +50,8 @@ import TaskStats from './pages/StatisticsReport/TaskStats';
 import ReportTemplates from './pages/ReportManagement/ReportTemplates';
 
 import SystemDocuments from './pages/SystemDocuments';
+import Dashboard from './pages/Dashboard';
+import MyTodos from './pages/MyTodos';
 
 // 系统设置
 import SystemSettings from './pages/SystemSettings';
@@ -68,7 +70,9 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/fill/:entrustmentId" element={<EntrustmentFill />} />
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<Navigate to="/device-management/info" replace />} />
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="my-todos" element={<MyTodos />} />
           <Route path="device-management">
             <Route path="info" element={<DeviceInfo />} />
             <Route path="maintenance" element={<MaintenancePlan />} />
