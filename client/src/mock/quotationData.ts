@@ -50,8 +50,8 @@ export interface Quotation {
     clientRemark: string;        // 客户要求备注
 
     // 审批流程 - 三级审批
-    status: 'draft' | 'pending_sales' | 'pending_finance' | 'pending_lab' | 'approved' | 'rejected';
-    // 草稿/待销售审批/待财务审批/待实验室审批/已批准/已拒绝
+    status: 'draft' | 'pending_sales' | 'pending_finance' | 'pending_lab' | 'approved' | 'rejected' | 'archived';
+    // 草稿/待销售审批/待财务审批/待实验室审批/已批准/已拒绝/已归档
     currentApprovalLevel: number;  // 当前审批级别 (0:未提交 1:销售 2:财务 3:实验室)
     approvalHistory: ApprovalRecord[];
 
@@ -61,6 +61,17 @@ export interface Quotation {
     ngReason?: string;           // NG原因
     contractFile?: string;       // 盖章合同文件路径
     contractFileName?: string;   // 合同文件名
+
+    // 归档信息
+    isArchived?: boolean;        // 是否已归档
+    archivedAt?: string;         // 归档时间
+    archivedBy?: string;         // 归档人
+    archivedContractFile?: string;     // 归档合同文件路径
+    archivedContractFileName?: string; // 归档合同文件名
+
+    // 关联合同
+    contractId?: string;         // 关联的委托合同ID
+    contractNo?: string;         // 关联的委托合同编号
 
     // PDF
     pdfUrl?: string;             // 生成的PDF路径
@@ -83,7 +94,8 @@ export const STATUS_MAP: Record<Quotation['status'], { text: string; color: stri
     pending_finance: { text: '待财务审批', color: 'processing' },
     pending_lab: { text: '待实验室审批', color: 'processing' },
     approved: { text: '已批准', color: 'success' },
-    rejected: { text: '已拒绝', color: 'error' }
+    rejected: { text: '已拒绝', color: 'error' },
+    archived: { text: '已归档', color: 'cyan' }
 };
 
 // 客户反馈状态映射
