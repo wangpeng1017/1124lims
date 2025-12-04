@@ -21,7 +21,6 @@ const ConsultationForm: React.FC<ConsultationFormProps> = ({
     onSave
 }) => {
     const [form] = Form.useForm();
-    const [selectedClient, setSelectedClient] = useState<string | null>(null);
 
     useEffect(() => {
         if (visible) {
@@ -31,17 +30,14 @@ const ConsultationForm: React.FC<ConsultationFormProps> = ({
                     ...consultation,
                     expectedDeadline: consultation.expectedDeadline ? dayjs(consultation.expectedDeadline) : null
                 });
-                setSelectedClient(consultation.clientCompany);
             } else {
                 // 新建模式 - 重置表单
                 form.resetFields();
-                setSelectedClient(null);
             }
         }
     }, [visible, consultation, form]);
 
     const handleClientSelect = (value: string) => {
-        setSelectedClient(value);
         const client = clientData.find(c => c.name === value);
         if (client) {
             form.setFieldsValue({
