@@ -127,7 +127,7 @@ const Dashboard: React.FC = () => {
             dataIndex: 'type',
             key: 'type',
             width: 120,
-            render: (type) => {
+            render: (type: keyof typeof TODO_TYPE_MAP) => {
                 const typeInfo = TODO_TYPE_MAP[type];
                 return <Tag color={typeInfo.color}>{typeInfo.icon} {typeInfo.text}</Tag>;
             },
