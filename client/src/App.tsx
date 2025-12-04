@@ -7,7 +7,7 @@ import MaintenancePlan from './pages/DeviceManagement/MaintenancePlan';
 import RepairManagement from './pages/DeviceManagement/RepairManagement';
 import CalibrationPlan from './pages/DeviceManagement/CalibrationPlan';
 import EntrustmentOrder from './pages/Entrustment';
-import EntrustmentContract from './pages/Entrustment/EntrustmentContract';
+import ContractManagement from './pages/Entrustment/ContractManagement';
 import ClientUnit from './pages/Entrustment/ClientUnit';
 import EntrustmentFill from './pages/Entrustment/EntrustmentFill';
 import EntrustmentConsultation from './pages/Entrustment/EntrustmentConsultation';
@@ -81,7 +81,7 @@ const App: React.FC = () => {
             <Route path="consultation" element={<EntrustmentConsultation />} />
             <Route path="quotation" element={<QuotationManagement />} />
             <Route path="order" element={<EntrustmentOrder />} />
-            <Route path="contract" element={<EntrustmentContract />} />
+            <Route path="contract" element={<ContractManagement />} />
             <Route path="client" element={<ClientUnit />} />
           </Route>
           <Route path="personnel">
