@@ -5,6 +5,7 @@ import { PlusOutlined, SearchOutlined, FileTextOutlined, EditOutlined, DeleteOut
 import { quotationData, STATUS_MAP, CLIENT_STATUS_MAP, type Quotation } from '../../mock/quotationData';
 import { ApprovalService } from '../../services/approvalService';
 import QuotationForm from './QuotationForm';
+import QuotationDetailDrawer from './QuotationDetailDrawer';
 import { pdf } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
 import QuotationPDF from '../../components/QuotationPDF';
@@ -26,6 +27,10 @@ const QuotationManagement: React.FC = () => {
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [editingQuotation, setEditingQuotation] = useState<Quotation | null>(null);
     const [fromConsultation, setFromConsultation] = useState<IConsultation | null>(null);
+
+    // 详情抽屉状态
+    const [isDetailVisible, setIsDetailVisible] = useState(false);
+    const [detailQuotation, setDetailQuotation] = useState<Quotation | null>(null);
 
     // 客户反馈Modal状态
     const [isFeedbackModalVisible, setIsFeedbackModalVisible] = useState(false);
@@ -107,6 +112,11 @@ const QuotationManagement: React.FC = () => {
         setEditingQuotation(null);
         setFromConsultation(null);
         setIsFormVisible(true);
+    };
+
+    const handleViewDetail = (record: Quotation) => {
+        setDetailQuotation(record);
+        setIsDetailVisible(true);
     };
 
     const handleEdit = (record: Quotation) => {
@@ -259,7 +269,7 @@ const QuotationManagement: React.FC = () => {
             key: 'quotationNo',
             width: 150,
             fixed: 'left',
-            render: (text) => <a>{text}</a>
+            render: (text, record) => <a onClick={() => handleViewDetail(record)}>{text}</a>
         },
         {
             title: '创建日期',
@@ -341,7 +351,7 @@ const QuotationManagement: React.FC = () => {
                         key="view"
                         size="small"
                         icon={<FileTextOutlined />}
-                        onClick={() => message.info(`查看详情: ${record.quotationNo}`)}
+                        onClick={() => handleViewDetail(record)}
                     >
                         查看
                     </Button>
@@ -490,6 +500,12 @@ const QuotationManagement: React.FC = () => {
                     setFromConsultation(null);
                 }}
                 onSave={handleSaveQuotation}
+            />
+
+            <QuotationDetailDrawer
+                visible={isDetailVisible}
+                quotation={detailQuotation}
+                onClose={() => setIsDetailVisible(false)}
             />
 
             <Modal
