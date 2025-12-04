@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Table, Card, Button, Space, Modal, Form, Input, InputNumber, message, Badge } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { PlusOutlined, ScanOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import { mySampleData, type IMySample } from '../../mock/sample';
 
 const MySamples: React.FC = () => {
@@ -93,13 +93,13 @@ const MySamples: React.FC = () => {
     return (
         <Card
             title="我的样品"
-            extra={<Button type="primary" icon={<PlusOutlined />} onClick={handleCollect}>扫码领用</Button>}
+            extra={<Button type="primary" icon={<PlusOutlined />} onClick={handleCollect}>新建领用</Button>}
         >
             <Table columns={columns} dataSource={dataSource} rowKey="id" />
 
             {/* Collection Modal */}
             <Modal
-                title={<><ScanOutlined /> 扫码领用样品</>}
+                title="新建领用"
                 open={isModalOpen}
                 onOk={handleOk}
                 onCancel={() => setIsModalOpen(false)}
