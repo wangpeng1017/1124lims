@@ -9,7 +9,7 @@ import QuotationDetailDrawer from './QuotationDetailDrawer';
 import { pdf } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
 import QuotationPDF from '../../components/QuotationPDF';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import type { IConsultation } from '../../mock/consultation';
 
 const { Search } = Input;
@@ -17,6 +17,7 @@ const { Option } = Select;
 
 const QuotationManagement: React.FC = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const [dataSource, setDataSource] = useState<Quotation[]>(quotationData);
     const [filteredData, setFilteredData] = useState<Quotation[]>(quotationData);
     const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -231,9 +232,25 @@ const QuotationManagement: React.FC = () => {
                 return item;
             });
             setDataSource(newData);
+            applyFilters(newData, statusFilter, clientStatusFilter, searchText);
+            message.success('报价单已更新');
+        } else {
+            // 新建模式
+            const newQuotation: Quotation = {
+                id: String(dataSource.length + 1),
+                quotationNo: `BJ${new Date().toISOString().slice(0, 10).replace(/-/g, '')}${String(dataSource.length + 1).padStart(3, '0')}`,
+                ...values,
+                // 如果是从咨询单创建,保存关联信息
+                consultationId: fromConsultation?.id,
+                consultationNo: fromConsultation?.consultationNo,
+            } as Quotation;
+            const newData = [newQuotation, ...dataSource];
+            setDataSource(newData);
+            applyFilters(newData, statusFilter, clientStatusFilter, searchText);
             message.success('报价单已创建');
         }
         setIsFormVisible(false);
+        setFromConsultation(null);
     };
 
     const handleSubmitFeedback = () => {
@@ -329,6 +346,15 @@ const QuotationManagement: React.FC = () => {
             width: 150,
             fixed: 'left',
             render: (text, record) => <a onClick={() => handleViewDetail(record)}>{text}</a>
+        },
+        {
+            title: '咨询单号',
+            dataIndex: 'consultationNo',
+            key: 'consultationNo',
+            width: 150,
+            render: (text) => text ? (
+                <a onClick={() => navigate('/entrustment/consultation')}>{text}</a>
+            ) : '-'
         },
         {
             title: '创建日期',

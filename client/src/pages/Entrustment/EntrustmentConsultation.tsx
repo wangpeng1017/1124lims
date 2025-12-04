@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Table, Card, Button, Space, Tag, Input, Select, message, Popconfirm, DatePicker, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { PlusOutlined, SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, CloseCircleOutlined, FileAddOutlined } from '@ant-design/icons';
 import { consultationData, CONSULTATION_STATUS_MAP, URGENCY_LEVEL_MAP, type IConsultation } from '../../mock/consultation';
 import ConsultationForm from './ConsultationForm';
 import ConsultationDetailDrawer from './ConsultationDetailDrawer';
+import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 
 const { Search } = Input;
@@ -12,6 +13,7 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const EntrustmentConsultation: React.FC = () => {
+    const navigate = useNavigate();
     const [dataSource, setDataSource] = useState<IConsultation[]>(consultationData);
     const [filteredData, setFilteredData] = useState<IConsultation[]>(consultationData);
     const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -152,6 +154,27 @@ const EntrustmentConsultation: React.FC = () => {
         setDataSource(newData);
         applyFilters(newData, statusFilter, urgencyFilter, followerFilter, searchText, dateRange);
         message.success('咨询已关闭');
+    };
+
+    const handleGenerateQuotation = (record: IConsultation) => {
+        // 跳转到报价单页面并传递咨询单数据
+        navigate('/entrustment/quotation', {
+            state: { fromConsultation: record }
+        });
+
+        // 更新咨询单状态为已报价
+        const newData = dataSource.map(item => {
+            if (item.id === record.id) {
+                return {
+                    ...item,
+                    status: 'quoted' as const,
+                    updatedAt: new Date().toISOString()
+                };
+            }
+            return item;
+        });
+        setDataSource(newData);
+        applyFilters(newData, statusFilter, urgencyFilter, followerFilter, searchText, dateRange);
     };
 
     const handleSaveConsultation = (values: Partial<IConsultation>) => {
@@ -314,6 +337,21 @@ const EntrustmentConsultation: React.FC = () => {
                         查看
                     </Button>
                 );
+
+                // 跟进中状态 - 可生成报价单
+                if (record.status === 'following' && !record.quotationNo) {
+                    actions.push(
+                        <Button
+                            key="quotation"
+                            size="small"
+                            type="primary"
+                            icon={<FileAddOutlined />}
+                            onClick={() => handleGenerateQuotation(record)}
+                        >
+                            生成报价单
+                        </Button>
+                    );
+                }
 
                 // 待跟进/跟进中状态 - 可编辑、关闭
                 if (record.status === 'pending' || record.status === 'following') {

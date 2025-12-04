@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
-import { Modal, Form, Input, Select, DatePicker, InputNumber, Row, Col } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Modal, Form, Input, Select, DatePicker, InputNumber, Row, Col, Upload, Button, message } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 import { TEST_PURPOSE_MAP, type IConsultation } from '../../mock/consultation';
 import { clientData } from '../../mock/entrustment';
 import dayjs from 'dayjs';
@@ -21,6 +22,7 @@ const ConsultationForm: React.FC<ConsultationFormProps> = ({
     onSave
 }) => {
     const [form] = Form.useForm();
+    const [fileList, setFileList] = useState<any[]>([]);
 
     useEffect(() => {
         if (visible) {
@@ -30,9 +32,20 @@ const ConsultationForm: React.FC<ConsultationFormProps> = ({
                     ...consultation,
                     expectedDeadline: consultation.expectedDeadline ? dayjs(consultation.expectedDeadline) : null
                 });
+                // 恢复附件列表
+                if (consultation.attachments) {
+                    const files = consultation.attachments.map(att => ({
+                        uid: att.id,
+                        name: att.fileName,
+                        status: 'done',
+                        url: att.fileUrl
+                    }));
+                    setFileList(files);
+                }
             } else {
                 // 新建模式 - 重置表单
                 form.resetFields();
+                setFileList([]);
             }
         }
     }, [visible, consultation, form]);
@@ -50,12 +63,24 @@ const ConsultationForm: React.FC<ConsultationFormProps> = ({
 
     const handleOk = () => {
         form.validateFields().then(values => {
+            // 处理附件数据
+            const attachments = fileList.map((file, index) => ({
+                id: file.uid || `att_${Date.now()}_${index}`,
+                fileName: file.name,
+                fileUrl: file.url || `/uploads/consultations/${file.name}`,
+                fileSize: file.size || 0,
+                uploadTime: new Date().toISOString(),
+                uploadBy: '当前用户'
+            }));
+
             const formattedValues = {
                 ...values,
-                expectedDeadline: values.expectedDeadline ? values.expectedDeadline.format('YYYY-MM-DD') : undefined
+                expectedDeadline: values.expectedDeadline ? values.expectedDeadline.format('YYYY-MM-DD') : undefined,
+                attachments: attachments.length > 0 ? attachments : undefined
             };
             onSave(formattedValues);
             form.resetFields();
+            setFileList([]);
         }).catch(info => {
             console.log('验证失败:', info);
         });
@@ -63,6 +88,7 @@ const ConsultationForm: React.FC<ConsultationFormProps> = ({
 
     const handleCancel = () => {
         form.resetFields();
+        setFileList([]);
         onCancel();
     };
 
@@ -311,6 +337,49 @@ const ConsultationForm: React.FC<ConsultationFormProps> = ({
                                 maxLength={500}
                                 showCount
                             />
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <Row gutter={16}>
+                    <Col span={24}>
+                        <Form.Item
+                            label="附件上传"
+                            tooltip="可上传客户提供的截图、文件等资料"
+                        >
+                            <Upload
+                                fileList={fileList}
+                                beforeUpload={(file) => {
+                                    const isValidType = [
+                                        'application/pdf',
+                                        'application/msword',
+                                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                        'image/jpeg',
+                                        'image/png'
+                                    ].includes(file.type);
+                                    if (!isValidType) {
+                                        message.error('只支持 PDF、Word、JPG、PNG 格式文件!');
+                                        return Upload.LIST_IGNORE;
+                                    }
+                                    const isLt10M = file.size / 1024 / 1024 < 10;
+                                    if (!isLt10M) {
+                                        message.error('文件大小不能超过 10MB!');
+                                        return Upload.LIST_IGNORE;
+                                    }
+                                    setFileList([...fileList, file]);
+                                    return false;
+                                }}
+                                onRemove={(file) => {
+                                    setFileList(fileList.filter(f => f.uid !== file.uid));
+                                }}
+                                maxCount={5}
+                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                multiple
+                            >
+                                <Button icon={<UploadOutlined />}>选择文件</Button>
+                            </Upload>
+                            <div style={{ marginTop: 8, color: '#999', fontSize: 12 }}>
+                                支持 PDF、Word、图片格式,最多5个文件,单个文件不超过10MB
+                            </div>
                         </Form.Item>
                     </Col>
                 </Row>

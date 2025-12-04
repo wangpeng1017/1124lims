@@ -73,6 +73,10 @@ export interface Quotation {
     contractId?: string;         // 关联的委托合同ID
     contractNo?: string;         // 关联的委托合同编号
 
+    // 关联咨询单
+    consultationId?: string;     // 关联的咨询单ID
+    consultationNo?: string;     // 关联的咨询单号
+
     // PDF
     pdfUrl?: string;             // 生成的PDF路径
 

@@ -51,6 +51,16 @@ export interface IConsultation {
     quotationId?: string;                // 关联的报价单ID
     quotationNo?: string;                // 关联的报价单号
 
+    // 附件信息
+    attachments?: {
+        id: string;
+        fileName: string;
+        fileUrl: string;
+        fileSize: number;
+        uploadTime: string;
+        uploadBy: string;
+    }[];
+
     // 元数据
     createdBy: string;                   // 创建人
     updatedAt: string;                   // 更新时间
