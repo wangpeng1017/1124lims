@@ -1,28 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Button, Modal, Form, Input, message, Tag, Space, Steps } from 'antd';
+import { Card, Table, Button, Modal, Form, Input, message, Tag, Space, Steps, Tabs, Statistic, Row, Col, Select, Descriptions } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import { ApprovalService, type ApprovalInstance, APPROVAL_WORKFLOW_CONFIG } from '../../services/approvalService';
+import { CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, FileTextOutlined } from '@ant-design/icons';
+import {
+    ApprovalService,
+    type ApprovalInstance,
+    type ApprovalRole,
+    type BusinessType,
+    APPROVAL_WORKFLOW_CONFIG,
+    BUSINESS_TYPE_MAP
+} from '../../services/approvalService';
 
 const { TextArea } = Input;
+const { Option } = Select;
 
 const ApprovalCenter: React.FC = () => {
     // 模拟当前用户角色(实际应从用户登录信息获取)
-    const [currentUserRole, setCurrentUserRole] = useState<'sales_manager' | 'finance' | 'lab_director'>('sales_manager');
+    const [currentUserRole, setCurrentUserRole] = useState<ApprovalRole>('sales_manager');
     const [currentUserName] = useState('王经理'); // 模拟当前用户名
 
     const [pendingApprovals, setPendingApprovals] = useState<ApprovalInstance[]>([]);
+    const [completedApprovals, setCompletedApprovals] = useState<ApprovalInstance[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedInstance, setSelectedInstance] = useState<ApprovalInstance | null>(null);
     const [form] = Form.useForm();
+    const [activeTab, setActiveTab] = useState('pending');
+    const [businessTypeFilter, setBusinessTypeFilter] = useState<BusinessType | undefined>(undefined);
 
     useEffect(() => {
-        loadPendingApprovals();
-    }, [currentUserRole]);
+        loadApprovals();
+    }, [currentUserRole, businessTypeFilter]);
 
-    const loadPendingApprovals = () => {
-        const approvals = ApprovalService.getPendingApprovals(currentUserRole);
-        setPendingApprovals(approvals);
+    const loadApprovals = () => {
+        const pending = ApprovalService.getPendingApprovals(currentUserRole, businessTypeFilter);
+        const completed = ApprovalService.getCompletedApprovals(businessTypeFilter);
+        setPendingApprovals(pending);
+        setCompletedApprovals(completed);
     };
 
     const handleApprove = (instance: ApprovalInstance) => {
@@ -45,7 +58,7 @@ const ApprovalCenter: React.FC = () => {
             if (result.success) {
                 message.success(result.message);
                 setIsModalOpen(false);
-                loadPendingApprovals();
+                loadApprovals();
             } else {
                 message.error(result.message);
             }
@@ -56,20 +69,57 @@ const ApprovalCenter: React.FC = () => {
         const progress = ApprovalService.getApprovalProgress(instance.id);
         if (!progress) return null;
 
-        const config = APPROVAL_WORKFLOW_CONFIG.quotation;
-        const currentStep = instance.currentLevel - 1;
+        const config = APPROVAL_WORKFLOW_CONFIG[instance.businessType];
+        const currentStep = instance.status === 'pending' ? instance.currentLevel - 1 : config.levels.length;
 
         return (
             <Steps
                 size="small"
                 current={currentStep}
-                items={config.levels.map((level, index) => ({
-                    title: level.name,
-                    description: instance.approvalRecords.find(r => r.level === level.level)?.approver || '待审批',
-                    status: index < currentStep ? 'finish' : index === currentStep ? 'process' : 'wait'
-                }))}
+                status={instance.status === 'rejected' ? 'error' : undefined}
+                items={config.levels.map((level, index) => {
+                    const record = instance.approvalRecords.find(r => r.level === level.level);
+                    return {
+                        title: level.name,
+                        description: record?.approver || '待审批',
+                        status: record
+                            ? record.action === 'approve'
+                                ? 'finish'
+                                : 'error'
+                            : index === currentStep
+                                ? 'process'
+                                : 'wait'
+                    };
+                })}
             />
         );
+    };
+
+    const renderBusinessData = (instance: ApprovalInstance) => {
+        if (!instance.businessData) return null;
+
+        switch (instance.businessType) {
+            case 'quotation':
+                return (
+                    <Descriptions column={2} size="small" bordered>
+                        <Descriptions.Item label="客户">{instance.businessData.clientCompany}</Descriptions.Item>
+                        <Descriptions.Item label="样品">{instance.businessData.sampleName}</Descriptions.Item>
+                        <Descriptions.Item label="金额">¥{instance.businessData.discountTotal}</Descriptions.Item>
+                        <Descriptions.Item label="联系人">{instance.businessData.clientContact}</Descriptions.Item>
+                    </Descriptions>
+                );
+            case 'report':
+                return (
+                    <Descriptions column={2} size="small" bordered>
+                        <Descriptions.Item label="报告编号">{instance.businessData.reportNo}</Descriptions.Item>
+                        <Descriptions.Item label="样品名称">{instance.businessData.sampleName}</Descriptions.Item>
+                        <Descriptions.Item label="检测项目">{instance.businessData.testItems?.join(', ')}</Descriptions.Item>
+                        <Descriptions.Item label="检测人">{instance.businessData.tester}</Descriptions.Item>
+                    </Descriptions>
+                );
+            default:
+                return null;
+        }
     };
 
     const columns: ColumnsType<ApprovalInstance> = [
@@ -85,7 +135,10 @@ const ApprovalCenter: React.FC = () => {
             dataIndex: 'businessType',
             key: 'businessType',
             width: 100,
-            render: () => <Tag color="blue">报价单</Tag>
+            render: (type: BusinessType) => {
+                const typeInfo = BUSINESS_TYPE_MAP[type];
+                return <Tag color={typeInfo.color}>{typeInfo.text}</Tag>;
+            }
         },
         {
             title: '提交人',
@@ -105,7 +158,14 @@ const ApprovalCenter: React.FC = () => {
             key: 'currentLevel',
             width: 120,
             render: (_, record) => {
-                const config = APPROVAL_WORKFLOW_CONFIG.quotation;
+                if (record.status !== 'pending') {
+                    return (
+                        <Tag color={record.status === 'approved' ? 'success' : 'error'}>
+                            {record.status === 'approved' ? '已批准' : '已拒绝'}
+                        </Tag>
+                    );
+                }
+                const config = APPROVAL_WORKFLOW_CONFIG[record.businessType];
                 const levelConfig = config.levels.find(l => l.level === record.currentLevel);
                 return <Tag color="processing">{levelConfig?.name}</Tag>;
             }
@@ -123,123 +183,270 @@ const ApprovalCenter: React.FC = () => {
             fixed: 'right',
             render: (_, record) => (
                 <Space>
-                    <Button
-                        type="primary"
-                        size="small"
-                        icon={<CheckCircleOutlined />}
-                        onClick={() => handleApprove(record)}
-                    >
-                        审批
-                    </Button>
+                    {activeTab === 'pending' && (
+                        <Button
+                            type="primary"
+                            size="small"
+                            icon={<CheckCircleOutlined />}
+                            onClick={() => handleApprove(record)}
+                        >
+                            审批
+                        </Button>
+                    )}
+                    {activeTab === 'completed' && (
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => {
+                                setSelectedInstance(record);
+                                setIsModalOpen(true);
+                            }}
+                        >
+                            查看
+                        </Button>
+                    )}
                 </Space>
             )
         }
     ];
 
-    return (
-        <Card title="审批中心">
-            <Space style={{ marginBottom: 16 }}>
-                <span>当前角色:</span>
-                <Button
-                    type={currentUserRole === 'sales_manager' ? 'primary' : 'default'}
-                    onClick={() => setCurrentUserRole('sales_manager')}
-                >
-                    销售经理
-                </Button>
-                <Button
-                    type={currentUserRole === 'finance' ? 'primary' : 'default'}
-                    onClick={() => setCurrentUserRole('finance')}
-                >
-                    财务
-                </Button>
-                <Button
-                    type={currentUserRole === 'lab_director' ? 'primary' : 'default'}
-                    onClick={() => setCurrentUserRole('lab_director')}
-                >
-                    实验室负责人
-                </Button>
-            </Space>
+    const stats = ApprovalService.getApprovalStatistics(currentUserRole);
 
-            <Table
-                columns={columns}
-                dataSource={pendingApprovals}
-                rowKey="id"
-                pagination={{ pageSize: 10 }}
-                scroll={{ x: 1400 }}
-            />
+    return (
+        <div style={{ padding: '24px' }}>
+            {/* 统计卡片 */}
+            <Row gutter={16} style={{ marginBottom: 24 }}>
+                <Col span={6}>
+                    <Card>
+                        <Statistic
+                            title="待审批"
+                            value={stats.pending}
+                            prefix={<ClockCircleOutlined />}
+                            valueStyle={{ color: '#1890ff' }}
+                        />
+                    </Card>
+                </Col>
+                <Col span={6}>
+                    <Card>
+                        <Statistic
+                            title="已批准"
+                            value={stats.approved}
+                            prefix={<CheckCircleOutlined />}
+                            valueStyle={{ color: '#52c41a' }}
+                        />
+                    </Card>
+                </Col>
+                <Col span={6}>
+                    <Card>
+                        <Statistic
+                            title="已拒绝"
+                            value={stats.rejected}
+                            prefix={<CloseCircleOutlined />}
+                            valueStyle={{ color: '#ff4d4f' }}
+                        />
+                    </Card>
+                </Col>
+                <Col span={6}>
+                    <Card>
+                        <Statistic
+                            title="总计"
+                            value={stats.total}
+                            prefix={<FileTextOutlined />}
+                        />
+                    </Card>
+                </Col>
+            </Row>
+
+            <Card title="审批中心">
+                <Space style={{ marginBottom: 16 }} wrap>
+                    <span>当前角色:</span>
+                    <Button
+                        type={currentUserRole === 'sales_manager' ? 'primary' : 'default'}
+                        onClick={() => setCurrentUserRole('sales_manager')}
+                    >
+                        销售经理
+                    </Button>
+                    <Button
+                        type={currentUserRole === 'finance' ? 'primary' : 'default'}
+                        onClick={() => setCurrentUserRole('finance')}
+                    >
+                        财务
+                    </Button>
+                    <Button
+                        type={currentUserRole === 'lab_director' ? 'primary' : 'default'}
+                        onClick={() => setCurrentUserRole('lab_director')}
+                    >
+                        实验室负责人
+                    </Button>
+                    <Button
+                        type={currentUserRole === 'technical_director' ? 'primary' : 'default'}
+                        onClick={() => setCurrentUserRole('technical_director')}
+                    >
+                        技术负责人
+                    </Button>
+                    <Button
+                        type={currentUserRole === 'quality_manager' ? 'primary' : 'default'}
+                        onClick={() => setCurrentUserRole('quality_manager')}
+                    >
+                        质量负责人
+                    </Button>
+
+                    <Select
+                        placeholder="业务类型"
+                        style={{ width: 150 }}
+                        allowClear
+                        value={businessTypeFilter}
+                        onChange={setBusinessTypeFilter}
+                    >
+                        {Object.entries(BUSINESS_TYPE_MAP).map(([key, value]) => (
+                            <Option key={key} value={key}>
+                                {value.text}
+                            </Option>
+                        ))}
+                    </Select>
+                </Space>
+
+                <Tabs
+                    activeKey={activeTab}
+                    onChange={setActiveTab}
+                    items={[
+                        {
+                            key: 'pending',
+                            label: `待审批 (${pendingApprovals.length})`,
+                            children: (
+                                <Table
+                                    columns={columns}
+                                    dataSource={pendingApprovals}
+                                    rowKey="id"
+                                    pagination={{ pageSize: 10 }}
+                                    scroll={{ x: 1400 }}
+                                />
+                            )
+                        },
+                        {
+                            key: 'completed',
+                            label: `已完成 (${completedApprovals.length})`,
+                            children: (
+                                <Table
+                                    columns={columns}
+                                    dataSource={completedApprovals}
+                                    rowKey="id"
+                                    pagination={{ pageSize: 10 }}
+                                    scroll={{ x: 1400 }}
+                                />
+                            )
+                        }
+                    ]}
+                />
+            </Card>
 
             <Modal
-                title="审批"
+                title={activeTab === 'pending' ? '审批' : '审批详情'}
                 open={isModalOpen}
                 onCancel={() => setIsModalOpen(false)}
-                footer={[
-                    <Button key="cancel" onClick={() => setIsModalOpen(false)}>
-                        取消
-                    </Button>,
-                    <Button
-                        key="reject"
-                        danger
-                        icon={<CloseCircleOutlined />}
-                        onClick={() => handleSubmitApproval('reject')}
-                    >
-                        拒绝
-                    </Button>,
-                    <Button
-                        key="approve"
-                        type="primary"
-                        icon={<CheckCircleOutlined />}
-                        onClick={() => handleSubmitApproval('approve')}
-                    >
-                        批准
-                    </Button>
-                ]}
+                width={800}
+                footer={
+                    activeTab === 'pending'
+                        ? [
+                            <Button key="cancel" onClick={() => setIsModalOpen(false)}>
+                                取消
+                            </Button>,
+                            <Button
+                                key="reject"
+                                danger
+                                icon={<CloseCircleOutlined />}
+                                onClick={() => handleSubmitApproval('reject')}
+                            >
+                                拒绝
+                            </Button>,
+                            <Button
+                                key="approve"
+                                type="primary"
+                                icon={<CheckCircleOutlined />}
+                                onClick={() => handleSubmitApproval('approve')}
+                            >
+                                批准
+                            </Button>
+                        ]
+                        : [
+                            <Button key="close" onClick={() => setIsModalOpen(false)}>
+                                关闭
+                            </Button>
+                        ]
+                }
             >
                 {selectedInstance && (
                     <div>
-                        <p><strong>业务单号:</strong> {selectedInstance.businessNo}</p>
-                        <p><strong>提交人:</strong> {selectedInstance.submittedBy}</p>
-                        <p><strong>提交时间:</strong> {new Date(selectedInstance.submittedAt).toLocaleString('zh-CN')}</p>
+                        <Descriptions column={2} bordered size="small">
+                            <Descriptions.Item label="业务类型">
+                                <Tag color={BUSINESS_TYPE_MAP[selectedInstance.businessType].color}>
+                                    {BUSINESS_TYPE_MAP[selectedInstance.businessType].text}
+                                </Tag>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="业务单号">{selectedInstance.businessNo}</Descriptions.Item>
+                            <Descriptions.Item label="提交人">{selectedInstance.submittedBy}</Descriptions.Item>
+                            <Descriptions.Item label="提交时间">
+                                {new Date(selectedInstance.submittedAt).toLocaleString('zh-CN')}
+                            </Descriptions.Item>
+                        </Descriptions>
+
+                        {selectedInstance.businessData && (
+                            <div style={{ marginTop: 16 }}>
+                                <strong>业务详情:</strong>
+                                <div style={{ marginTop: 8 }}>
+                                    {renderBusinessData(selectedInstance)}
+                                </div>
+                            </div>
+                        )}
 
                         <div style={{ margin: '16px 0' }}>
                             <strong>审批进度:</strong>
-                            {renderApprovalProgress(selectedInstance)}
+                            <div style={{ marginTop: 8 }}>
+                                {renderApprovalProgress(selectedInstance)}
+                            </div>
                         </div>
 
                         {selectedInstance.approvalRecords.length > 0 && (
                             <div style={{ margin: '16px 0' }}>
                                 <strong>审批历史:</strong>
-                                {selectedInstance.approvalRecords.map((record, index) => (
-                                    <div key={index} style={{ marginTop: 8, padding: 8, background: '#f5f5f5', borderRadius: 4 }}>
-                                        <div>
-                                            <Tag color={record.action === 'approve' ? 'success' : 'error'}>
-                                                {record.action === 'approve' ? '批准' : '拒绝'}
-                                            </Tag>
-                                            <span>{record.approver} ({APPROVAL_WORKFLOW_CONFIG.quotation.levels.find(l => l.level === record.level)?.name})</span>
+                                {selectedInstance.approvalRecords.map((record, index) => {
+                                    const config = APPROVAL_WORKFLOW_CONFIG[selectedInstance.businessType];
+                                    const levelName = config.levels.find(l => l.level === record.level)?.name;
+                                    return (
+                                        <div key={index} style={{ marginTop: 8, padding: 8, background: '#f5f5f5', borderRadius: 4 }}>
+                                            <div>
+                                                <Tag color={record.action === 'approve' ? 'success' : 'error'}>
+                                                    {record.action === 'approve' ? '批准' : '拒绝'}
+                                                </Tag>
+                                                <span>{record.approver} ({levelName})</span>
+                                            </div>
+                                            <div style={{ marginTop: 4, fontSize: 12, color: '#666' }}>
+                                                {new Date(record.timestamp).toLocaleString('zh-CN')}
+                                            </div>
+                                            {record.comment && (
+                                                <div style={{ marginTop: 4 }}>意见: {record.comment}</div>
+                                            )}
                                         </div>
-                                        <div style={{ marginTop: 4, fontSize: 12, color: '#666' }}>
-                                            {new Date(record.timestamp).toLocaleString('zh-CN')}
-                                        </div>
-                                        {record.comment && (
-                                            <div style={{ marginTop: 4 }}>意见: {record.comment}</div>
-                                        )}
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
 
-                        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-                            <Form.Item
-                                name="comment"
-                                label="审批意见"
-                                rules={[{ required: true, message: '请填写审批意见' }]}
-                            >
-                                <TextArea rows={4} placeholder="请输入审批意见..." />
-                            </Form.Item>
-                        </Form>
+                        {activeTab === 'pending' && (
+                            <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+                                <Form.Item
+                                    name="comment"
+                                    label="审批意见"
+                                    rules={[{ required: true, message: '请填写审批意见' }]}
+                                >
+                                    <TextArea rows={4} placeholder="请输入审批意见..." />
+                                </Form.Item>
+                            </Form>
+                        )}
                     </div>
                 )}
             </Modal>
-        </Card>
+        </div>
     );
 };
 

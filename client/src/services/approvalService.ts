@@ -1,8 +1,11 @@
-// 简化版审批流程 - 硬编码三级审批
+// 审批流程服务 - 支持多种业务类型
+
+export type BusinessType = 'quotation' | 'report' | 'contract' | 'outsourcing';
+export type ApprovalRole = 'sales_manager' | 'finance' | 'lab_director' | 'technical_director' | 'quality_manager';
 
 export interface ApprovalRecord {
-    level: number;               // 审批级别 1/2/3
-    role: 'sales_manager' | 'finance' | 'lab_director';  // 审批角色
+    level: number;               // 审批级别
+    role: ApprovalRole;          // 审批角色
     approver: string;            // 审批人姓名
     action: 'approve' | 'reject';
     comment: string;
@@ -11,10 +14,11 @@ export interface ApprovalRecord {
 
 export interface ApprovalInstance {
     id: string;
-    businessType: 'quotation';   // 业务类型(当前仅支持报价单)
+    businessType: BusinessType;  // 业务类型
     businessId: string;          // 业务单据ID
     businessNo: string;          // 业务单据号
-    currentLevel: number;        // 当前审批级别 (0:未提交 1:销售 2:财务 3:实验室)
+    businessData?: any;          // 业务数据（用于显示详情）
+    currentLevel: number;        // 当前审批级别
     status: 'pending' | 'approved' | 'rejected' | 'cancelled';
     approvalRecords: ApprovalRecord[];
     submittedBy: string;
@@ -22,15 +26,46 @@ export interface ApprovalInstance {
     completedAt?: string;
 }
 
-// 审批级别配置(硬编码)
+// 审批级别配置
 export const APPROVAL_WORKFLOW_CONFIG = {
     quotation: {
+        name: '报价单审批',
         levels: [
             { level: 1, role: 'sales_manager' as const, name: '销售经理' },
             { level: 2, role: 'finance' as const, name: '财务' },
             { level: 3, role: 'lab_director' as const, name: '实验室负责人' }
         ]
+    },
+    report: {
+        name: '报告审批',
+        levels: [
+            { level: 1, role: 'technical_director' as const, name: '技术负责人' },
+            { level: 2, role: 'quality_manager' as const, name: '质量负责人' },
+            { level: 3, role: 'lab_director' as const, name: '实验室负责人' }
+        ]
+    },
+    contract: {
+        name: '合同审批',
+        levels: [
+            { level: 1, role: 'sales_manager' as const, name: '销售经理' },
+            { level: 2, role: 'lab_director' as const, name: '实验室负责人' }
+        ]
+    },
+    outsourcing: {
+        name: '委外审批',
+        levels: [
+            { level: 1, role: 'technical_director' as const, name: '技术负责人' },
+            { level: 2, role: 'lab_director' as const, name: '实验室负责人' }
+        ]
     }
+};
+
+// 业务类型映射
+export const BUSINESS_TYPE_MAP: Record<BusinessType, { text: string; color: string }> = {
+    quotation: { text: '报价单', color: 'blue' },
+    report: { text: '报告', color: 'green' },
+    contract: { text: '合同', color: 'purple' },
+    outsourcing: { text: '委外', color: 'orange' }
 };
 
 // Mock审批实例数据
@@ -48,16 +83,18 @@ export class ApprovalService {
      * 提交审批
      */
     static submitApproval(
-        businessType: 'quotation',
+        businessType: BusinessType,
         businessId: string,
         businessNo: string,
-        submittedBy: string
+        submittedBy: string,
+        businessData?: any
     ): ApprovalInstance {
         const instance: ApprovalInstance = {
             id: generateInstanceId(),
             businessType,
             businessId,
             businessNo,
+            businessData,
             currentLevel: 1,  // 从第一级开始
             status: 'pending',
             approvalRecords: [],
@@ -88,7 +125,7 @@ export class ApprovalService {
             return { success: false, message: '该审批已完成', instance: null };
         }
 
-        const config = APPROVAL_WORKFLOW_CONFIG.quotation;
+        const config = APPROVAL_WORKFLOW_CONFIG[instance.businessType];
         const currentLevelConfig = config.levels.find(l => l.level === instance.currentLevel);
 
         if (!currentLevelConfig) {
@@ -142,17 +179,34 @@ export class ApprovalService {
     /**
      * 获取待审批列表(按用户角色)
      */
-    static getPendingApprovals(userRole: 'sales_manager' | 'finance' | 'lab_director'): ApprovalInstance[] {
-        const config = APPROVAL_WORKFLOW_CONFIG.quotation;
-        const levelConfig = config.levels.find(l => l.role === userRole);
+    static getPendingApprovals(userRole: ApprovalRole, businessType?: BusinessType): ApprovalInstance[] {
+        return approvalInstances.filter(instance => {
+            if (instance.status !== 'pending') return false;
+            if (businessType && instance.businessType !== businessType) return false;
 
-        if (!levelConfig) {
-            return [];
-        }
+            const config = APPROVAL_WORKFLOW_CONFIG[instance.businessType];
+            const levelConfig = config.levels.find(l => l.level === instance.currentLevel);
 
-        return approvalInstances.filter(
-            i => i.status === 'pending' && i.currentLevel === levelConfig.level
-        );
+            return levelConfig?.role === userRole;
+        });
+    }
+
+    /**
+     * 获取所有待审批列表
+     */
+    static getAllPendingApprovals(): ApprovalInstance[] {
+        return approvalInstances.filter(i => i.status === 'pending');
+    }
+
+    /**
+     * 获取已完成审批列表
+     */
+    static getCompletedApprovals(businessType?: BusinessType): ApprovalInstance[] {
+        return approvalInstances.filter(instance => {
+            if (instance.status === 'pending') return false;
+            if (businessType && instance.businessType !== businessType) return false;
+            return true;
+        });
     }
 
     /**
@@ -209,7 +263,7 @@ export class ApprovalService {
             return null;
         }
 
-        const config = APPROVAL_WORKFLOW_CONFIG.quotation;
+        const config = APPROVAL_WORKFLOW_CONFIG[instance.businessType];
         const currentLevelConfig = config.levels.find(l => l.level === instance.currentLevel);
 
         return {
@@ -218,6 +272,29 @@ export class ApprovalService {
             completedLevels: instance.approvalRecords.filter(r => r.action === 'approve').length,
             currentLevelName: currentLevelConfig?.name || '',
             records: instance.approvalRecords
+        };
+    }
+
+    /**
+     * 获取审批统计信息
+     */
+    static getApprovalStatistics(userRole?: ApprovalRole) {
+        const all = approvalInstances;
+        const pending = userRole ? this.getPendingApprovals(userRole) : this.getAllPendingApprovals();
+        const approved = approvalInstances.filter(i => i.status === 'approved');
+        const rejected = approvalInstances.filter(i => i.status === 'rejected');
+
+        return {
+            total: all.length,
+            pending: pending.length,
+            approved: approved.length,
+            rejected: rejected.length,
+            byType: {
+                quotation: approvalInstances.filter(i => i.businessType === 'quotation').length,
+                report: approvalInstances.filter(i => i.businessType === 'report').length,
+                contract: approvalInstances.filter(i => i.businessType === 'contract').length,
+                outsourcing: approvalInstances.filter(i => i.businessType === 'outsourcing').length,
+            }
         };
     }
 }
