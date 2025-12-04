@@ -8,11 +8,12 @@ const { TextArea } = Input;
 interface QuotationFormProps {
     visible: boolean;
     quotation: Quotation | null;
+    fromConsultation?: any; // IConsultation类型
     onCancel: () => void;
     onSave: (values: Partial<Quotation>) => void;
 }
 
-const QuotationForm: React.FC<QuotationFormProps> = ({ visible, quotation, onCancel, onSave }) => {
+const QuotationForm: React.FC<QuotationFormProps> = ({ visible, quotation, fromConsultation, onCancel, onSave }) => {
     const [form] = Form.useForm();
     const [items, setItems] = useState<QuotationItem[]>([]);
 
@@ -29,6 +30,34 @@ const QuotationForm: React.FC<QuotationFormProps> = ({ visible, quotation, onCan
                 clientRemark: quotation.clientRemark
             });
             setItems(quotation.items);
+        } else if (visible && fromConsultation) {
+            // 从咨询单创建报价单
+            form.setFieldsValue({
+                clientCompany: fromConsultation.clientCompany,
+                clientContact: fromConsultation.clientContact,
+                clientTel: fromConsultation.clientTel,
+                clientEmail: fromConsultation.clientEmail || '',
+                clientAddress: fromConsultation.clientAddress || '',
+                sampleName: fromConsultation.sampleName,
+                clientRemark: fromConsultation.clientRequirements || ''
+            });
+            // 根据检测项目自动生成报价项
+            const autoItems: QuotationItem[] = fromConsultation.testItems.map((item: string, index: number) => ({
+                id: index + 1,
+                serviceItem: item,
+                methodStandard: '',
+                quantity: fromConsultation.estimatedQuantity || 1,
+                unitPrice: 0,
+                totalPrice: 0
+            }));
+            setItems(autoItems.length > 0 ? autoItems : [{
+                id: 1,
+                serviceItem: '',
+                methodStandard: '',
+                quantity: 1,
+                unitPrice: 0,
+                totalPrice: 0
+            }]);
         } else if (visible) {
             // 新建模式
             form.resetFields();
@@ -41,7 +70,7 @@ const QuotationForm: React.FC<QuotationFormProps> = ({ visible, quotation, onCan
                 totalPrice: 0
             }]);
         }
-    }, [visible, quotation, form]);
+    }, [visible, quotation, fromConsultation, form]);
 
     const calculatePrices = (currentItems: QuotationItem[]) => {
         const subtotal = currentItems.reduce((sum, item) => sum + item.totalPrice, 0);

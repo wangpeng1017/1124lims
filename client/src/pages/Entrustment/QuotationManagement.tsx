@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Card, Button, Space, Tag, Input, Select, message, Popconfirm, Modal, Form, Upload, Radio } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, SearchOutlined, FileTextOutlined, EditOutlined, DeleteOutlined, CloseCircleOutlined, UploadOutlined, FormOutlined } from '@ant-design/icons';
@@ -8,11 +8,14 @@ import QuotationForm from './QuotationForm';
 import { pdf } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
 import QuotationPDF from '../../components/QuotationPDF';
+import { useLocation } from 'react-router-dom';
+import type { IConsultation } from '../../mock/consultation';
 
 const { Search } = Input;
 const { Option } = Select;
 
 const QuotationManagement: React.FC = () => {
+    const location = useLocation();
     const [dataSource, setDataSource] = useState<Quotation[]>(quotationData);
     const [filteredData, setFilteredData] = useState<Quotation[]>(quotationData);
     const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -22,6 +25,7 @@ const QuotationManagement: React.FC = () => {
     // 表单状态
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [editingQuotation, setEditingQuotation] = useState<Quotation | null>(null);
+    const [fromConsultation, setFromConsultation] = useState<IConsultation | null>(null);
 
     // 客户反馈Modal状态
     const [isFeedbackModalVisible, setIsFeedbackModalVisible] = useState(false);
@@ -88,8 +92,20 @@ const QuotationManagement: React.FC = () => {
         applyFilters(dataSource, statusFilter, clientStatusFilter, value);
     };
 
+    // 检查是否从咨询单跳转过来
+    useEffect(() => {
+        const state = location.state as { fromConsultation?: IConsultation };
+        if (state?.fromConsultation) {
+            setFromConsultation(state.fromConsultation);
+            setEditingQuotation(null);
+            setIsFormVisible(true);
+            message.info(`正在为咨询单 ${state.fromConsultation.consultationNo} 创建报价单`);
+        }
+    }, [location]);
+
     const handleAdd = () => {
         setEditingQuotation(null);
+        setFromConsultation(null);
         setIsFormVisible(true);
     };
 
@@ -468,7 +484,11 @@ const QuotationManagement: React.FC = () => {
             <QuotationForm
                 visible={isFormVisible}
                 quotation={editingQuotation}
-                onCancel={() => setIsFormVisible(false)}
+                fromConsultation={fromConsultation}
+                onCancel={() => {
+                    setIsFormVisible(false);
+                    setFromConsultation(null);
+                }}
                 onSave={handleSaveQuotation}
             />
 
