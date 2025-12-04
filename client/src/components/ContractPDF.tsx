@@ -1,6 +1,6 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
-import { IContract } from '../mock/contract';
+import type { IContract } from '../mock/contract';
 
 // 注册中文字体（实际项目中需要引入字体文件）
 // Font.register({
