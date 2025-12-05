@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Card, Button, Modal, Form, Input, Select, InputNumber, Space, Popconfirm, message, Tabs, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined } from '@ant-design/icons';
@@ -6,10 +6,19 @@ import { calibrationPlanData, calibrationRecordData, deviceData } from '../../mo
 import type { ICalibrationPlan, ICalibrationRecord } from '../../mock/devices';
 
 const PlanList: React.FC = () => {
-    const [dataSource, setDataSource] = useState<ICalibrationPlan[]>(calibrationPlanData);
+    const [dataSource, setDataSource] = useState<ICalibrationPlan[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [form] = Form.useForm();
     const [editingId, setEditingId] = useState<string | null>(null);
+
+    // 初始化加载数据
+    const fetchData = useCallback(() => {
+        setDataSource(calibrationPlanData);
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleAdd = () => {
         setEditingId(null);

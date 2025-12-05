@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Card, Tag, Button, Space, Modal, Form, Input, Select, Popconfirm, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined } from '@ant-design/icons';
@@ -6,10 +6,19 @@ import { employeeData, departmentData } from '../../mock/personnel';
 import type { Employee } from '../../mock/personnel';
 
 const EmployeeList: React.FC = () => {
-    const [dataSource, setDataSource] = useState<Employee[]>(employeeData);
+    const [dataSource, setDataSource] = useState<Employee[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<Employee | null>(null);
     const [form] = Form.useForm();
+
+    // 初始化加载数据
+    const fetchData = useCallback(() => {
+        setDataSource(employeeData);
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleAdd = () => {
         setEditingRecord(null);

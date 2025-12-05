@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Card, Button, Space, Modal, Form, Input, Popconfirm, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined } from '@ant-design/icons';
@@ -6,10 +6,19 @@ import { departmentData } from '../../mock/personnel';
 import type { Department } from '../../mock/personnel';
 
 const DepartmentInfo: React.FC = () => {
-    const [dataSource, setDataSource] = useState<Department[]>(departmentData);
+    const [dataSource, setDataSource] = useState<Department[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<Department | null>(null);
     const [form] = Form.useForm();
+
+    // 初始化加载数据
+    const fetchData = useCallback(() => {
+        setDataSource(departmentData);
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleAdd = () => {
         setEditingRecord(null);

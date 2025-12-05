@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Table, Tag, Button, Space, Modal, Form, Input, InputNumber, Select, DatePicker, message, Statistic, Row, Col, Popconfirm } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, SearchOutlined, AlertOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
@@ -6,12 +6,21 @@ import dayjs from 'dayjs';
 import { consumablesData, type IConsumableInfo } from '../../mock/consumables';
 
 const ConsumableInfo: React.FC = () => {
-    const [dataSource, setDataSource] = useState<IConsumableInfo[]>(consumablesData);
+    const [dataSource, setDataSource] = useState<IConsumableInfo[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<IConsumableInfo | null>(null);
     const [searchText, setSearchText] = useState('');
     const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
     const [form] = Form.useForm();
+
+    // 初始化加载数据
+    const fetchData = useCallback(() => {
+        setDataSource(consumablesData);
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     // 统计数据
     const totalItems = dataSource.length;
