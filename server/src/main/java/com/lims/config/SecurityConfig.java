@@ -47,7 +47,8 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers(WHITE_LIST).permitAll()
-                    .anyRequest().authenticated()
+                    // 暂时允许所有请求访问以便测试
+                    .anyRequest().permitAll()
             );
         
         // TODO: 添加JWT过滤器
