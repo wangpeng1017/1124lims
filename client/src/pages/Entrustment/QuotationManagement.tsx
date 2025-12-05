@@ -528,11 +528,32 @@ const QuotationManagement: React.FC = () => {
         }
     ];
 
+    // 生成合同
+    const handleGenerateContract = () => {
+        if (selectedRows.length !== 1) {
+            message.warning('请选择一个报价单');
+            return;
+        }
+        const quotation = selectedRows[0];
+        // 跳转到合同管理页面，并传递报价单数据
+        navigate('/entrustment/contract', {
+            state: { fromQuotation: quotation }
+        });
+        message.success('正在跳转到合同管理页面...');
+    };
+
     return (
         <Card
             title="报价单管理"
             extra={
                 <Space>
+                    <Button
+                        icon={<FileTextOutlined />}
+                        onClick={handleGenerateContract}
+                        disabled={selectedRows.length === 0}
+                    >
+                        生成合同
+                    </Button>
                     <Button
                         icon={<FormOutlined />}
                         onClick={handleTopClientFeedback}

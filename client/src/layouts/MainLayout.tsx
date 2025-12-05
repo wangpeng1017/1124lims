@@ -108,6 +108,7 @@ const items: MenuItem[] = [
     getItem('委托应收', '/finance-management/receivables', <DollarOutlined />),
     getItem('收款记录', '/finance-management/payment-records', <TransactionOutlined />),
     getItem('开票管理', '/finance-management/invoices', <FileTextOutlined />),
+    getItem('成本管理', '/finance-management/cost-module', <AccountBookOutlined />),
   ]),
   getItem('统计报表', '/statistics-report', <BarChartOutlined />, [
     getItem('委托单统计', '/statistics-report/entrustment', <FileTextOutlined />),

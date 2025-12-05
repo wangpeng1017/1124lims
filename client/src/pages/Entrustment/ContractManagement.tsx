@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Table, Tag, Space, Button, Modal, Form, Input, DatePicker, message, Descriptions, Divider } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, FilePdfOutlined, EyeOutlined, DownloadOutlined } from '@ant-design/icons';
@@ -7,8 +7,11 @@ import { quotationData, type Quotation } from '../../mock/quotationData';
 import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
 import ContractPDF from '../../components/ContractPDF';
 import dayjs from 'dayjs';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const ContractManagement: React.FC = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
     const [dataSource, setDataSource] = useState<IContract[]>(contractData);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -21,6 +24,26 @@ const ContractManagement: React.FC = () => {
     const availableQuotations = quotationData.filter(
         q => q.status === 'approved' && q.clientStatus === 'ok' && !q.contractId
     );
+
+    // 检查是否从报价单跳转过来
+    useEffect(() => {
+        const state = location.state as { fromQuotation?: Quotation };
+        if (state?.fromQuotation) {
+            const quotation = state.fromQuotation;
+            setSelectedQuotation(quotation);
+            createForm.setFieldsValue({
+                quotationId: quotation.id,
+                contractName: `${quotation.sampleName}检测委托合同`,
+                signDate: dayjs(),
+                effectiveDate: dayjs(),
+                expiryDate: dayjs().add(1, 'year'),
+            });
+            setIsCreateModalOpen(true);
+            message.info(`正在为报价单 ${quotation.quotationNo} 创建合同`);
+            // 清除 location state
+            window.history.replaceState({}, document.title);
+        }
+    }, [location]);
 
     const handleCreateContract = () => {
         if (availableQuotations.length === 0) {
@@ -157,6 +180,9 @@ const ContractManagement: React.FC = () => {
             dataIndex: 'quotationNo',
             key: 'quotationNo',
             width: 150,
+            render: (text) => (
+                <a onClick={() => navigate('/entrustment/quotation')}>{text}</a>
+            ),
         },
         {
             title: '甲方',
@@ -385,7 +411,9 @@ const ContractManagement: React.FC = () => {
                     <Descriptions column={2} bordered size="small">
                         <Descriptions.Item label="合同编号" span={2}>{selectedContract.contractNo}</Descriptions.Item>
                         <Descriptions.Item label="合同名称" span={2}>{selectedContract.contractName}</Descriptions.Item>
-                        <Descriptions.Item label="关联报价单">{selectedContract.quotationNo}</Descriptions.Item>
+                        <Descriptions.Item label="关联报价单">
+                            <a onClick={() => navigate('/entrustment/quotation')}>{selectedContract.quotationNo}</a>
+                        </Descriptions.Item>
                         <Descriptions.Item label="合同金额">¥{selectedContract.contractAmount.toFixed(2)}</Descriptions.Item>
                         <Descriptions.Item label="甲方" span={2}>{selectedContract.partyA.company}</Descriptions.Item>
                         <Descriptions.Item label="联系人">{selectedContract.partyA.contact}</Descriptions.Item>

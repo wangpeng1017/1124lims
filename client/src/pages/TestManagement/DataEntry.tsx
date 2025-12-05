@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Select, Button, Row, Col, message, Modal, Alert } from 'antd';
-import { SaveOutlined, FilePdfOutlined, PrinterOutlined } from '@ant-design/icons';
+import { Card, Form, Select, Button, Row, Col, message, Modal, Alert, Upload } from 'antd';
+import { SaveOutlined, FilePdfOutlined, PrinterOutlined, UploadOutlined, PaperClipOutlined } from '@ant-design/icons';
 import { useLocation } from 'react-router-dom';
 import { testTaskData, type ITestTask } from '../../mock/test';
 import { deviceData } from '../../mock/devices';
@@ -14,6 +14,7 @@ const DataEntry: React.FC = () => {
     const [currentTemplate, setCurrentTemplate] = useState<TestTemplate | null>(null);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [reportData, setReportData] = useState<any>(null);
+    const [fileList, setFileList] = useState<any[]>([]);
 
     // 获取进行中的任务
     const activeTasks = testTaskData.filter(t => t.status === '进行中');
@@ -114,6 +115,58 @@ const DataEntry: React.FC = () => {
                 ) : (
                     <Alert message="请选择检测模版以加载录入表单" type="info" showIcon style={{ marginBottom: 24 }} />
                 )}
+
+                {/* 上传附件 - 位于底部，备注上方 */}
+                <Form.Item
+                    label="上传附件"
+                    name="attachments"
+                    tooltip="可上传与检测相关的附件文件，如图片、PDF、Word、Excel等"
+                    style={{ marginBottom: 24 }}
+                >
+                    <Upload
+                        fileList={fileList}
+                        beforeUpload={(file) => {
+                            const isValidType = [
+                                'application/pdf',
+                                'application/msword',
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                'application/vnd.ms-excel',
+                                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                'image/jpeg',
+                                'image/png',
+                                'image/gif',
+                                'text/plain'
+                            ].includes(file.type);
+
+                            if (!isValidType) {
+                                message.error('只支持 PDF、Word、Excel、图片和文本文件!');
+                                return Upload.LIST_IGNORE;
+                            }
+
+                            const isLt20M = file.size / 1024 / 1024 < 20;
+                            if (!isLt20M) {
+                                message.error('文件大小不能超过 20MB!');
+                                return Upload.LIST_IGNORE;
+                            }
+
+                            setFileList([...fileList, file]);
+                            return false; // 阻止自动上传
+                        }}
+                        onRemove={(file) => {
+                            const index = fileList.indexOf(file);
+                            const newFileList = fileList.slice();
+                            newFileList.splice(index, 1);
+                            setFileList(newFileList);
+                        }}
+                        multiple
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt"
+                    >
+                        <Button icon={<UploadOutlined />}>选择文件</Button>
+                    </Upload>
+                    <div style={{ marginTop: 8, color: '#999', fontSize: 12 }}>
+                        <PaperClipOutlined /> 支持 PDF、Word、Excel、图片、文本文件，单个文件不超过 20MB，可上传多个文件
+                    </div>
+                </Form.Item>
 
                 <Row justify="center">
                     <Col>

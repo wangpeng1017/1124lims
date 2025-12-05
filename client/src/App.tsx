@@ -34,6 +34,7 @@ import ReportCategories from './pages/SystemSettings/BasicData/ReportCategories'
 import Receivables from './pages/FinanceManagement/Receivables';
 import PaymentRecords from './pages/FinanceManagement/PaymentRecords';
 import InvoiceManagement from './pages/FinanceManagement/InvoiceManagement';
+import CostModule from './pages/FinanceManagement/CostModule';
 import ConsumableInfo from './pages/ConsumablesManagement/ConsumableInfo';
 import StockTransactions from './pages/ConsumablesManagement/StockTransactions';
 
@@ -121,6 +122,7 @@ const App: React.FC = () => {
             <Route path="receivables" element={<Receivables />} />
             <Route path="payment-records" element={<PaymentRecords />} />
             <Route path="invoices" element={<InvoiceManagement />} />
+            <Route path="cost-module" element={<CostModule />} />
           </Route>
           <Route path="consumables-management">
             <Route path="info" element={<ConsumableInfo />} />
