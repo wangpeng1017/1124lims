@@ -1,20 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Table, Tag, Button, Space, Modal, Form, Input, message, Popconfirm, Badge, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlayCircleOutlined, FormOutlined, CheckCircleOutlined, SwapOutlined, ExportOutlined, EyeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { testTaskData, type ITestTask } from '../../mock/test';
+import { type ITestTask } from '../../mock/test';
 import { employeeData } from '../../mock/personnel';
 import PersonSelector from '../../components/PersonSelector';
 import TaskDetailDrawer from '../../components/TaskDetailDrawer';
+import { useTaskService } from '../../services/useDataService';
 
 
 const MyTasks: React.FC = () => {
     const navigate = useNavigate();
-    // 模拟只显示分配给"当前用户"的内部任务(非委外)
-    const [dataSource, setDataSource] = useState<ITestTask[]>(
-        testTaskData.filter(t => t.assignedTo === '当前用户' && !t.isOutsourced)
-    );
+    // 使用API服务
+    const { loading, data: apiData, fetchMyTasks, start, complete } = useTaskService();
+    const [dataSource, setDataSource] = useState<ITestTask[]>([]);
+
+    // 初始化加载数据
+    useEffect(() => {
+        fetchMyTasks();
+    }, [fetchMyTasks]);
+
+    // 同步API数据（只显示内部任务）
+    useEffect(() => {
+        if (apiData && apiData.length > 0) {
+            setDataSource((apiData as any).filter((t: any) => !t.isOutsourced));
+        }
+    }, [apiData]);
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
     const [currentTask, setCurrentTask] = useState<ITestTask | null>(null);
     const [form] = Form.useForm();
@@ -23,20 +35,18 @@ const MyTasks: React.FC = () => {
     const [detailVisible, setDetailVisible] = useState(false);
     const [detailTask, setDetailTask] = useState<ITestTask | null>(null);
 
-    const handleStart = (record: ITestTask) => {
-        const newData = dataSource.map(item =>
-            item.id === record.id ? { ...item, status: '进行中' as const } : item
-        );
-        setDataSource(newData);
-        message.success('任务已开始');
+    const handleStart = async (record: ITestTask) => {
+        const result = await start(record.id);
+        if (result.success) {
+            fetchMyTasks();
+        }
     };
 
-    const handleComplete = (record: ITestTask) => {
-        const newData = dataSource.map(item =>
-            item.id === record.id ? { ...item, status: '已完成' as const, progress: 100 } : item
-        );
-        setDataSource(newData);
-        message.success('任务已完成');
+    const handleComplete = async (record: ITestTask) => {
+        const result = await complete(record.id);
+        if (result.success) {
+            fetchMyTasks();
+        }
     };
 
     const handleTransferClick = (record: ITestTask) => {

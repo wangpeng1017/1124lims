@@ -1,15 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Table, Tag, Button, Space, Modal, Descriptions, Divider, List, Form, Input, Select, DatePicker, message, Row, Col } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { EyeOutlined, DownloadOutlined, FileTextOutlined, PlusOutlined } from '@ant-design/icons';
-import { clientReportData, testReportData } from '../../mock/report';
+import { testReportData } from '../../mock/report';
 import type { IClientReport } from '../../mock/report';
 import dayjs from 'dayjs';
+import { useReportService } from '../../services/useDataService';
 
 const ClientReports: React.FC = () => {
-    const [dataSource, setDataSource] = useState<IClientReport[]>(clientReportData);
+    // 使用API服务
+    const { loading, data: apiData, fetchList } = useReportService();
+    const [dataSource, setDataSource] = useState<IClientReport[]>([]);
     const [previewReport, setPreviewReport] = useState<IClientReport | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+    // 初始化加载数据
+    useEffect(() => {
+        fetchList();
+    }, [fetchList]);
+
+    // 同步API数据
+    useEffect(() => {
+        if (apiData && apiData.length > 0) {
+            setDataSource(apiData as any);
+        }
+    }, [apiData]);
 
     // Create Modal State
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

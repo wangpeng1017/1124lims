@@ -1,14 +1,17 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Table, Card, Button, Space, Modal, Form, Input, Select, Popconfirm, message, InputNumber, Descriptions, Tag, Tabs } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, BarcodeOutlined, DownloadOutlined } from '@ant-design/icons';
-import { sampleDetailData, type ISampleDetail } from '../../mock/sample';
+import { type ISampleDetail } from '../../mock/sample';
 import { entrustmentData } from '../../mock/entrustment';
 import Barcode from 'react-barcode';
 import html2canvas from 'html2canvas';
+import { useSampleService } from '../../services/useDataService';
 
 const SampleRegistration: React.FC = () => {
-    const [dataSource, setDataSource] = useState<ISampleDetail[]>(sampleDetailData);
+    // 使用API服务
+    const { loading, data: apiData, fetchList, create, update, remove } = useSampleService();
+    const [dataSource, setDataSource] = useState<ISampleDetail[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<ISampleDetail | null>(null);
     const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
@@ -16,6 +19,18 @@ const SampleRegistration: React.FC = () => {
     const [selectedEntrustment, setSelectedEntrustment] = useState<string>('');
     const [form] = Form.useForm();
     const labelRef = useRef<HTMLDivElement>(null);
+
+    // 初始化加载数据
+    useEffect(() => {
+        fetchList();
+    }, [fetchList]);
+
+    // 同步API数据
+    useEffect(() => {
+        if (apiData && apiData.length > 0) {
+            setDataSource(apiData as any);
+        }
+    }, [apiData]);
 
     const handleAdd = () => {
         setEditingRecord(null);
@@ -31,9 +46,11 @@ const SampleRegistration: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = (id: number) => {
-        setDataSource(dataSource.filter(item => item.id !== id));
-        message.success('删除成功');
+    const handleDelete = async (id: number) => {
+        const result = await remove(id);
+        if (result.success) {
+            fetchList();
+        }
     };
 
     const handleGenerateLabel = (record: ISampleDetail) => {
