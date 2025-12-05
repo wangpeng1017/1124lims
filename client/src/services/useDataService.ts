@@ -390,7 +390,37 @@ export function useDeviceService() {
         }
     }, []);
 
-    return { loading, data, total, fetchList, create };
+    const update = useCallback(async (data: Partial<Device>) => {
+        if (!USE_API) {
+            message.success('更新成功(mock)');
+            return { success: true };
+        }
+        try {
+            await deviceApi.update(data);
+            message.success('更新成功');
+            return { success: true };
+        } catch (error: any) {
+            message.error(error.message || '更新失败');
+            return { success: false };
+        }
+    }, []);
+
+    const remove = useCallback(async (id: number) => {
+        if (!USE_API) {
+            message.success('删除成功(mock)');
+            return { success: true };
+        }
+        try {
+            await deviceApi.delete(id);
+            message.success('删除成功');
+            return { success: true };
+        } catch (error: any) {
+            message.error(error.message || '删除失败');
+            return { success: false };
+        }
+    }, []);
+
+    return { loading, data, total, fetchList, create, update, remove };
 }
 
 // ==================== 认证服务 Hook ====================

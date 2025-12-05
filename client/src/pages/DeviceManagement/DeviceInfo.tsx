@@ -1,17 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Card, Tag, Row, Col, Button, Modal, Form, Input, Select, InputNumber, Space, Popconfirm, message, Drawer, Descriptions, Tabs } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { SearchOutlined, PlusOutlined } from '@ant-design/icons';
-import { deviceData } from '../../mock/devices';
 import type { IDeviceInfo } from '../../mock/devices';
+import { useDeviceService } from '../../services/useDataService';
 
 const DeviceInfo: React.FC = () => {
-    const [dataSource, setDataSource] = useState<IDeviceInfo[]>(deviceData);
+    // 使用API服务
+    const { loading, data: apiData, fetchList, create, update, remove } = useDeviceService();
+    const [dataSource, setDataSource] = useState<IDeviceInfo[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<IDeviceInfo | null>(null);
     const [viewingRecord, setViewingRecord] = useState<IDeviceInfo | null>(null);
     const [form] = Form.useForm();
+
+    // 初始化加载数据
+    useEffect(() => {
+        fetchList();
+    }, [fetchList]);
+
+    // 同步API数据
+    useEffect(() => {
+        if (apiData && apiData.length > 0) {
+            setDataSource(apiData as any);
+        }
+    }, [apiData]);
 
     const handleAdd = () => {
         setEditingRecord(null);
@@ -30,30 +44,30 @@ const DeviceInfo: React.FC = () => {
         setIsDrawerOpen(true);
     };
 
-    const handleDelete = (id: string) => {
-        setDataSource(prev => prev.filter(item => item.id !== id));
-        message.success('删除成功');
+    const handleDelete = async (id: string) => {
+        const result = await remove(parseInt(id));
+        if (result.success) {
+            setDataSource(prev => prev.filter(item => item.id !== id));
+            fetchList();
+        }
     };
 
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
             if (editingRecord) {
-                setDataSource(prev => prev.map(item => item.id === editingRecord.id ? { ...item, ...values } : item));
-                message.success('更新成功');
+                const result = await update({ id: editingRecord.id, ...values });
+                if (result.success) {
+                    fetchList();
+                    setIsModalOpen(false);
+                }
             } else {
-                const maxId = dataSource.length > 0 ? Math.max(...dataSource.map(d => parseInt(d.id) || 0)) : 0;
-                const newId = (maxId + 1).toString();
-                const newDevice = {
-                    id: newId,
-                    ...values,
-                    createTime: new Date().toISOString(),
-                    updateTime: new Date().toISOString()
-                } as IDeviceInfo;
-                setDataSource(prev => [newDevice, ...prev]);
-                message.success('添加成功');
+                const result = await create(values);
+                if (result.success) {
+                    fetchList();
+                    setIsModalOpen(false);
+                }
             }
-            setIsModalOpen(false);
         } catch (error) {
             console.error('Validate Failed:', error);
         }
