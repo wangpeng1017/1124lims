@@ -92,7 +92,8 @@ const SystemDocuments: React.FC = () => {
 
     const columns: ColumnsType<ISystemDocument> = [
         { title: '序号', dataIndex: 'id', key: 'id', width: 80 },
-        { title: '文件名称', dataIndex: 'name', key: 'name', width: 250 },
+        { title: '文件名称', dataIndex: 'name', key: 'name', width: 200 },
+        { title: '版本', dataIndex: 'version', key: 'version', width: 100 },
         {
             title: '附件',
             dataIndex: 'attachmentName',
@@ -169,6 +170,9 @@ const SystemDocuments: React.FC = () => {
                 <Form form={form} layout="vertical">
                     <Form.Item name="name" label="文件名称" rules={[{ required: true, message: '请输入文件名称' }]}>
                         <Input placeholder="请输入文件名称" />
+                    </Form.Item>
+                    <Form.Item name="version" label="版本" rules={[{ required: true, message: '请输入版本号' }]}>
+                        <Input placeholder="请输入版本号，如 V1.0" />
                     </Form.Item>
                     <Form.Item name="description" label="描述">
                         <Input.TextArea rows={3} placeholder="请输入文件描述" />

@@ -38,6 +38,10 @@ export interface IContract {
     sampleName: string;               // 样品名称
     testItems: QuotationItem[];       // 检测项目
 
+    // 预付款信息
+    hasAdvancePayment: boolean;       // 是否有预付款
+    advancePaymentAmount?: number;    // 预付款金额
+
     // 合同条款
     terms: {
         paymentTerms: string;           // 付款条款
@@ -148,6 +152,8 @@ export const contractData: IContract[] = [
             { id: 1, serviceItem: '拉伸强度测试', methodStandard: 'GB/T 228.1-2021', quantity: 3, unitPrice: 500, totalPrice: 1500 },
             { id: 2, serviceItem: '金相分析', methodStandard: 'GB/T 13298-2015', quantity: 2, unitPrice: 800, totalPrice: 1600 }
         ],
+        hasAdvancePayment: true,
+        advancePaymentAmount: 1500,
         terms: DEFAULT_CONTRACT_TERMS,
         signDate: '2023-12-01',
         effectiveDate: '2023-12-01',

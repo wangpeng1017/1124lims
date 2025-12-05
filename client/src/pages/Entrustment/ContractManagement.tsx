@@ -102,6 +102,7 @@ const ContractManagement: React.FC = () => {
                 contractAmount: selectedQuotation.discountTotal,
                 sampleName: selectedQuotation.sampleName,
                 testItems: selectedQuotation.items,
+                hasAdvancePayment: false, // TODO: 需求5 - 后续添加UI支持
                 terms: {
                     paymentTerms: values.paymentTerms || '按照合同约定支付',
                     deliveryTerms: values.deliveryTerms || '按照合同约定交付',

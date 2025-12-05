@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, Table, Tag, Progress, Space, Input, Select, Button, Tooltip, Modal, Form, DatePicker, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { SearchOutlined, EyeOutlined, ExportOutlined } from '@ant-design/icons';
+import { SearchOutlined, EyeOutlined } from '@ant-design/icons';
 import { testTaskData, type ITestTask } from '../../mock/test';
+import { entrustmentData } from '../../mock/entrustment';
 import { employeeData } from '../../mock/personnel';
 import dayjs from 'dayjs';
 import { deviceData } from '../../mock/devices';
@@ -11,12 +12,20 @@ import TaskDetailDrawer from '../../components/TaskDetailDrawer';
 
 const { Option } = Select;
 
+// 委托单分组数据类型
+interface EntrustmentGroup {
+    entrustmentId: string;
+    clientName: string;
+    sampleDate: string;
+    follower: string;
+    tasks: ITestTask[];
+}
+
 const AllTasks: React.FC = () => {
     const [dataSource, setDataSource] = useState<ITestTask[]>(testTaskData);
     const [searchText, setSearchText] = useState('');
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const [personFilter, setPersonFilter] = useState<string | null>(null);
-    const [assignmentStatusFilter, setAssignmentStatusFilter] = useState<string | null>(null);
 
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
     const [assigningTask, setAssigningTask] = useState<ITestTask | null>(null);
@@ -27,28 +36,56 @@ const AllTasks: React.FC = () => {
     const [detailVisible, setDetailVisible] = useState(false);
     const [detailTask, setDetailTask] = useState<ITestTask | null>(null);
 
-    // 过滤数据
-    const filteredData = dataSource.filter(item => {
-        // 只显示内部任务(非委外)
-        const matchInternal = !item.isOutsourced;
+    // 按委托单分组任务（只显示内部任务）
+    const groupedData = useMemo(() => {
+        // 过滤出内部任务
+        const internalTasks = dataSource.filter(t => !t.isOutsourced);
 
-        const matchSearch =
-            item.taskNo.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.sampleName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.sampleNo.toLowerCase().includes(searchText.toLowerCase());
-        const matchStatus = statusFilter ? item.status === statusFilter : true;
-        const matchPerson = personFilter ? item.assignedTo === personFilter : true;
+        // 按委托单ID分组
+        const groups = new Map<string, EntrustmentGroup>();
 
-        // 分配状态筛选
-        let matchAssignmentStatus = true;
-        if (assignmentStatusFilter === 'unassigned') {
-            matchAssignmentStatus = !item.assignedTo || item.assignedTo === '';
-        } else if (assignmentStatusFilter === 'assigned') {
-            matchAssignmentStatus = !!item.assignedTo && item.assignedTo !== '';
-        }
+        internalTasks.forEach(task => {
+            const entrustmentId = task.entrustmentId;
+            if (!groups.has(entrustmentId)) {
+                // 查找对应的委托单信息
+                const entrustment = entrustmentData.find(e => e.entrustmentId === entrustmentId);
+                groups.set(entrustmentId, {
+                    entrustmentId,
+                    clientName: entrustment?.clientName || '未知客户',
+                    sampleDate: entrustment?.sampleDate || '',
+                    follower: entrustment?.follower || '',
+                    tasks: []
+                });
+            }
+            groups.get(entrustmentId)!.tasks.push(task);
+        });
 
-        return matchInternal && matchSearch && matchStatus && matchPerson && matchAssignmentStatus;
-    });
+        return Array.from(groups.values());
+    }, [dataSource]);
+
+    // 应用筛选
+    const filteredData = useMemo(() => {
+        return groupedData.filter(group => {
+            // 搜索筛选
+            const matchSearch = searchText === '' ||
+                group.entrustmentId.toLowerCase().includes(searchText.toLowerCase()) ||
+                group.clientName.toLowerCase().includes(searchText.toLowerCase()) ||
+                group.tasks.some(t =>
+                    t.taskNo.toLowerCase().includes(searchText.toLowerCase()) ||
+                    t.sampleName.toLowerCase().includes(searchText.toLowerCase())
+                );
+
+            // 状态筛选
+            const matchStatus = !statusFilter ||
+                group.tasks.some(t => t.status === statusFilter);
+
+            // 负责人筛选
+            const matchPerson = !personFilter ||
+                group.tasks.some(t => t.assignedTo === personFilter);
+
+            return matchSearch && matchStatus && matchPerson;
+        });
+    }, [groupedData, searchText, statusFilter, personFilter]);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -94,7 +131,8 @@ const AllTasks: React.FC = () => {
         setDetailVisible(true);
     };
 
-    const columns: ColumnsType<ITestTask> = [
+    // 子表格：任务列表
+    const taskColumns: ColumnsType<ITestTask> = [
         {
             title: '任务编号',
             dataIndex: 'taskNo',
@@ -107,36 +145,9 @@ const AllTasks: React.FC = () => {
             dataIndex: 'sampleName',
             key: 'sampleName',
             width: 150,
-            render: (text, record) => (
-                <Space direction="vertical" size={0}>
-                    <span>{text}</span>
-                    <span style={{ fontSize: '12px', color: '#888' }}>{record.sampleNo}</span>
-                </Space>
-            )
         },
         {
-            title: '任务类型',
-            key: 'taskType',
-            width: 120,
-            render: (_, record) => (
-                <>
-                    {record.isOutsourced ? (
-                        <Tag icon={<ExportOutlined />} color="blue">
-                            委外
-                        </Tag>
-                    ) : (
-                        <Tag color="green">内部</Tag>
-                    )}
-                    {record.isOutsourced && record.outsourceInfo && (
-                        <div style={{ fontSize: '12px', color: '#666', marginTop: 4 }}>
-                            {record.outsourceInfo.supplierName}
-                        </div>
-                    )}
-                </>
-            ),
-        },
-        {
-            title: '检测参数',
+            title: '检测项目',
             dataIndex: 'parameters',
             key: 'parameters',
             width: 200,
@@ -149,7 +160,14 @@ const AllTasks: React.FC = () => {
             )
         },
         {
-            title: '负责人',
+            title: '状态',
+            dataIndex: 'status',
+            key: 'status',
+            width: 90,
+            render: (status) => <Tag color={getStatusColor(status)}>{status}</Tag>
+        },
+        {
+            title: '执行人',
             dataIndex: 'assignedTo',
             key: 'assignedTo',
             width: 100,
@@ -162,29 +180,11 @@ const AllTasks: React.FC = () => {
             width: 110,
         },
         {
-            title: '优先级',
-            dataIndex: 'priority',
-            key: 'priority',
-            width: 80,
-            render: (priority) => (
-                <Tag color={priority === 'Urgent' ? 'red' : 'green'}>
-                    {priority === 'Urgent' ? '紧急' : '普通'}
-                </Tag>
-            )
-        },
-        {
             title: '进度',
             dataIndex: 'progress',
             key: 'progress',
-            width: 150,
+            width: 120,
             render: (percent) => <Progress percent={percent} size="small" />
-        },
-        {
-            title: '状态',
-            dataIndex: 'status',
-            key: 'status',
-            width: 90,
-            render: (status) => <Tag color={getStatusColor(status)}>{status}</Tag>
         },
         {
             title: '操作',
@@ -193,12 +193,7 @@ const AllTasks: React.FC = () => {
             width: 120,
             render: (_, record) => (
                 <Space size="small">
-                    {!record.assignedTo && (
-                        <a onClick={() => handleOpenAssign(record)}>分配</a>
-                    )}
-                    {record.assignedTo && record.status !== '已完成' && (
-                        <a onClick={() => handleOpenAssign(record)}>改派</a>
-                    )}
+                    <a onClick={() => handleOpenAssign(record)}>分配</a>
                     <Tooltip title="查看明细">
                         <Button
                             type="link"
@@ -212,9 +207,74 @@ const AllTasks: React.FC = () => {
         },
     ];
 
-    const unassignedCount = dataSource.filter(t => !t.assignedTo).length;
-    const inProgressCount = dataSource.filter(t => t.status === '进行中').length;
-    const completedCount = dataSource.filter(t => t.status === '已完成').length;
+    // 主表格：委托单列表
+    const entrustmentColumns: ColumnsType<EntrustmentGroup> = [
+        {
+            title: '委托单号',
+            dataIndex: 'entrustmentId',
+            key: 'entrustmentId',
+            width: 150,
+        },
+        {
+            title: '客户名称',
+            dataIndex: 'clientName',
+            key: 'clientName',
+            width: 200,
+        },
+        {
+            title: '收样日期',
+            dataIndex: 'sampleDate',
+            key: 'sampleDate',
+            width: 120,
+        },
+        {
+            title: '跟进人',
+            dataIndex: 'follower',
+            key: 'follower',
+            width: 100,
+        },
+        {
+            title: '任务数',
+            key: 'taskCount',
+            width: 80,
+            render: (_, record) => record.tasks.length,
+        },
+        {
+            title: '完成情况',
+            key: 'completion',
+            width: 150,
+            render: (_, record) => {
+                const total = record.tasks.length;
+                const completed = record.tasks.filter(t => t.status === '已完成').length;
+                const inProgress = record.tasks.filter(t => t.status === '进行中').length;
+                return (
+                    <Space size={4}>
+                        <Tag color="success">{completed}完成</Tag>
+                        <Tag color="processing">{inProgress}进行中</Tag>
+                    </Space>
+                );
+            }
+        },
+    ];
+
+    // 展开行渲染
+    const expandedRowRender = (record: EntrustmentGroup) => {
+        return (
+            <Table
+                columns={taskColumns}
+                dataSource={record.tasks}
+                rowKey="id"
+                pagination={false}
+                size="small"
+            />
+        );
+    };
+
+    // 统计数据
+    const allTasks = dataSource.filter(t => !t.isOutsourced);
+    const unassignedCount = allTasks.filter(t => !t.assignedTo).length;
+    const inProgressCount = allTasks.filter(t => t.status === '进行中').length;
+    const completedCount = allTasks.filter(t => t.status === '已完成').length;
 
     return (
         <Card
@@ -230,21 +290,12 @@ const AllTasks: React.FC = () => {
         >
             <Space style={{ marginBottom: 16 }} wrap>
                 <Input
-                    placeholder="搜索任务号/样品名称"
+                    placeholder="搜索委托单号/客户/任务号"
                     prefix={<SearchOutlined />}
-                    style={{ width: 200 }}
+                    style={{ width: 240 }}
                     onChange={e => setSearchText(e.target.value)}
                     allowClear
                 />
-                <Select
-                    placeholder="分配状态"
-                    style={{ width: 120 }}
-                    allowClear
-                    onChange={setAssignmentStatusFilter}
-                >
-                    <Option value="unassigned">未分配</Option>
-                    <Option value="assigned">已分配</Option>
-                </Select>
                 <Select
                     placeholder="任务状态"
                     style={{ width: 120 }}
@@ -270,13 +321,16 @@ const AllTasks: React.FC = () => {
             </Space>
 
             <Table
-                columns={columns}
+                columns={entrustmentColumns}
                 dataSource={filteredData}
-                rowKey="id"
-                scroll={{ x: 1400 }}
+                rowKey="entrustmentId"
+                expandable={{
+                    expandedRowRender,
+                    defaultExpandAllRows: false,
+                }}
                 pagination={{
                     pageSize: 10,
-                    showTotal: (total) => `共 ${total} 条任务`
+                    showTotal: (total) => `共 ${total} 个委托单`
                 }}
             />
 
