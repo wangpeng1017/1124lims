@@ -6,7 +6,10 @@
       "Bash(git commit:*)",
       "Bash(git push)",
       "Bash(git push:*)",
-      "Bash(npx tsc --noEmit)"
+      "Bash(npx tsc --noEmit)",
+      "Bash(gh issue list:*)",
+      "Bash(find . -name \"*.java\" -type f -exec sed -i 's/return Result\\.success(\"\"\\([^\"\"]*\\)\"\");/return Result.successMsg(\"\"\\1\"\");/g' {} ;)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
