@@ -1,14 +1,15 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, Table, Tag, Progress, Space, Input, Select, Button, Tooltip, Modal, Form, DatePicker, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { SearchOutlined, EyeOutlined } from '@ant-design/icons';
-import { testTaskData, type ITestTask } from '../../mock/test';
+import { type ITestTask } from '../../mock/test';
 import { entrustmentData } from '../../mock/entrustment';
 import { employeeData } from '../../mock/personnel';
 import dayjs from 'dayjs';
 import { deviceData } from '../../mock/devices';
 import PersonSelector from '../../components/PersonSelector';
 import TaskDetailDrawer from '../../components/TaskDetailDrawer';
+import { useTaskService } from '../../services/useDataService';
 
 const { Option } = Select;
 
@@ -22,7 +23,21 @@ interface EntrustmentGroup {
 }
 
 const AllTasks: React.FC = () => {
-    const [dataSource, setDataSource] = useState<ITestTask[]>(testTaskData);
+    // 使用API服务
+    const { loading, data: apiData, fetchList, assign } = useTaskService();
+    const [dataSource, setDataSource] = useState<ITestTask[]>([]);
+
+    // 初始化加载数据
+    useEffect(() => {
+        fetchList();
+    }, [fetchList]);
+
+    // 同步API数据
+    useEffect(() => {
+        if (apiData && apiData.length > 0) {
+            setDataSource(apiData as any);
+        }
+    }, [apiData]);
     const [searchText, setSearchText] = useState('');
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const [personFilter, setPersonFilter] = useState<string | null>(null);

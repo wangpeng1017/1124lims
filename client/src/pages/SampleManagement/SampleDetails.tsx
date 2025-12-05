@@ -1,16 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Card, Input, Select, Space, Tag, Button, Modal, Form, InputNumber, DatePicker, message, Statistic, Row, Col } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { SearchOutlined, ExportOutlined, UserAddOutlined, SendOutlined, HistoryOutlined } from '@ant-design/icons';
-import { sampleDetailData, sampleCollectionData, sampleOutsourceData, type ISampleDetail, type ISampleCollection, type ISampleOutsource } from '../../mock/sample';
+import { sampleCollectionData, sampleOutsourceData, type ISampleDetail, type ISampleCollection, type ISampleOutsource } from '../../mock/sample';
 import { supplierData } from '../../mock/supplier';
 import dayjs from 'dayjs';
+import { useSampleService } from '../../services/useDataService';
 
 const SampleDetails: React.FC = () => {
-    const [dataSource, setDataSource] = useState<ISampleDetail[]>(sampleDetailData);
-    const [filteredData, setFilteredData] = useState<ISampleDetail[]>(sampleDetailData);
+    // 使用API服务
+    const { loading, data: apiData, fetchList } = useSampleService();
+    const [dataSource, setDataSource] = useState<ISampleDetail[]>([]);
+    const [filteredData, setFilteredData] = useState<ISampleDetail[]>([]);
     const [collectionRecords, setCollectionRecords] = useState<ISampleCollection[]>(sampleCollectionData);
     const [outsourceRecords, setOutsourceRecords] = useState<ISampleOutsource[]>(sampleOutsourceData);
+
+    // 初始化加载数据
+    useEffect(() => {
+        fetchList();
+    }, [fetchList]);
+
+    // 同步API数据
+    useEffect(() => {
+        if (apiData && apiData.length > 0) {
+            setDataSource(apiData as any);
+            setFilteredData(apiData as any);
+        }
+    }, [apiData]);
 
     const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
     const [isOutsourceModalOpen, setIsOutsourceModalOpen] = useState(false);

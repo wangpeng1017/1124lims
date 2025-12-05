@@ -1,4 +1,5 @@
-import { request, ApiResponse, PageResult } from './api';
+import { request } from './api';
+import type { ApiResponse, PageResult } from './api';
 
 // 委托单接口定义
 export interface Entrustment {

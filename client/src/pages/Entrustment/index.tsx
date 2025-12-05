@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Card, Tag, Space, Button, Drawer, Form, Input, Popconfirm, message, Tooltip, Select, Row, Col, Divider, List, Radio, Modal, DatePicker } from 'antd';
 import { LinkOutlined, PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { entrustmentData } from '../../mock/entrustment';
 import type { IEntrustmentRecord, IEntrustmentProject } from '../../mock/entrustment';
 import { detectionParametersData } from '../../mock/basicParameters';
 import { deviceData } from '../../mock/devices';
@@ -10,6 +9,7 @@ import { supplierData } from '../../mock/supplier';
 import dayjs from 'dayjs';
 import { employeeData } from '../../mock/personnel';
 import PersonSelector from '../../components/PersonSelector';
+import { useEntrustmentService } from '../../services/useDataService';
 
 const orgUsers = [
     {
@@ -38,10 +38,24 @@ const orgUsers = [
 const outsourcingSuppliers = supplierData.filter(s => s.categories.includes('CAT001'));
 
 const Entrustment: React.FC = () => {
-    const [dataSource, setDataSource] = useState<IEntrustmentRecord[]>(entrustmentData);
+    // 使用API服务
+    const { loading, data: apiData, total, fetchList, create, update, remove } = useEntrustmentService();
+    const [dataSource, setDataSource] = useState<IEntrustmentRecord[]>([]);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<IEntrustmentRecord | null>(null);
     const [form] = Form.useForm();
+
+    // 初始化加载数据
+    useEffect(() => {
+        fetchList();
+    }, [fetchList]);
+
+    // 同步API数据到本地状态
+    useEffect(() => {
+        if (apiData && apiData.length > 0) {
+            setDataSource(apiData as any);
+        }
+    }, [apiData]);
     // const navigate = useNavigate(); // Unused
 
     // 项目管理状态
@@ -70,9 +84,13 @@ const Entrustment: React.FC = () => {
         setIsDrawerOpen(true);
     };
 
-    const handleDelete = (id: number) => {
-        setDataSource(prev => prev.filter(item => item.id !== id));
-        message.success('删除成功');
+    const handleDelete = async (id: number) => {
+        const result = await remove(id);
+        if (result.success) {
+            setDataSource(prev => prev.filter(item => item.id !== id));
+            // 重新加载数据确保同步
+            fetchList();
+        }
     };
 
     const handleGenerateLink = (record: IEntrustmentRecord) => {
@@ -105,14 +123,20 @@ const Entrustment: React.FC = () => {
             };
 
             if (editingRecord) {
-                setDataSource(prev => prev.map(item => item.id === editingRecord.id ? { ...item, ...finalValues } : item));
-                message.success('更新成功');
+                // 更新操作
+                const result = await update({ id: editingRecord.id, ...finalValues });
+                if (result.success) {
+                    fetchList(); // 重新加载数据
+                    setIsDrawerOpen(false);
+                }
             } else {
-                const newId = Math.max(...dataSource.map(d => d.id), 0) + 1;
-                setDataSource(prev => [{ id: newId, ...finalValues }, ...prev]);
-                message.success('添加成功');
+                // 创建操作
+                const result = await create(finalValues);
+                if (result.success) {
+                    fetchList(); // 重新加载数据
+                    setIsDrawerOpen(false);
+                }
             }
-            setIsDrawerOpen(false);
         } catch (error) {
             console.error('Validate Failed:', error);
         }

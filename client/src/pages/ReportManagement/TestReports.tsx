@@ -1,18 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Table, Tag, Button, Space, Select, Modal, Descriptions, Divider } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { EyeOutlined, DownloadOutlined, FileTextOutlined } from '@ant-design/icons';
-import { testReportData, reportTemplateData, type ITestReport } from '../../mock/report';
+import { reportTemplateData, type ITestReport } from '../../mock/report';
+import { useReportService } from '../../services/useDataService';
 
 const { Option } = Select;
 
 const TestReports: React.FC = () => {
+    // 使用API服务
+    const { loading, data: apiData, fetchList } = useReportService();
+    const [dataSource, setDataSource] = useState<ITestReport[]>([]);
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const [previewReport, setPreviewReport] = useState<ITestReport | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
 
-    const filteredData = testReportData.filter(item =>
+    // 初始化加载数据
+    useEffect(() => {
+        fetchList();
+    }, [fetchList]);
+
+    // 同步API数据
+    useEffect(() => {
+        if (apiData && apiData.length > 0) {
+            setDataSource(apiData as any);
+        }
+    }, [apiData]);
+
+    const filteredData = dataSource.filter(item =>
         statusFilter ? item.status === statusFilter : true
     );
 
