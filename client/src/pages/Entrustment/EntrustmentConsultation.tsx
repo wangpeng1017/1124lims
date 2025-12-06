@@ -30,6 +30,19 @@ const EntrustmentConsultation: React.FC = () => {
     const [isDetailVisible, setIsDetailVisible] = useState(false);
     const [detailConsultation, setDetailConsultation] = useState<IConsultation | null>(null);
 
+    // 行选择状态
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const [selectedRows, setSelectedRows] = useState<IConsultation[]>([]);
+
+    const rowSelection = {
+        type: 'radio' as const,
+        selectedRowKeys,
+        onChange: (keys: React.Key[], rows: IConsultation[]) => {
+            setSelectedRowKeys(keys);
+            setSelectedRows(rows);
+        },
+    };
+
     // 获取所有跟进人列表
     const followers = Array.from(new Set(dataSource.map(item => item.follower)));
 
@@ -312,9 +325,16 @@ const EntrustmentConsultation: React.FC = () => {
             render: (text) => text ? <a>{text}</a> : '-'
         },
         {
+            title: '创建时间',
+            dataIndex: 'createTime',
+            key: 'createTime',
+            width: 170,
+            sorter: (a, b) => a.createTime.localeCompare(b.createTime)
+        },
+        {
             title: '操作',
             key: 'action',
-            width: 280,
+            width: 180,
             fixed: 'right',
             render: (_, record) => {
                 const actions = [];
@@ -331,22 +351,7 @@ const EntrustmentConsultation: React.FC = () => {
                     </Button>
                 );
 
-                // 跟进中状态 - 可生成报价单
-                if (record.status === 'following' && !record.quotationNo) {
-                    actions.push(
-                        <Button
-                            key="quotation"
-                            size="small"
-                            type="primary"
-                            icon={<FileAddOutlined />}
-                            onClick={() => handleGenerateQuotation(record)}
-                        >
-                            生成报价单
-                        </Button>
-                    );
-                }
-
-                // 待跟进/跟进中状态 - 可编辑、关闭
+                // 待跟进/跟进中状态 - 可编辑
                 if (record.status === 'pending' || record.status === 'following') {
                     actions.push(
                         <Button
@@ -357,17 +362,6 @@ const EntrustmentConsultation: React.FC = () => {
                         >
                             编辑
                         </Button>
-                    );
-                    actions.push(
-                        <Popconfirm
-                            key="close"
-                            title="确定关闭此咨询吗?"
-                            onConfirm={() => handleCloseConsultation(record)}
-                        >
-                            <Button size="small" icon={<CloseCircleOutlined />}>
-                                关闭
-                            </Button>
-                        </Popconfirm>
                     );
                 }
 
@@ -388,13 +382,6 @@ const EntrustmentConsultation: React.FC = () => {
 
                 return <Space size="small">{actions}</Space>;
             }
-        },
-        {
-            title: '创建时间',
-            dataIndex: 'createTime',
-            key: 'createTime',
-            width: 170,
-            sorter: (a, b) => a.createTime.localeCompare(b.createTime)
         }
     ];
 
@@ -403,6 +390,26 @@ const EntrustmentConsultation: React.FC = () => {
             title="委托咨询"
             extra={
                 <Space>
+                    <Button
+                        type="primary"
+                        icon={<FileAddOutlined />}
+                        onClick={() => selectedRows[0] && handleGenerateQuotation(selectedRows[0])}
+                        disabled={selectedRows.length === 0 || selectedRows[0]?.status !== 'following' || !!selectedRows[0]?.quotationNo}
+                    >
+                        生成报价单
+                    </Button>
+                    <Popconfirm
+                        title="确定关闭此咨询吗?"
+                        onConfirm={() => selectedRows[0] && handleCloseConsultation(selectedRows[0])}
+                        disabled={selectedRows.length === 0 || (selectedRows[0]?.status !== 'pending' && selectedRows[0]?.status !== 'following')}
+                    >
+                        <Button
+                            icon={<CloseCircleOutlined />}
+                            disabled={selectedRows.length === 0 || (selectedRows[0]?.status !== 'pending' && selectedRows[0]?.status !== 'following')}
+                        >
+                            关闭咨询
+                        </Button>
+                    </Popconfirm>
                     <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
                         新建咨询
                     </Button>
@@ -463,6 +470,7 @@ const EntrustmentConsultation: React.FC = () => {
                 columns={columns}
                 dataSource={filteredData}
                 rowKey="id"
+                rowSelection={rowSelection}
                 pagination={{ pageSize: 10 }}
                 scroll={{ x: 'max-content' }}
                 rowClassName={(record) =>

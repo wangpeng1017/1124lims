@@ -417,9 +417,15 @@ const QuotationManagement: React.FC = () => {
             width: 100
         },
         {
+            title: '创建时间',
+            dataIndex: 'createTime',
+            key: 'createTime',
+            width: 170
+        },
+        {
             title: '操作',
             key: 'action',
-            width: 320,
+            width: 180,
             fixed: 'right',
             render: (_, record) => {
                 const actions = [];
@@ -436,8 +442,8 @@ const QuotationManagement: React.FC = () => {
                     </Button>
                 );
 
-                // 草稿状态 - 可编辑、提交审批、删除
-                if (record.status === 'draft') {
+                // 草稿或已拒绝状态 - 可编辑
+                if (record.status === 'draft' || record.status === 'rejected') {
                     actions.push(
                         <Button
                             key="edit"
@@ -448,16 +454,10 @@ const QuotationManagement: React.FC = () => {
                             编辑
                         </Button>
                     );
-                    actions.push(
-                        <Button
-                            key="submit"
-                            size="small"
-                            type="primary"
-                            onClick={() => handleSubmitApproval(record)}
-                        >
-                            提交审批
-                        </Button>
-                    );
+                }
+
+                // 草稿状态 - 可删除
+                if (record.status === 'draft') {
                     actions.push(
                         <Popconfirm
                             key="delete"
@@ -471,60 +471,8 @@ const QuotationManagement: React.FC = () => {
                     );
                 }
 
-                // 已批准状态 - 生成PDF、归档
-                if (record.status === 'approved') {
-                    actions.push(
-                        <Button
-                            key="pdf"
-                            size="small"
-                            type="primary"
-                            icon={<FileTextOutlined />}
-                            onClick={() => handleViewPDF(record)}
-                        >
-                            生成PDF
-                        </Button>
-                    );
-
-                    // 只有客户反馈OK的才能归档
-                    if (record.clientStatus === 'ok') {
-                        actions.push(
-                            <Button
-                                key="archive"
-                                size="small"
-                                icon={<UploadOutlined />}
-                                onClick={() => handleArchive(record)}
-                            >
-                                归档
-                            </Button>
-                        );
-                    }
-                }
-
-
-
-                // 已拒绝状态 - 可重新编辑
-                if (record.status === 'rejected') {
-                    actions.push(
-                        <Button
-                            key="reedit"
-                            size="small"
-                            type="primary"
-                            icon={<EditOutlined />}
-                            onClick={() => handleEdit(record)}
-                        >
-                            重新编辑
-                        </Button>
-                    );
-                }
-
                 return <Space size="small">{actions}</Space>;
             }
-        },
-        {
-            title: '创建时间',
-            dataIndex: 'createTime',
-            key: 'createTime',
-            width: 170
         }
     ];
 
@@ -547,6 +495,26 @@ const QuotationManagement: React.FC = () => {
             title="报价单管理"
             extra={
                 <Space>
+                    <Button
+                        onClick={() => selectedRows[0] && handleSubmitApproval(selectedRows[0])}
+                        disabled={selectedRows.length === 0 || selectedRows[0]?.status !== 'draft'}
+                    >
+                        提交审批
+                    </Button>
+                    <Button
+                        icon={<FileTextOutlined />}
+                        onClick={() => selectedRows[0] && handleViewPDF(selectedRows[0])}
+                        disabled={selectedRows.length === 0 || selectedRows[0]?.status !== 'approved'}
+                    >
+                        生成PDF
+                    </Button>
+                    <Button
+                        icon={<UploadOutlined />}
+                        onClick={() => selectedRows[0] && handleArchive(selectedRows[0])}
+                        disabled={selectedRows.length === 0 || selectedRows[0]?.status !== 'approved' || selectedRows[0]?.clientStatus !== 'ok'}
+                    >
+                        归档
+                    </Button>
                     <Button
                         icon={<FileTextOutlined />}
                         onClick={handleGenerateContract}

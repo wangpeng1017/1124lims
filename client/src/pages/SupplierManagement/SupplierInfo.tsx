@@ -158,6 +158,7 @@ const SupplierInfo: React.FC = () => {
             fixed: 'right',
             render: (status) => getCooperationStatusTag(status)
         },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
         {
             title: '操作',
             key: 'action',
@@ -176,7 +177,6 @@ const SupplierInfo: React.FC = () => {
                 </Space>
             ),
         },
-        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
     ];
 
     // 获取供应商的评价历史

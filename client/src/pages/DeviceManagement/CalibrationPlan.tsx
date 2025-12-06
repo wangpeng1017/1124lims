@@ -85,6 +85,7 @@ const PlanList: React.FC = () => {
             width: 100,
             render: (status) => <Tag color={status === 'active' ? 'green' : 'default'}>{status === 'active' ? '启用' : '停用'}</Tag>
         },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
         {
             title: '操作',
             key: 'action',
@@ -98,7 +99,6 @@ const PlanList: React.FC = () => {
                 </Space>
             ),
         },
-        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
     ];
 
     return (

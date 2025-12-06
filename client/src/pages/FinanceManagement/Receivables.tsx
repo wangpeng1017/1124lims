@@ -14,6 +14,19 @@ const Receivables: React.FC = () => {
     const [form] = Form.useForm();
     const [fileList, setFileList] = useState<UploadFile[]>([]);
 
+    // 行选择状态
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const [selectedRows, setSelectedRows] = useState<IReceivable[]>([]);
+
+    const rowSelection = {
+        type: 'radio' as const,
+        selectedRowKeys,
+        onChange: (keys: React.Key[], rows: IReceivable[]) => {
+            setSelectedRowKeys(keys);
+            setSelectedRows(rows);
+        },
+    };
+
     const handlePayment = (record: IReceivable) => {
         setCurrentReceivable(record);
         form.setFieldsValue({
@@ -92,43 +105,44 @@ const Receivables: React.FC = () => {
             render: (status) => <Tag color={getStatusColor(status)}>{status}</Tag>
         },
         { title: '应收日期', dataIndex: 'dueDate', key: 'dueDate' },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
         {
             title: '操作',
             key: 'action',
             fixed: 'right',
-            width: 180,
+            width: 80,
             render: (_, record) => (
-                <Space size="small">
-                    <Button
-                        type="link"
-                        size="small"
-                        icon={<EyeOutlined />}
-                        onClick={() => handleViewDetail(record)}
-                    >
-                        查看
-                    </Button>
-                    {record.status === '未收款' && (
-                        <Button
-                            type="primary"
-                            size="small"
-                            icon={<DollarOutlined />}
-                            onClick={() => handlePayment(record)}
-                        >
-                            收款
-                        </Button>
-                    )}
-                </Space>
+                <Button
+                    type="link"
+                    size="small"
+                    icon={<EyeOutlined />}
+                    onClick={() => handleViewDetail(record)}
+                >
+                    查看
+                </Button>
             ),
         },
-        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
     ];
 
     return (
-        <Card title="委托应收">
+        <Card
+            title="委托应收"
+            extra={
+                <Button
+                    type="primary"
+                    icon={<DollarOutlined />}
+                    onClick={() => selectedRows[0] && handlePayment(selectedRows[0])}
+                    disabled={selectedRows.length === 0 || selectedRows[0]?.status !== '未收款'}
+                >
+                    收款
+                </Button>
+            }
+        >
             <Table
                 columns={columns}
                 dataSource={dataSource}
                 rowKey="id"
+                rowSelection={rowSelection}
                 scroll={{ x: 1200 }}
             />
 

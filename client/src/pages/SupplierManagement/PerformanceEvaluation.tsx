@@ -170,6 +170,7 @@ const PerformanceEvaluation: React.FC = () => {
             render: (level) => getLevelTag(level)
         },
         { title: '评价人', dataIndex: 'evaluator', key: 'evaluator', width: 100 },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
         {
             title: '操作',
             key: 'action',
@@ -179,7 +180,6 @@ const PerformanceEvaluation: React.FC = () => {
                 <a onClick={() => handleView(record)}>详情</a>
             ),
         },
-        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
     ];
 
     return (

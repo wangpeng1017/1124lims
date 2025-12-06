@@ -151,6 +151,7 @@ const EvaluationTemplate: React.FC = () => {
                 </Tag>
             )
         },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
         {
             title: '操作',
             key: 'action',
@@ -168,7 +169,6 @@ const EvaluationTemplate: React.FC = () => {
                 </Space>
             ),
         },
-        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
     ];
 
     return (

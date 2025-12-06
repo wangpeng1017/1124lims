@@ -133,6 +133,7 @@ const ClientUnit: React.FC = () => {
             }
         },
         { title: '备注', dataIndex: 'remark', key: 'remark', ellipsis: true },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
         {
             title: '操作',
             key: 'action',
@@ -174,7 +175,6 @@ const ClientUnit: React.FC = () => {
                 return <Space size="middle">{actions}</Space>;
             },
         },
-        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
     ];
 
     return (

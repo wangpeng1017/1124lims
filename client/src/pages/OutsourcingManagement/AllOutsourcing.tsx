@@ -27,6 +27,19 @@ const AllOutsourcing: React.FC = () => {
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [detailTask, setDetailTask] = useState<IOutsourceTask | null>(null);
 
+    // 行选择状态
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const [selectedRows, setSelectedRows] = useState<IOutsourceTask[]>([]);
+
+    const rowSelection = {
+        type: 'radio' as const,
+        selectedRowKeys,
+        onChange: (keys: React.Key[], rows: IOutsourceTask[]) => {
+            setSelectedRowKeys(keys);
+            setSelectedRows(rows);
+        },
+    };
+
 
 
     // 过滤数据
@@ -233,9 +246,15 @@ const AllOutsourcing: React.FC = () => {
             width: 100,
         },
         {
+            title: '创建时间',
+            dataIndex: 'createTime',
+            key: 'createTime',
+            width: 170,
+        },
+        {
             title: '操作',
             key: 'action',
-            width: 200,
+            width: 180,
             fixed: 'right',
             render: (_, record) => (
                 <Space size="small">
@@ -245,7 +264,7 @@ const AllOutsourcing: React.FC = () => {
                         icon={<EyeOutlined />}
                         onClick={() => handleViewDetail(record)}
                     >
-                        详情
+                        查看
                     </Button>
                     {record.status === '待确认' && (
                         <>
@@ -267,24 +286,8 @@ const AllOutsourcing: React.FC = () => {
                             </Popconfirm>
                         </>
                     )}
-                    {record.approvalStatus === '待审批' && record.status === '待确认' && (
-                        <Button
-                            type="link"
-                            size="small"
-                            icon={<AuditOutlined />}
-                            onClick={() => handleSubmitApproval(record)}
-                        >
-                            提交审批
-                        </Button>
-                    )}
                 </Space>
             ),
-        },
-        {
-            title: '创建时间',
-            dataIndex: 'createTime',
-            key: 'createTime',
-            width: 170,
         },
     ];
 
@@ -292,9 +295,18 @@ const AllOutsourcing: React.FC = () => {
         <Card
             title="全部委外任务"
             extra={
-                <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-                    新建委外任务
-                </Button>
+                <Space>
+                    <Button
+                        icon={<AuditOutlined />}
+                        onClick={() => selectedRows[0] && handleSubmitApproval(selectedRows[0])}
+                        disabled={selectedRows.length === 0 || selectedRows[0]?.approvalStatus !== '待审批' || selectedRows[0]?.status !== '待确认'}
+                    >
+                        提交审批
+                    </Button>
+                    <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+                        新建委外任务
+                    </Button>
+                </Space>
             }
         >
             {/* 搜索和筛选 */}
@@ -344,6 +356,7 @@ const AllOutsourcing: React.FC = () => {
                 columns={columns}
                 dataSource={filteredData}
                 rowKey="id"
+                rowSelection={rowSelection}
                 pagination={{ pageSize: 10 }}
                 scroll={{ x: 1800 }}
             />

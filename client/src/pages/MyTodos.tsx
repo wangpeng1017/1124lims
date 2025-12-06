@@ -147,6 +147,12 @@ const MyTodos: React.FC = () => {
             },
         },
         {
+            title: '创建时间',
+            dataIndex: 'createTime',
+            key: 'createTime',
+            width: 170,
+        },
+        {
             title: '操作',
             key: 'action',
             fixed: 'right',
@@ -180,12 +186,6 @@ const MyTodos: React.FC = () => {
                     )}
                 </Space>
             ),
-        },
-        {
-            title: '创建时间',
-            dataIndex: 'createTime',
-            key: 'createTime',
-            width: 170,
         },
     ];
 
