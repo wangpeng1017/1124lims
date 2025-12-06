@@ -47,6 +47,8 @@ import EntrustmentStats from './pages/StatisticsReport/EntrustmentStats';
 import SampleStats from './pages/StatisticsReport/SampleStats';
 import TaskStats from './pages/StatisticsReport/TaskStats';
 import ReportTemplates from './pages/ReportManagement/ReportTemplates';
+import ClientReportTemplates from './pages/ReportManagement/ClientReportTemplates';
+import TemplateEditor from './pages/ReportManagement/TemplateEditor';
 
 import SystemDocuments from './pages/SystemDocuments';
 import Dashboard from './pages/Dashboard';
@@ -113,6 +115,9 @@ const App: React.FC = () => {
           <Route path="report-management">
             <Route path="test-reports" element={<TestReports />} />
             <Route path="client-reports" element={<ClientReports />} />
+            <Route path="client-templates" element={<ClientReportTemplates />} />
+            <Route path="template-editor" element={<TemplateEditor />} />
+            <Route path="template-editor/:templateId" element={<TemplateEditor />} />
             <Route path="approval" element={<ReportApproval />} />
             <Route path="records" element={<ReportRecords />} />
             <Route path="report-templates" element={<ReportTemplates />} />

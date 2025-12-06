@@ -82,6 +82,7 @@ const items: MenuItem[] = [
   getItem('报告管理', '/report-management', <FileDoneOutlined />, [
     getItem('任务报告', '/report-management/test-reports', <FileTextOutlined />),
     getItem('客户报告', '/report-management/client-reports', <FileDoneOutlined />),
+    getItem('客户模板', '/report-management/client-templates', <FormOutlined />),
     getItem('报告审批', '/report-management/approval', <ReportAuditOutlined />),
     getItem('报告记录', '/report-management/records', <HistoryOutlined />),
     getItem('报告模板管理', '/report-management/report-templates', <FileTextOutlined />),
