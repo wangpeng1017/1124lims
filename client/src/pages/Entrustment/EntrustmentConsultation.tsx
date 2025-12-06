@@ -62,10 +62,7 @@ const EntrustmentConsultation: React.FC = () => {
             filtered = filtered.filter(item => item.status === status);
         }
 
-        // 紧急程度筛选
-        if (urgency !== 'all') {
-            filtered = filtered.filter(item => item.urgencyLevel === urgency);
-        }
+        // 跟进人筛选（移除紧急程度筛选）
 
         // 跟进人筛选
         if (follower !== 'all') {
@@ -292,16 +289,6 @@ const EntrustmentConsultation: React.FC = () => {
             }
         },
         {
-            title: '紧急程度',
-            dataIndex: 'urgencyLevel',
-            key: 'urgencyLevel',
-            width: 100,
-            render: (level: IConsultation['urgencyLevel']) => {
-                const config = URGENCY_LEVEL_MAP[level];
-                return <Tag color={config.color}>{config.text}</Tag>;
-            }
-        },
-        {
             title: '状态',
             dataIndex: 'status',
             key: 'status',
@@ -351,8 +338,8 @@ const EntrustmentConsultation: React.FC = () => {
                     </Button>
                 );
 
-                // 待跟进/跟进中状态 - 可编辑
-                if (record.status === 'pending' || record.status === 'following') {
+                // 待跟进/跟进中/已拒绝状态 - 可编辑
+                if (['pending', 'following', 'rejected'].includes(record.status)) {
                     actions.push(
                         <Button
                             key="edit"
@@ -365,12 +352,27 @@ const EntrustmentConsultation: React.FC = () => {
                     );
                 }
 
-                // 待跟进状态 - 可删除
-                if (record.status === 'pending') {
+                // 待跟进/跟进中状态 - 可关闭（关闭=状态改为已关闭，数据保留）
+                if (['pending', 'following'].includes(record.status)) {
+                    actions.push(
+                        <Popconfirm
+                            key="close"
+                            title="关闭咨询后状态将变为已关闭，数据会保留。确定关闭吗?"
+                            onConfirm={() => handleCloseConsultation(record)}
+                        >
+                            <Button size="small">
+                                关闭
+                            </Button>
+                        </Popconfirm>
+                    );
+                }
+
+                // 待跟进/已拒绝/已关闭状态 - 可删除（删除=物理删除数据）
+                if (['pending', 'rejected', 'closed'].includes(record.status)) {
                     actions.push(
                         <Popconfirm
                             key="delete"
-                            title="确定删除吗?"
+                            title="删除后数据将永久移除，无法恢复。确定删除吗?"
                             onConfirm={() => handleDelete(record.id)}
                         >
                             <Button size="small" danger icon={<DeleteOutlined />}>
@@ -380,7 +382,7 @@ const EntrustmentConsultation: React.FC = () => {
                     );
                 }
 
-                return <Space size="small">{actions}</Space>;
+                return <Space size="small" wrap>{actions}</Space>;
             }
         }
     ];
@@ -436,17 +438,6 @@ const EntrustmentConsultation: React.FC = () => {
                     <Option value="quoted">已报价</Option>
                     <Option value="rejected">已拒绝</Option>
                     <Option value="closed">已关闭</Option>
-                </Select>
-                <Select
-                    style={{ width: 150 }}
-                    placeholder="紧急程度"
-                    value={urgencyFilter}
-                    onChange={handleUrgencyFilterChange}
-                >
-                    <Option value="all">全部</Option>
-                    <Option value="normal">普通</Option>
-                    <Option value="urgent">紧急</Option>
-                    <Option value="very_urgent">非常紧急</Option>
                 </Select>
                 <Select
                     style={{ width: 150 }}
