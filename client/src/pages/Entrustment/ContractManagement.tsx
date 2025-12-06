@@ -20,6 +20,19 @@ const ContractManagement: React.FC = () => {
     const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
     const [createForm] = Form.useForm();
 
+    // 行选择状态
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const [selectedRows, setSelectedRows] = useState<IContract[]>([]);
+
+    const rowSelection = {
+        type: 'radio' as const,
+        selectedRowKeys,
+        onChange: (keys: React.Key[], rows: IContract[]) => {
+            setSelectedRowKeys(keys);
+            setSelectedRows(rows);
+        },
+    };
+
     // 获取可生成合同的报价单（已批准且客户已接受）
     const availableQuotations = quotationData.filter(
         q => q.status === 'approved' && q.clientStatus === 'ok' && !q.contractId
@@ -219,44 +232,16 @@ const ContractManagement: React.FC = () => {
             title: '操作',
             key: 'action',
             fixed: 'right',
-            width: 200,
+            width: 80,
             render: (_, record) => (
-                <Space size="small">
-                    <Button
-                        type="link"
-                        size="small"
-                        icon={<EyeOutlined />}
-                        onClick={() => handleViewDetail(record)}
-                    >
-                        详情
-                    </Button>
-                    <Button
-                        type="link"
-                        size="small"
-                        icon={<FilePdfOutlined />}
-                        onClick={() => handlePreviewPDF(record)}
-                    >
-                        预览
-                    </Button>
-                    {record.status === 'draft' && (
-                        <Button
-                            type="link"
-                            size="small"
-                            onClick={() => handleSignContract(record)}
-                        >
-                            签订
-                        </Button>
-                    )}
-                    {record.status === 'signed' && (
-                        <Button
-                            type="link"
-                            size="small"
-                            onClick={() => handleExecuteContract(record)}
-                        >
-                            执行
-                        </Button>
-                    )}
-                </Space>
+                <Button
+                    type="link"
+                    size="small"
+                    icon={<EyeOutlined />}
+                    onClick={() => handleViewDetail(record)}
+                >
+                    查看
+                </Button>
             ),
         },
     ];
@@ -266,19 +251,41 @@ const ContractManagement: React.FC = () => {
             title="委托合同管理"
             bordered={false}
             extra={
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={handleCreateContract}
-                >
-                    生成合同
-                </Button>
+                <Space>
+                    <Button
+                        icon={<FilePdfOutlined />}
+                        onClick={() => selectedRows[0] && handlePreviewPDF(selectedRows[0])}
+                        disabled={selectedRows.length === 0}
+                    >
+                        预览PDF
+                    </Button>
+                    <Button
+                        onClick={() => selectedRows[0] && handleSignContract(selectedRows[0])}
+                        disabled={selectedRows.length === 0 || selectedRows[0]?.status !== 'draft'}
+                    >
+                        签订合同
+                    </Button>
+                    <Button
+                        onClick={() => selectedRows[0] && handleExecuteContract(selectedRows[0])}
+                        disabled={selectedRows.length === 0 || selectedRows[0]?.status !== 'signed'}
+                    >
+                        执行合同
+                    </Button>
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={handleCreateContract}
+                    >
+                        生成合同
+                    </Button>
+                </Space>
             }
         >
             <Table
                 columns={columns}
                 dataSource={dataSource}
                 rowKey="id"
+                rowSelection={rowSelection}
                 scroll={{ x: 1400 }}
                 pagination={{
                     pageSize: 10,

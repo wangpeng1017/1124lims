@@ -70,6 +70,19 @@ const Entrustment: React.FC = () => {
     const [currentProject, setCurrentProject] = useState<IEntrustmentProject | null>(null);
     const [assignForm] = Form.useForm();
 
+    // 行选择状态
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const [selectedRows, setSelectedRows] = useState<IEntrustmentRecord[]>([]);
+
+    const rowSelection = {
+        type: 'radio' as const,
+        selectedRowKeys,
+        onChange: (keys: React.Key[], rows: IEntrustmentRecord[]) => {
+            setSelectedRowKeys(keys);
+            setSelectedRows(rows);
+        },
+    };
+
     const handleAdd = () => {
         setEditingRecord(null);
         setProjects([]);
@@ -372,12 +385,9 @@ const Entrustment: React.FC = () => {
             title: '操作',
             key: 'action',
             fixed: 'right',
-            width: 180,
+            width: 120,
             render: (_, record) => (
                 <Space size="middle">
-                    <Tooltip title="生成外部链接">
-                        <a onClick={() => handleGenerateLink(record)}><LinkOutlined /></a>
-                    </Tooltip>
                     <a onClick={() => handleEdit(record)}>编辑</a>
                     <Popconfirm title="确定删除?" onConfirm={() => handleDelete(record.id)}>
                         <a style={{ color: 'red' }}>删除</a>
@@ -390,12 +400,24 @@ const Entrustment: React.FC = () => {
     return (
         <Card
             title="委托单管理"
-            extra={<Button type="primary" onClick={handleAdd}>新建委托</Button>}
+            extra={
+                <Space>
+                    <Button
+                        icon={<LinkOutlined />}
+                        onClick={() => selectedRows[0] && handleGenerateLink(selectedRows[0])}
+                        disabled={selectedRows.length === 0}
+                    >
+                        生成外部链接
+                    </Button>
+                    <Button type="primary" onClick={handleAdd}>新建委托</Button>
+                </Space>
+            }
         >
             <Table
                 columns={columns}
                 dataSource={dataSource}
                 rowKey="id"
+                rowSelection={rowSelection}
                 pagination={{ pageSize: 10 }}
                 scroll={{ x: 1300 }}
                 expandable={{
