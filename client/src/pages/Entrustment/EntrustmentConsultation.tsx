@@ -236,13 +236,6 @@ const EntrustmentConsultation: React.FC = () => {
             )
         },
         {
-            title: '创建时间',
-            dataIndex: 'createTime',
-            key: 'createTime',
-            width: 170,
-            sorter: (a, b) => a.createTime.localeCompare(b.createTime)
-        },
-        {
             title: '客户公司',
             dataIndex: 'clientCompany',
             key: 'clientCompany',
@@ -395,6 +388,13 @@ const EntrustmentConsultation: React.FC = () => {
 
                 return <Space size="small">{actions}</Space>;
             }
+        },
+        {
+            title: '创建时间',
+            dataIndex: 'createTime',
+            key: 'createTime',
+            width: 170,
+            sorter: (a, b) => a.createTime.localeCompare(b.createTime)
         }
     ];
 

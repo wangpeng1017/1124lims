@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Button, Space, InputNumber, message } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { type Quotation, type QuotationItem, DEFAULT_SERVICE_INFO } from '../../mock/quotationData';
+import dayjs from 'dayjs';
 
 const { TextArea } = Input;
 
@@ -131,7 +132,7 @@ const QuotationForm: React.FC<QuotationFormProps> = ({ visible, quotation, fromC
                 ...DEFAULT_SERVICE_INFO,
                 items,
                 ...prices,
-                createDate: quotation?.createDate || new Date().toISOString().split('T')[0],
+                createTime: quotation?.createTime || dayjs().format('YYYY-MM-DD HH:mm:ss'),
                 status: quotation?.status || 'draft',
                 currentApprovalLevel: quotation?.currentApprovalLevel || 0,
                 approvalHistory: quotation?.approvalHistory || [],

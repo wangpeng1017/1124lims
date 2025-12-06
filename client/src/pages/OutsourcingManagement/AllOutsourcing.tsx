@@ -82,7 +82,7 @@ const AllOutsourcing: React.FC = () => {
                     outsourceNo: generateOutsourceNo(),
                     ...values,
                     createdBy: '当前用户',
-                    createdDate: new Date().toISOString().slice(0, 10),
+                    createTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
                     expectedReturnDate: values.expectedReturnDate ? values.expectedReturnDate.format('YYYY-MM-DD') : undefined,
                     approvalStatus: '待审批' as const,
                     status: '待确认' as const,
@@ -233,12 +233,6 @@ const AllOutsourcing: React.FC = () => {
             width: 100,
         },
         {
-            title: '创建日期',
-            dataIndex: 'createdDate',
-            key: 'createdDate',
-            width: 110,
-        },
-        {
             title: '操作',
             key: 'action',
             width: 200,
@@ -285,6 +279,12 @@ const AllOutsourcing: React.FC = () => {
                     )}
                 </Space>
             ),
+        },
+        {
+            title: '创建时间',
+            dataIndex: 'createTime',
+            key: 'createTime',
+            width: 170,
         },
     ];
 
@@ -464,7 +464,7 @@ const AllOutsourcing: React.FC = () => {
                         <Descriptions.Item label="总金额">¥{detailTask.totalPrice}</Descriptions.Item>
                         <Descriptions.Item label="内部责任人">{detailTask.assignedTo}</Descriptions.Item>
                         <Descriptions.Item label="创建人">{detailTask.createdBy}</Descriptions.Item>
-                        <Descriptions.Item label="创建日期">{detailTask.createdDate}</Descriptions.Item>
+                        <Descriptions.Item label="创建时间">{detailTask.createTime}</Descriptions.Item>
                         <Descriptions.Item label="预计返回日期">{detailTask.expectedReturnDate || '-'}</Descriptions.Item>
                         <Descriptions.Item label="发送日期">{detailTask.sendDate || '-'}</Descriptions.Item>
                         <Descriptions.Item label="物流单号">{detailTask.trackingNo || '-'}</Descriptions.Item>

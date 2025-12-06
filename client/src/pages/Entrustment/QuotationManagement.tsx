@@ -357,12 +357,6 @@ const QuotationManagement: React.FC = () => {
             ) : '-'
         },
         {
-            title: '创建日期',
-            dataIndex: 'createDate',
-            key: 'createDate',
-            width: 120
-        },
-        {
             title: '委托方',
             dataIndex: 'clientCompany',
             key: 'clientCompany',
@@ -525,6 +519,12 @@ const QuotationManagement: React.FC = () => {
 
                 return <Space size="small">{actions}</Space>;
             }
+        },
+        {
+            title: '创建时间',
+            dataIndex: 'createTime',
+            key: 'createTime',
+            width: 170
         }
     ];
 

@@ -32,11 +32,6 @@ const RoleManagement: React.FC = () => {
             ),
         },
         {
-            title: '创建时间',
-            dataIndex: 'createTime',
-            key: 'createTime',
-        },
-        {
             title: '操作',
             key: 'action',
             render: (_: any, record: IRole) => (
@@ -58,6 +53,12 @@ const RoleManagement: React.FC = () => {
                     </Popconfirm>
                 </Space>
             ),
+        },
+        {
+            title: '创建时间',
+            dataIndex: 'createTime',
+            key: 'createTime',
+            width: 170,
         },
     ];
 

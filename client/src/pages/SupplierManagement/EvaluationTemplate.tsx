@@ -3,6 +3,7 @@ import { Table, Card, Button, Space, Modal, Form, Input, InputNumber, message, T
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, FormOutlined, DeleteOutlined } from '@ant-design/icons';
 import { evaluationTemplateData, supplierCategoryData, type IEvaluationTemplate, type IEvaluationIndicator } from '../../mock/supplier';
+import dayjs from 'dayjs';
 
 const EvaluationTemplate: React.FC = () => {
     const [dataSource, setDataSource] = useState<IEvaluationTemplate[]>(evaluationTemplateData);
@@ -118,8 +119,8 @@ const EvaluationTemplate: React.FC = () => {
                     indicators,
                     totalScore,
                     status: 'active',
-                    createTime: new Date().toISOString(),
-                    updateTime: new Date().toISOString()
+                    createTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                    updateTime: dayjs().format('YYYY-MM-DD HH:mm:ss')
                 }]);
                 message.success('新建成功');
             }
@@ -138,7 +139,6 @@ const EvaluationTemplate: React.FC = () => {
             render: (_, record) => <Tag color="blue">{record.indicators.length}项</Tag>
         },
         { title: '总分', dataIndex: 'totalScore', key: 'totalScore', width: 80 },
-        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 180, render: (time) => time.split('T')[0] },
         {
             title: '状态',
             dataIndex: 'status',
@@ -168,6 +168,7 @@ const EvaluationTemplate: React.FC = () => {
                 </Space>
             ),
         },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
     ];
 
     return (

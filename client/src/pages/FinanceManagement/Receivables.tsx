@@ -91,7 +91,6 @@ const Receivables: React.FC = () => {
             key: 'status',
             render: (status) => <Tag color={getStatusColor(status)}>{status}</Tag>
         },
-        { title: '创建日期', dataIndex: 'createDate', key: 'createDate' },
         { title: '应收日期', dataIndex: 'dueDate', key: 'dueDate' },
         {
             title: '操作',
@@ -121,6 +120,7 @@ const Receivables: React.FC = () => {
                 </Space>
             ),
         },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
     ];
 
     return (
@@ -238,7 +238,7 @@ const Receivables: React.FC = () => {
                             </Descriptions.Item>
                             <Descriptions.Item label="委托单号">{currentReceivable.entrustmentId}</Descriptions.Item>
                             <Descriptions.Item label="客户单位">{currentReceivable.clientName}</Descriptions.Item>
-                            <Descriptions.Item label="创建日期">{currentReceivable.createDate}</Descriptions.Item>
+                            <Descriptions.Item label="创建时间">{currentReceivable.createTime}</Descriptions.Item>
                             <Descriptions.Item label="应收日期">{currentReceivable.dueDate}</Descriptions.Item>
                             <Descriptions.Item label="应收总额">
                                 ¥{currentReceivable.totalAmount.toFixed(2)}

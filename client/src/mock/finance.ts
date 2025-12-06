@@ -19,7 +19,7 @@ export interface IReceivable {
     remainingAmount: number;      // 待收金额
     status: '未收款' | '已收款';
     reportNos: string[];          // 关联报告编号
-    createDate: string;           // 创建日期
+    createTime: string;           // 创建时间
     dueDate: string;              // 应收日期
     remark?: string;
 }
@@ -91,7 +91,7 @@ export const receivableData: IReceivable[] = [
         remainingAmount: 0,
         status: '已收款',
         reportNos: ['RPT-20231125-001'],
-        createDate: '2023-11-08',
+        createTime: '2023-11-08 10:30:00',
         dueDate: '2023-11-30',
         remark: ''
     },
@@ -115,7 +115,7 @@ export const receivableData: IReceivable[] = [
         remainingAmount: 1500,
         status: '未收款',
         reportNos: ['RPT-20231125-002'],
-        createDate: '2023-11-10',
+        createTime: '2023-11-10 14:20:00',
         dueDate: '2023-12-10'
     },
     {
@@ -138,7 +138,7 @@ export const receivableData: IReceivable[] = [
         remainingAmount: 800,
         status: '未收款',
         reportNos: [],
-        createDate: '2023-11-05',
+        createTime: '2023-11-05 09:15:00',
         dueDate: '2023-12-05'
     }
 ];

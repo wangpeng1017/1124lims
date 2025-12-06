@@ -21,7 +21,7 @@ export interface ApprovalRecord {
 export interface Quotation {
     id: string;                  // 报价单编号
     quotationNo: string;         // 报价单号 (如: BJ20231201001)
-    createDate: string;          // 创建日期
+    createTime: string;          // 创建时间
 
     // 委托方信息
     clientCompany: string;
@@ -123,7 +123,7 @@ export const quotationData: Quotation[] = [
     {
         id: '1',
         quotationNo: 'BJ20231201001',
-        createDate: '2023-12-01',
+        createTime: '2023-12-01 09:30:00',
         clientCompany: '奇瑞汽车股份有限公司',
         clientContact: '李工',
         clientTel: '13800138000',
@@ -155,7 +155,7 @@ export const quotationData: Quotation[] = [
     {
         id: '2',
         quotationNo: 'BJ20231202001',
-        createDate: '2023-12-02',
+        createTime: '2023-12-02 08:15:00',
         clientCompany: '上海汽车集团股份有限公司',
         clientContact: '赵工',
         clientTel: '13900139000',
@@ -182,7 +182,7 @@ export const quotationData: Quotation[] = [
     {
         id: '3',
         quotationNo: 'BJ20231203001',
-        createDate: '2023-12-03',
+        createTime: '2023-12-03 11:00:00',
         clientCompany: '比亚迪汽车工业有限公司',
         clientContact: '孙工',
         clientTel: '13700137000',
@@ -207,7 +207,7 @@ export const quotationData: Quotation[] = [
     {
         id: '4',
         quotationNo: 'BJ20231204001',
-        createDate: '2023-12-04',
+        createTime: '2023-12-04 14:00:00',
         clientCompany: '长城汽车股份有限公司',
         clientContact: '周工',
         clientTel: '13600136000',

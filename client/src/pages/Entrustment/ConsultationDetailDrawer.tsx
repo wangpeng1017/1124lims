@@ -167,7 +167,7 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
                 <Card title="基本信息" style={{ marginBottom: 16 }}>
                     <Descriptions column={2} size="small">
                         <Descriptions.Item label="咨询单号">{consultation.consultationNo}</Descriptions.Item>
-                        <Descriptions.Item label="创建日期">{consultation.createDate}</Descriptions.Item>
+                        <Descriptions.Item label="创建时间">{consultation.createTime}</Descriptions.Item>
                         <Descriptions.Item label="状态">
                             <Tag color={CONSULTATION_STATUS_MAP[consultation.status].color}>
                                 {CONSULTATION_STATUS_MAP[consultation.status].text}

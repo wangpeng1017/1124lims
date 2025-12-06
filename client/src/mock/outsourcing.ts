@@ -27,7 +27,7 @@ export interface IOutsourceTask {
     assignedTo: string;            // 内部责任人姓名 (对应原 internalManager)
     assignedToId: string;          // 内部责任人ID (对应原 internalManagerId)
     createdBy: string;             // 创建人 (对应原 assignedBy)
-    createdDate: string;           // 创建日期 (对应原 assignDate)
+    createTime: string;            // 创建时间 (对应原 assignDate)
 
     // 物流信息
     sendDate?: string;             // 发送日期
@@ -83,7 +83,7 @@ export const outsourceTaskData: IOutsourceTask[] = [
         assignedTo: '张三',
         assignedToId: 'EMP001',
         createdBy: '吴凡',
-        createdDate: '2023-11-15',
+        createTime: '2023-11-15 09:30:00',
         sendDate: '2023-11-16',
         trackingNo: 'SF1234567890',
         expectedReturnDate: '2023-11-30',
@@ -109,7 +109,7 @@ export const outsourceTaskData: IOutsourceTask[] = [
         assignedTo: '李四',
         assignedToId: 'EMP002',
         createdBy: '张鑫明',
-        createdDate: '2023-11-20',
+        createTime: '2023-11-20 10:15:00',
         approvalStatus: '待审批',
         status: '待确认',
         progress: 0,
@@ -131,7 +131,7 @@ export const outsourceTaskData: IOutsourceTask[] = [
         assignedTo: '王五',
         assignedToId: 'EMP003',
         createdBy: '刘丽愉',
-        createdDate: '2023-11-18',
+        createTime: '2023-11-18 14:20:00',
         sendDate: '2023-11-19',
         trackingNo: 'SF9876543210',
         approvalStatus: '已通过',
@@ -156,7 +156,7 @@ export const outsourceTaskData: IOutsourceTask[] = [
         assignedTo: '赵六',
         assignedToId: 'EMP004',
         createdBy: '武基勇',
-        createdDate: '2023-11-22',
+        createTime: '2023-11-22 11:00:00',
         approvalStatus: '已通过',
         approvalId: 'DD-20231122-001',
         status: '已完成',
@@ -180,7 +180,7 @@ export const outsourceTaskData: IOutsourceTask[] = [
         assignedTo: '当前用户',
         assignedToId: 'EMP005',
         createdBy: '当前用户',
-        createdDate: '2023-11-25',
+        createTime: '2023-11-25 16:30:00',
         expectedReturnDate: '2023-12-10',
         approvalStatus: '待审批',
         status: '待确认',
@@ -203,7 +203,7 @@ export const outsourceTaskData: IOutsourceTask[] = [
         assignedTo: '当前用户',
         assignedToId: 'EMP005',
         createdBy: '吴凡',
-        createdDate: '2023-11-26',
+        createTime: '2023-11-26 08:45:00',
         sendDate: '2023-11-27',
         trackingNo: 'YTO1122334455',
         approvalStatus: '已通过',

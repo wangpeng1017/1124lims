@@ -104,7 +104,7 @@ const QuotationDetailDrawer: React.FC<QuotationDetailDrawerProps> = ({
             <Card title="基本信息" style={{ marginBottom: 16 }}>
                 <Descriptions column={2} size="small">
                     <Descriptions.Item label="报价单号">{quotation.quotationNo}</Descriptions.Item>
-                    <Descriptions.Item label="创建日期">{quotation.createDate}</Descriptions.Item>
+                    <Descriptions.Item label="创建时间">{quotation.createTime}</Descriptions.Item>
                     <Descriptions.Item label="审批状态">
                         <Tag color={STATUS_MAP[quotation.status].color}>
                             {STATUS_MAP[quotation.status].text}
