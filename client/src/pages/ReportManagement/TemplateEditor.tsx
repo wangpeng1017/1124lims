@@ -37,6 +37,22 @@ const FIELD_OPTIONS = [
     { key: 'resultDescription', label: '检测结果描述' },
 ];
 
+// A4 纸张尺寸配置 (按比例缩放到画布)
+// A4: 210mm x 297mm, 画布宽度 700px => 比例 3.33px/mm
+const A4_CONFIG = {
+    widthMM: 210,        // A4 宽度 mm
+    heightMM: 297,       // A4 高度 mm
+    canvasWidth: 700,    // 画布宽度 px
+    canvasHeight: 990,   // 画布高度 px (297/210 * 700)
+    pxPerMM: 700 / 210,  // 约 3.33 px/mm
+    cols: 12,            // GridLayout 列数
+    rowHeight: 30,       // 行高 px
+    colWidth: 700 / 12,  // 列宽 px (约 58.33)
+    colWidthMM: 210 / 12, // 列宽 mm (17.5mm)
+    rowHeightMM: 30 / (700 / 210), // 行高 mm (约 9mm)
+};
+
+
 interface TemplateEditorProps {
     templateId?: string;
 }
@@ -232,6 +248,22 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
     // 渲染组件预览
     const renderComponentPreview = (item: ITemplateLayoutItem) => {
         const componentDef = COMPONENT_TYPES.find(c => c.type === item.type);
+        const isSelected = selectedItem?.id === item.id;
+
+        // 使用 onMouseUp 代替 onClick，在拖拽结束后触发，避免与拖拽冲突
+        const handleMouseUp = (e: React.MouseEvent) => {
+            // 仅当鼠标没有移动太多时才触发选择（区分点击和拖拽）
+            const target = e.target as HTMLElement;
+            // 如果点击的是删除按钮区域，不处理
+            if (target.closest('.delete-btn-area')) return;
+        };
+
+        // 点击编辑按钮打开配置
+        const handleEditClick = (e: React.MouseEvent) => {
+            e.stopPropagation();
+            e.preventDefault();
+            handleSelectItem(item);
+        };
 
         return (
             <div
@@ -240,29 +272,49 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     padding: 8,
-                    background: selectedItem?.id === item.id ? '#e6f7ff' : '#fafafa',
-                    border: '1px dashed #d9d9d9',
+                    background: isSelected ? '#e6f7ff' : '#fafafa',
+                    border: isSelected ? '2px solid #1890ff' : '1px dashed #d9d9d9',
                     borderRadius: 4,
-                    cursor: 'pointer',
+                    cursor: 'move',
+                    position: 'relative',
                 }}
-                onClick={() => handleSelectItem(item)}
+                onDoubleClick={handleEditClick}
             >
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                     <Tag color="blue">{componentDef?.icon} {componentDef?.label}</Tag>
-                    <Popconfirm
-                        title="确定删除此组件?"
-                        onConfirm={(e) => {
-                            e?.stopPropagation();
-                            handleDeleteItem(item.id);
-                        }}
-                    >
-                        <DeleteOutlined
-                            style={{ color: '#ff4d4f', cursor: 'pointer' }}
-                            onClick={(e) => e.stopPropagation()}
-                        />
-                    </Popconfirm>
+                    <Space size={4}>
+                        {/* 编辑按钮 - 主要交互方式 */}
+                        <Button
+                            type="primary"
+                            size="small"
+                            icon={<EditOutlined />}
+                            onClick={handleEditClick}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            style={{ fontSize: 12, padding: '0 6px', height: 22 }}
+                        >
+                            配置
+                        </Button>
+                        {/* 删除按钮 */}
+                        <div className="delete-btn-area" onMouseDown={(e) => e.stopPropagation()}>
+                            <Popconfirm
+                                title="确定删除此组件?"
+                                onConfirm={(e) => {
+                                    e?.stopPropagation();
+                                    handleDeleteItem(item.id);
+                                }}
+                            >
+                                <Button
+                                    danger
+                                    size="small"
+                                    icon={<DeleteOutlined />}
+                                    style={{ fontSize: 12, padding: '0 6px', height: 22 }}
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                            </Popconfirm>
+                        </div>
+                    </Space>
                 </div>
-                <div style={{ flex: 1, fontSize: 12, color: '#666', overflow: 'hidden' }}>
+                <div style={{ flex: 1, fontSize: 12, color: '#666', overflow: 'hidden', paddingTop: 4 }}>
                     {item.type === 'text' && (item.config.content || '文本内容...')}
                     {item.type === 'field' && `字段: ${item.config.fieldLabel || item.config.fieldKey || '未配置'}`}
                     {item.type === 'image' && '🖼️ 图片区域'}
@@ -270,6 +322,10 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
                     {item.type === 'signature' && '✍️ 签章区域'}
                     {item.type === 'declaration' && '📄 声明区域'}
                     {item.type === 'header' && '📰 页眉'}
+                </div>
+                {/* 双击提示 */}
+                <div style={{ fontSize: 10, color: '#999', textAlign: 'center', marginTop: 4 }}>
+                    双击或点击"配置"编辑
                 </div>
             </div>
         );
@@ -433,41 +489,144 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
                         }
                         bodyStyle={{ background: '#fff', minHeight: 600, padding: 16 }}
                     >
+                        {/* A4 尺寸信息面板 */}
                         <div style={{
-                            border: '2px solid #e0e0e0',
+                            marginBottom: 8,
+                            padding: '8px 12px',
+                            background: '#f5f5f5',
                             borderRadius: 4,
-                            minHeight: 550,
-                            background: '#fff',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            fontSize: 12
                         }}>
-                            <GridLayout
-                                className="layout"
-                                layout={gridLayout}
-                                cols={12}
-                                rowHeight={30}
-                                width={700}
-                                onLayoutChange={handleLayoutChange}
-                                draggableHandle=".drag-handle"
-                                isResizable
-                                isDraggable
-                            >
-                                {currentLayout.map((item) => (
-                                    <div key={item.id} className="drag-handle">
-                                        {renderComponentPreview(item)}
+                            <Space size="large">
+                                <span><strong>A4纸张:</strong> 210mm × 297mm</span>
+                                <span><strong>画布:</strong> {A4_CONFIG.canvasWidth}px × {A4_CONFIG.canvasHeight}px</span>
+                                <span><strong>比例:</strong> 1格 ≈ {A4_CONFIG.colWidthMM.toFixed(1)}mm × {A4_CONFIG.rowHeightMM.toFixed(1)}mm</span>
+                            </Space>
+                            <Tag color="blue">12列 × 33行 = A4满页</Tag>
+                        </div>
+
+                        {/* 水平标尺 (mm) */}
+                        <div style={{
+                            display: 'flex',
+                            marginLeft: 30,
+                            marginBottom: 4,
+                            height: 20,
+                            background: '#fafafa',
+                            borderRadius: '4px 4px 0 0'
+                        }}>
+                            {Array.from({ length: 22 }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    style={{
+                                        width: i === 21 ? 10 : A4_CONFIG.pxPerMM * 10,
+                                        borderLeft: '1px solid #ccc',
+                                        fontSize: 10,
+                                        color: '#666',
+                                        paddingLeft: 2,
+                                        display: 'flex',
+                                        alignItems: 'flex-end'
+                                    }}
+                                >
+                                    {i % 2 === 0 && <span>{i * 10}</span>}
+                                </div>
+                            ))}
+                        </div>
+
+                        <div style={{ display: 'flex' }}>
+                            {/* 垂直标尺 (mm) */}
+                            <div style={{
+                                width: 30,
+                                background: '#fafafa',
+                                borderRadius: '4px 0 0 4px',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}>
+                                {Array.from({ length: 30 }).map((_, i) => (
+                                    <div
+                                        key={i}
+                                        style={{
+                                            height: A4_CONFIG.pxPerMM * 10,
+                                            borderTop: '1px solid #ccc',
+                                            fontSize: 10,
+                                            color: '#666',
+                                            paddingTop: 2,
+                                            paddingLeft: 4,
+                                            lineHeight: 1
+                                        }}
+                                    >
+                                        {i % 2 === 0 && <span>{i * 10}</span>}
                                     </div>
                                 ))}
-                            </GridLayout>
-                            {currentLayout.length === 0 && (
+                            </div>
+
+                            {/* 画布区域 */}
+                            <div style={{
+                                border: '2px solid #1890ff',
+                                borderRadius: 4,
+                                minHeight: A4_CONFIG.canvasHeight,
+                                width: A4_CONFIG.canvasWidth,
+                                background: '#fff',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                position: 'relative'
+                            }}>
+                                {/* 列网格参考线 */}
                                 <div style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: '100%',
                                     display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    height: 400,
-                                    color: '#999'
+                                    pointerEvents: 'none',
+                                    zIndex: 0
                                 }}>
-                                    点击左侧组件添加到画布
+                                    {Array.from({ length: 12 }).map((_, i) => (
+                                        <div
+                                            key={i}
+                                            style={{
+                                                flex: 1,
+                                                borderRight: i < 11 ? '1px dashed #e8e8e8' : 'none',
+                                            }}
+                                        />
+                                    ))}
                                 </div>
-                            )}
+
+                                <GridLayout
+                                    className="layout"
+                                    layout={gridLayout}
+                                    cols={12}
+                                    rowHeight={A4_CONFIG.rowHeight}
+                                    width={A4_CONFIG.canvasWidth}
+                                    onLayoutChange={handleLayoutChange}
+                                    draggableHandle=".drag-handle"
+                                    isResizable
+                                    isDraggable
+                                    style={{ position: 'relative', zIndex: 1 }}
+                                >
+                                    {currentLayout.map((item) => (
+                                        <div key={item.id} className="drag-handle">
+                                            {renderComponentPreview(item)}
+                                        </div>
+                                    ))}
+                                </GridLayout>
+                                {currentLayout.length === 0 && (
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        height: 400,
+                                        color: '#999',
+                                        flexDirection: 'column',
+                                        gap: 8
+                                    }}>
+                                        <span>点击左侧组件添加到画布</span>
+                                        <Tag>每格约 17.5mm × 9mm</Tag>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </Card>
                 </Col>
