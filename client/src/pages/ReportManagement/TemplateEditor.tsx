@@ -1,6 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { Card, Button, Space, Row, Col, Form, Input, Select, message, Drawer, Tabs, List, Tag, Modal, Popconfirm } from 'antd';
-import { SaveOutlined, EyeOutlined, ArrowLeftOutlined, PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Card, Button, Space, Row, Col, Form, Input, Select, message, Drawer, Tabs, List, Tag, Modal, Popconfirm, Upload, Image, Divider } from 'antd';
+import { SaveOutlined, EyeOutlined, ArrowLeftOutlined, PlusOutlined, DeleteOutlined, EditOutlined, UploadOutlined, LoadingOutlined } from '@ant-design/icons';
+import type { UploadChangeParam } from 'antd/es/upload';
+import type { UploadFile, UploadProps } from 'antd/es/upload/interface';
 import GridLayout, { Layout } from 'react-grid-layout';
 import { useNavigate, useParams } from 'react-router-dom';
 import { clientReportTemplateData, type IClientReportTemplate, type ITemplateLayoutItem } from '../../mock/report';
@@ -387,9 +389,69 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
 
                 {selectedItem.type === 'image' && (
                     <>
-                        <Form.Item label="图片URL" name="imageUrl">
-                            <Input placeholder="输入图片地址" />
+                        <Form.Item label="图片来源">
+                            <Divider plain style={{ margin: '8px 0' }}>方式一：上传本地图片</Divider>
+                            <Upload
+                                name="file"
+                                listType="picture-card"
+                                showUploadList={false}
+                                beforeUpload={(file) => {
+                                    const isImage = file.type.startsWith('image/');
+                                    if (!isImage) {
+                                        message.error('只能上传图片文件!');
+                                        return false;
+                                    }
+                                    const isLt2M = file.size / 1024 / 1024 < 2;
+                                    if (!isLt2M) {
+                                        message.error('图片大小不能超过 2MB!');
+                                        return false;
+                                    }
+                                    // 转换为 base64
+                                    const reader = new FileReader();
+                                    reader.readAsDataURL(file);
+                                    reader.onload = () => {
+                                        configForm.setFieldsValue({ imageUrl: reader.result as string });
+                                        message.success('图片已加载');
+                                    };
+                                    return false; // 阻止自动上传
+                                }}
+                            >
+                                {configForm.getFieldValue('imageUrl') ? (
+                                    <img
+                                        src={configForm.getFieldValue('imageUrl')}
+                                        alt="preview"
+                                        style={{ width: '100%', maxHeight: 100, objectFit: 'contain' }}
+                                    />
+                                ) : (
+                                    <div>
+                                        <UploadOutlined />
+                                        <div style={{ marginTop: 8 }}>点击上传</div>
+                                    </div>
+                                )}
+                            </Upload>
+
+                            <Divider plain style={{ margin: '16px 0 8px' }}>方式二：输入图片URL</Divider>
                         </Form.Item>
+                        <Form.Item label="图片URL" name="imageUrl">
+                            <Input.TextArea
+                                rows={2}
+                                placeholder="输入图片地址，如: /assets/logo.png 或 https://example.com/image.jpg"
+                            />
+                        </Form.Item>
+                        {configForm.getFieldValue('imageUrl') && (
+                            <Form.Item label="图片预览">
+                                <div style={{ border: '1px solid #d9d9d9', borderRadius: 4, padding: 8, textAlign: 'center' }}>
+                                    <img
+                                        src={configForm.getFieldValue('imageUrl')}
+                                        alt="预览"
+                                        style={{ maxWidth: '100%', maxHeight: 150 }}
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="60"><rect fill="%23f0f0f0" width="100%" height="100%"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23999">加载失败</text></svg>';
+                                        }}
+                                    />
+                                </div>
+                            </Form.Item>
+                        )}
                     </>
                 )}
 
