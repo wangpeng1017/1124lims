@@ -4,10 +4,13 @@ import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, CopyOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { clientReportTemplateData, type IClientReportTemplate } from '../../mock/report';
+import { useAuth } from '../../hooks/useAuth';
 
 const ClientReportTemplates: React.FC = () => {
     const navigate = useNavigate();
+    const { canDelete } = useAuth();
     const [dataSource, setDataSource] = useState<IClientReportTemplate[]>(clientReportTemplateData);
+
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
@@ -240,19 +243,21 @@ const ClientReportTemplates: React.FC = () => {
                     >
                         切换状态
                     </Button>
-                    <Popconfirm
-                        title="确定删除该模板?"
-                        onConfirm={() => selectedRows[0] && handleDelete(selectedRows[0].id)}
-                        disabled={selectedRows.length === 0 || selectedRows[0]?.isDefault}
-                    >
-                        <Button
-                            danger
-                            icon={<DeleteOutlined />}
+                    {canDelete && (
+                        <Popconfirm
+                            title="确定删除该模板?"
+                            onConfirm={() => selectedRows[0] && handleDelete(selectedRows[0].id)}
                             disabled={selectedRows.length === 0 || selectedRows[0]?.isDefault}
                         >
-                            删除
-                        </Button>
-                    </Popconfirm>
+                            <Button
+                                danger
+                                icon={<DeleteOutlined />}
+                                disabled={selectedRows.length === 0 || selectedRows[0]?.isDefault}
+                            >
+                                删除
+                            </Button>
+                        </Popconfirm>
+                    )}
                     <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
                         新建模板
                     </Button>

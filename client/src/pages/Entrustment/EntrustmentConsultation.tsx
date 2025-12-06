@@ -6,6 +6,7 @@ import { consultationData, CONSULTATION_STATUS_MAP, URGENCY_LEVEL_MAP, type ICon
 import ConsultationForm from './ConsultationForm';
 import ConsultationDetailDrawer from './ConsultationDetailDrawer';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import dayjs from 'dayjs';
 
 const { Search } = Input;
@@ -14,6 +15,7 @@ const { RangePicker } = DatePicker;
 
 const EntrustmentConsultation: React.FC = () => {
     const navigate = useNavigate();
+    const { canDelete } = useAuth();
     const [dataSource, setDataSource] = useState<IConsultation[]>(consultationData);
     const [filteredData, setFilteredData] = useState<IConsultation[]>(consultationData);
     const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -352,23 +354,9 @@ const EntrustmentConsultation: React.FC = () => {
                     );
                 }
 
-                // 待跟进/跟进中状态 - 可关闭（关闭=状态改为已关闭，数据保留）
-                if (['pending', 'following'].includes(record.status)) {
-                    actions.push(
-                        <Popconfirm
-                            key="close"
-                            title="关闭咨询后状态将变为已关闭，数据会保留。确定关闭吗?"
-                            onConfirm={() => handleCloseConsultation(record)}
-                        >
-                            <Button size="small">
-                                关闭
-                            </Button>
-                        </Popconfirm>
-                    );
-                }
+                // 待跟进/已拒绝/已关闭状态 - 可删除（删除=物理删除数据，仅管理员可见）
 
-                // 待跟进/已拒绝/已关闭状态 - 可删除（删除=物理删除数据）
-                if (['pending', 'rejected', 'closed'].includes(record.status)) {
+                if (canDelete && ['pending', 'rejected', 'closed'].includes(record.status)) {
                     actions.push(
                         <Popconfirm
                             key="delete"
