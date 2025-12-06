@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Tag, Button, Space, Modal, Descriptions, Divider, List, Form, Input, Select, DatePicker, message, Row, Col } from 'antd';
+import { Card, Table, Tag, Button, Space, Modal, Descriptions, Divider, List, Form, Input, Select, DatePicker, message, Row, Col, Alert } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { EyeOutlined, DownloadOutlined, FileTextOutlined, PlusOutlined } from '@ant-design/icons';
-import { testReportData } from '../../mock/report';
-import type { IClientReport } from '../../mock/report';
+import { testReportData, clientReportTemplateData } from '../../mock/report';
+import type { IClientReport, IClientReportTemplate } from '../../mock/report';
 import dayjs from 'dayjs';
 import { useReportService } from '../../services/useDataService';
 
@@ -29,6 +29,8 @@ const ClientReports: React.FC = () => {
     // Create Modal State
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [createForm] = Form.useForm();
+    const [selectedTemplate, setSelectedTemplate] = useState<IClientReportTemplate | null>(null);
+    const [recommendedTemplates, setRecommendedTemplates] = useState<IClientReportTemplate[]>([]);
 
     const handlePreview = (record: IClientReport) => {
         setPreviewReport(record);
@@ -169,7 +171,29 @@ const ClientReports: React.FC = () => {
                 testDateStart: dayjs(),
                 testDateEnd: dayjs(),
             });
+
+            // 根据客户推荐模板
+            const clientTemplates = clientReportTemplateData.filter(
+                t => t.clientName === first.clientName && t.status === 'active'
+            );
+            const defaultTemplates = clientReportTemplateData.filter(
+                t => t.isDefault && t.status === 'active'
+            );
+            const recommended = clientTemplates.length > 0 ? clientTemplates : defaultTemplates;
+            setRecommendedTemplates(recommended);
+
+            // 自动选择第一个推荐模板
+            if (recommended.length > 0) {
+                createForm.setFieldsValue({ templateId: recommended[0].id });
+                setSelectedTemplate(recommended[0]);
+            }
         }
+    };
+
+    // 模板选择变化
+    const handleTemplateChange = (templateId: string) => {
+        const template = clientReportTemplateData.find(t => t.id === templateId);
+        setSelectedTemplate(template || null);
     };
 
     const handleCreateSubmit = () => {
@@ -201,11 +225,13 @@ const ClientReports: React.FC = () => {
                 preparer: '当前用户',
                 status: '草稿',
                 generatedDate: values.generatedDate.format('YYYY-MM-DD'),
-                templateId: 1
+                templateId: values.templateId || 'TPL-DEFAULT-001'
             };
 
             setDataSource([newReport, ...dataSource]);
             setIsCreateModalOpen(false);
+            setSelectedTemplate(null);
+            setRecommendedTemplates([]);
             message.success('客户报告已生成');
         });
     };
@@ -408,6 +434,42 @@ const ClientReports: React.FC = () => {
                             ))}
                         </Select>
                     </Form.Item>
+
+                    {/* 模板选择 */}
+                    {recommendedTemplates.length > 0 && (
+                        <Alert
+                            message={`系统根据客户推荐使用: ${recommendedTemplates[0].name}`}
+                            type="info"
+                            showIcon
+                            style={{ marginBottom: 16 }}
+                        />
+                    )}
+                    <Form.Item
+                        label="选择报告模板"
+                        name="templateId"
+                        rules={[{ required: true, message: '请选择报告模板' }]}
+                    >
+                        <Select
+                            placeholder="请选择报告模板"
+                            onChange={handleTemplateChange}
+                        >
+                            {clientReportTemplateData.filter(t => t.status === 'active').map(t => (
+                                <Select.Option key={t.id} value={t.id}>
+                                    {t.name} {t.clientName ? `(${t.clientName})` : '(通用)'}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    {selectedTemplate && (
+                        <div style={{ marginBottom: 16, padding: 12, background: '#f5f5f5', borderRadius: 4 }}>
+                            <strong>模板信息：</strong> {selectedTemplate.name}
+                            <br />
+                            <small style={{ color: '#666' }}>
+                                包含页面: {selectedTemplate.pages.map(p => p.name).join('、')}
+                            </small>
+                        </div>
+                    )}
+
 
                     <Row gutter={16}>
                         <Col span={12}>
