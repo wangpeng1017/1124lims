@@ -117,8 +117,8 @@ const ContractManagement: React.FC = () => {
                 status: 'draft',
                 attachments: [],
                 createdBy: '当前用户',
-                createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-                updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                createTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                updateTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
             };
 
             setDataSource([...dataSource, newContract]);
@@ -145,7 +145,7 @@ const ContractManagement: React.FC = () => {
             onOk: () => {
                 setDataSource(dataSource.map(item =>
                     item.id === record.id
-                        ? { ...item, status: 'signed', updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss') }
+                        ? { ...item, status: 'signed', updateTime: dayjs().format('YYYY-MM-DD HH:mm:ss') }
                         : item
                 ));
                 message.success('合同已签订');
@@ -156,7 +156,7 @@ const ContractManagement: React.FC = () => {
     const handleExecuteContract = (record: IContract) => {
         setDataSource(dataSource.map(item =>
             item.id === record.id
-                ? { ...item, status: 'executing', updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss') }
+                ? { ...item, status: 'executing', updateTime: dayjs().format('YYYY-MM-DD HH:mm:ss') }
                 : item
         ));
         message.success('合同已进入执行状态');

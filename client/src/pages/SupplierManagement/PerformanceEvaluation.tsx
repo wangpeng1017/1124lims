@@ -3,6 +3,7 @@ import { Table, Card, Button, Space, Modal, Form, Select, Input, InputNumber, me
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, AuditOutlined, StarOutlined } from '@ant-design/icons';
 import { supplierEvaluationData, supplierData, evaluationTemplateData, type ISupplierEvaluation } from '../../mock/supplier';
+import dayjs from 'dayjs';
 
 const PerformanceEvaluation: React.FC = () => {
     const [dataSource, setDataSource] = useState<ISupplierEvaluation[]>(supplierEvaluationData);
@@ -123,7 +124,7 @@ const PerformanceEvaluation: React.FC = () => {
                 evaluatorId: 'CurrentUser',
                 suggestions: values.suggestions || '',
                 attachments: [],
-                createTime: new Date().toISOString()
+                createTime: dayjs().format('YYYY-MM-DD HH:mm:ss')
             };
 
             setDataSource([newEvaluation, ...dataSource]);
@@ -178,6 +179,7 @@ const PerformanceEvaluation: React.FC = () => {
                 <a onClick={() => handleView(record)}>详情</a>
             ),
         },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
     ];
 
     return (

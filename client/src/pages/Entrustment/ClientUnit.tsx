@@ -4,6 +4,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined } from '@ant-design/icons';
 import { clientData } from '../../mock/entrustment';
 import type { IClientUnit } from '../../mock/entrustment';
+import dayjs from 'dayjs';
 
 const ClientUnit: React.FC = () => {
     const [dataSource, setDataSource] = useState<IClientUnit[]>(clientData);
@@ -82,7 +83,7 @@ const ClientUnit: React.FC = () => {
                     id: newId,
                     ...values,
                     creator: 'Admin',
-                    createTime: new Date().toISOString().split('T')[0],
+                    createTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
                     status: 'draft'
                 };
                 setDataSource([...dataSource, newItem]);
@@ -173,6 +174,7 @@ const ClientUnit: React.FC = () => {
                 return <Space size="middle">{actions}</Space>;
             },
         },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
     ];
 
     return (

@@ -3,6 +3,7 @@ import { Table, Card, Button, Space, Modal, Form, Input, Select, Popconfirm, mes
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, UserOutlined, StarOutlined } from '@ant-design/icons';
 import { supplierData, supplierCategoryData, supplierEvaluationData, type ISupplier } from '../../mock/supplier';
+import dayjs from 'dayjs';
 
 const SupplierInfo: React.FC = () => {
     const [dataSource, setDataSource] = useState<ISupplier[]>(supplierData);
@@ -69,8 +70,8 @@ const SupplierInfo: React.FC = () => {
                     certifications: [],
                     cooperationStatus: 'active',
                     remark: values.remark || '',
-                    createTime: new Date().toISOString().split('T')[0],
-                    updateTime: new Date().toISOString()
+                    createTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                    updateTime: dayjs().format('YYYY-MM-DD HH:mm:ss')
                 }]);
                 message.success('新建成功');
             }
@@ -175,6 +176,7 @@ const SupplierInfo: React.FC = () => {
                 </Space>
             ),
         },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
     ];
 
     // 获取供应商的评价历史

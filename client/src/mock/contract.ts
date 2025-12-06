@@ -72,8 +72,8 @@ export interface IContract {
     pdfUrl?: string;                  // 生成的PDF路径
 
     createdBy: string;
-    createdAt: string;
-    updatedAt: string;
+    createTime: string;
+    updateTime: string;
 }
 
 // 合同状态映射
@@ -169,7 +169,7 @@ export const contractData: IContract[] = [
         ],
         pdfUrl: '/pdfs/contracts/HT20231201001.pdf',
         createdBy: '张馨',
-        createdAt: '2023-12-01 16:00:00',
-        updatedAt: '2023-12-01 16:30:00'
+        createTime: '2023-12-01 16:00:00',
+        updateTime: '2023-12-01 16:30:00'
     }
 ];

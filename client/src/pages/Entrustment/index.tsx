@@ -80,7 +80,11 @@ const Entrustment: React.FC = () => {
     const handleEdit = (record: IEntrustmentRecord) => {
         setEditingRecord(record);
         setProjects(record.projects || []);
-        form.setFieldsValue(record);
+        // 将日期字符串转换为 dayjs 对象，DatePicker 需要 dayjs 对象而非字符串
+        form.setFieldsValue({
+            ...record,
+            sampleDate: record.sampleDate ? dayjs(record.sampleDate) : undefined,
+        });
         setIsDrawerOpen(true);
     };
 
@@ -115,11 +119,14 @@ const Entrustment: React.FC = () => {
             // 自动生成 testItems 字符串 (用于列表显示)
             const testItemsStr = projects.map(p => p.name).join('、');
 
+            // 格式化日期字段为后端需要的格式
             const finalValues = {
                 ...values,
                 projects,
                 testItems: testItemsStr,
-                assignmentMode: 'manual'
+                assignmentMode: 'manual',
+                // 将 dayjs 对象转换为 YYYY-MM-DD 字符串
+                sampleDate: values.sampleDate ? values.sampleDate.format('YYYY-MM-DD') : undefined,
             };
 
             if (editingRecord) {
@@ -435,7 +442,7 @@ const Entrustment: React.FC = () => {
                         </Col>
                         <Col span={12}>
                             <Form.Item name="sampleDate" label="送样时间" rules={[{ required: true }]}>
-                                <Input placeholder="YYYY.MM.DD" />
+                                <DatePicker style={{ width: '100%' }} placeholder="请选择送样日期" />
                             </Form.Item>
                         </Col>
                         <Col span={12}>

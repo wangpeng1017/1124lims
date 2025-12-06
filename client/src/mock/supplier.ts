@@ -122,7 +122,7 @@ export const supplierCategoryData: ISupplierCategory[] = [
         name: '外包供应商',
         code: 'OUTSOURCE',
         description: '提供检测服务的第三方机构',
-        createTime: '2023-01-01',
+        createTime: '2023-01-01 09:00:00',
         status: 'active'
     },
     {
@@ -130,7 +130,7 @@ export const supplierCategoryData: ISupplierCategory[] = [
         name: '耗材供应商',
         code: 'CONSUMABLE',
         description: '提供试剂、标准品、备件等物料的供应商',
-        createTime: '2023-01-01',
+        createTime: '2023-01-01 10:00:00',
         status: 'active'
     }
 ];
@@ -164,7 +164,7 @@ export const supplierData: ISupplier[] = [
         lastEvaluationDate: '2024-09-30',
         evaluationLevel: 'excellent',
         remark: '金属材料、环境检测、食品安全',
-        createTime: '2023-01-15',
+        createTime: '2023-01-15 09:00:00',
         updateTime: '2024-09-30'
     },
     {
@@ -194,7 +194,7 @@ export const supplierData: ISupplier[] = [
         lastEvaluationDate: '2024-09-30',
         evaluationLevel: 'good',
         remark: '机械性能、化学分析、无损检测',
-        createTime: '2023-02-20',
+        createTime: '2023-02-20 14:00:00',
         updateTime: '2024-09-30'
     },
     {
@@ -223,7 +223,7 @@ export const supplierData: ISupplier[] = [
         lastEvaluationDate: '2024-06-30',
         evaluationLevel: 'good',
         remark: '塑料材料、橡胶测试',
-        createTime: '2023-03-10',
+        createTime: '2023-03-10 10:00:00',
         updateTime: '2024-06-30'
     },
     {
@@ -249,7 +249,7 @@ export const supplierData: ISupplier[] = [
         lastEvaluationDate: '2024-09-30',
         evaluationLevel: 'excellent',
         remark: '化学试剂、标准品供应商',
-        createTime: '2023-05-01',
+        createTime: '2023-05-01 09:00:00',
         updateTime: '2024-09-30'
     },
     {
@@ -275,7 +275,7 @@ export const supplierData: ISupplier[] = [
         lastEvaluationDate: '2024-06-30',
         evaluationLevel: 'good',
         remark: '实验室耗材、备件供应',
-        createTime: '2023-06-15',
+        createTime: '2023-06-15 14:00:00',
         updateTime: '2024-06-30'
     },
     {
@@ -301,7 +301,7 @@ export const supplierData: ISupplier[] = [
         lastEvaluationDate: '2024-09-30',
         evaluationLevel: 'excellent',
         remark: '标准品、对照品供应',
-        createTime: '2023-04-01',
+        createTime: '2023-04-01 09:00:00',
         updateTime: '2024-09-30'
     }
 ];
@@ -321,7 +321,7 @@ export const evaluationTemplateData: IEvaluationTemplate[] = [
             { id: 'IND005', name: '合作稳定性', weight: 10, maxScore: 10, description: '长期合作意愿', order: 5 }
         ],
         totalScore: 100,
-        createTime: '2024-01-01',
+        createTime: '2024-01-01 09:00:00',
         updateTime: '2024-01-01',
         status: 'active'
     },
@@ -338,7 +338,7 @@ export const evaluationTemplateData: IEvaluationTemplate[] = [
             { id: 'IND010', name: '资质合规性', weight: 10, maxScore: 10, description: '产品证书、检验报告', order: 5 }
         ],
         totalScore: 100,
-        createTime: '2024-01-01',
+        createTime: '2024-01-01 10:00:00',
         updateTime: '2024-01-01',
         status: 'active'
     }

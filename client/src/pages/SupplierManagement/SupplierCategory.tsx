@@ -3,6 +3,7 @@ import { Table, Card, Button, Space, Modal, Form, Input, message, Tag, Popconfir
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { supplierCategoryData, supplierData, type ISupplierCategory } from '../../mock/supplier';
+import dayjs from 'dayjs';
 
 const SupplierCategory: React.FC = () => {
     const [dataSource, setDataSource] = useState<ISupplierCategory[]>(supplierCategoryData);
@@ -56,7 +57,7 @@ const SupplierCategory: React.FC = () => {
                     id: newId,
                     ...values,
                     status: 'active',
-                    createTime: new Date().toISOString().split('T')[0]
+                    createTime: dayjs().format('YYYY-MM-DD HH:mm:ss')
                 }]);
                 message.success('新建成功');
             }
@@ -82,13 +83,11 @@ const SupplierCategory: React.FC = () => {
                 return <Badge count={count} showZero color="#1890ff" />;
             }
         },
-        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 120 },
         {
             title: '状态',
             dataIndex: 'status',
             key: 'status',
             width: 80,
-            fixed: 'right',
             render: (status) => (
                 <Tag color={status === 'active' ? 'green' : 'red'}>
                     {status === 'active' ? '启用' : '停用'}
@@ -117,6 +116,7 @@ const SupplierCategory: React.FC = () => {
                 </Space>
             ),
         },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
     ];
 
     return (

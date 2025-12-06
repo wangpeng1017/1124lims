@@ -43,7 +43,7 @@ export const userData: IUser[] = [
         department: 'IT部',
         roles: ['admin'],
         status: 'active',
-        createTime: '2023-01-01',
+        createTime: '2023-01-01 09:00:00',
         lastLoginTime: '2023-11-25 09:00:00',
         employeeId: 1
     },
@@ -56,7 +56,7 @@ export const userData: IUser[] = [
         department: '检测部',
         roles: ['lab_manager'],
         status: 'active',
-        createTime: '2023-01-02',
+        createTime: '2023-01-02 10:00:00',
         lastLoginTime: '2023-11-24 10:00:00'
     },
     {
@@ -68,7 +68,7 @@ export const userData: IUser[] = [
         department: '检测部',
         roles: ['tester'],
         status: 'active',
-        createTime: '2023-01-05',
+        createTime: '2023-01-05 08:30:00',
         lastLoginTime: '2023-11-25 08:30:00'
     },
     {
@@ -80,7 +80,7 @@ export const userData: IUser[] = [
         department: '市场部',
         roles: ['sales'],
         status: 'active',
-        createTime: '2023-01-06',
+        createTime: '2023-01-06 14:00:00',
         lastLoginTime: '2023-11-23 14:00:00'
     },
     {
@@ -92,7 +92,7 @@ export const userData: IUser[] = [
         department: '财务部',
         roles: ['finance'], // 假设有财务角色，虽然主要关注4个核心角色
         status: 'active',
-        createTime: '2023-01-07',
+        createTime: '2023-01-07 09:00:00',
         lastLoginTime: '2023-11-22 16:00:00'
     }
 ];
@@ -105,7 +105,7 @@ export const roleData: IRole[] = [
         description: '拥有系统所有权限',
         permissions: ['all'],
         status: 'active',
-        createTime: '2023-01-01'
+        createTime: '2023-01-01 09:00:00'
     },
     {
         id: 'lab_manager',
@@ -113,7 +113,7 @@ export const roleData: IRole[] = [
         description: '负责实验室业务管理和报表查看',
         permissions: ['dashboard', 'entrustment', 'test', 'report', 'device', 'personnel'],
         status: 'active',
-        createTime: '2023-01-01'
+        createTime: '2023-01-01 09:00:00'
     },
     {
         id: 'tester',
@@ -121,7 +121,7 @@ export const roleData: IRole[] = [
         description: '负责任务执行和数据录入',
         permissions: ['test', 'sample', 'device'],
         status: 'active',
-        createTime: '2023-01-01'
+        createTime: '2023-01-01 09:00:00'
     },
     {
         id: 'sales',
@@ -129,7 +129,7 @@ export const roleData: IRole[] = [
         description: '负责委托管理和客户管理',
         permissions: ['entrustment', 'report_view'],
         status: 'active',
-        createTime: '2023-01-01'
+        createTime: '2023-01-01 09:00:00'
     }
 ];
 

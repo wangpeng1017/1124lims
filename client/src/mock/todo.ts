@@ -22,7 +22,7 @@ export interface ITodo {
     priority: TodoPriority;
     status: TodoStatus;
     dueDate: string;
-    createdAt: string;
+    createTime: string;
     createdBy: string;
     assignedTo: string;
     relatedId?: string;        // 关联的业务ID（如报价单ID、任务ID等）
@@ -68,7 +68,7 @@ export const todoData: ITodo[] = [
         priority: 'high',
         status: 'pending',
         dueDate: '2023-12-05',
-        createdAt: '2023-12-02 09:15:00',
+        createTime: '2023-12-02 09:15:00',
         createdBy: '张馨',
         assignedTo: '张会计',
         relatedId: '2',
@@ -83,7 +83,7 @@ export const todoData: ITodo[] = [
         priority: 'urgent',
         status: 'pending',
         dueDate: '2023-12-04',
-        createdAt: '2023-12-01 14:30:00',
+        createTime: '2023-12-01 14:30:00',
         createdBy: '李主任',
         assignedTo: '当前用户',
         relatedId: '3',
@@ -98,7 +98,7 @@ export const todoData: ITodo[] = [
         priority: 'high',
         status: 'in_progress',
         dueDate: '2023-12-06',
-        createdAt: '2023-12-01 16:00:00',
+        createTime: '2023-12-01 16:00:00',
         createdBy: '王工',
         assignedTo: '李主任',
         relatedId: '1',
@@ -113,7 +113,7 @@ export const todoData: ITodo[] = [
         priority: 'normal',
         status: 'pending',
         dueDate: '2023-12-10',
-        createdAt: '2023-12-01 10:00:00',
+        createTime: '2023-12-01 10:00:00',
         createdBy: '系统',
         assignedTo: '设备管理员',
         relatedId: '1',
@@ -128,7 +128,7 @@ export const todoData: ITodo[] = [
         priority: 'high',
         status: 'overdue',
         dueDate: '2023-11-30',
-        createdAt: '2023-11-25 09:00:00',
+        createTime: '2023-11-25 09:00:00',
         createdBy: '系统',
         assignedTo: '设备管理员',
         relatedId: '2',
@@ -143,7 +143,7 @@ export const todoData: ITodo[] = [
         priority: 'normal',
         status: 'pending',
         dueDate: '2023-12-05',
-        createdAt: '2023-12-02 11:00:00',
+        createTime: '2023-12-02 11:00:00',
         createdBy: '张三',
         assignedTo: '样品管理员',
         relatedId: '5',
@@ -158,7 +158,7 @@ export const todoData: ITodo[] = [
         priority: 'high',
         status: 'pending',
         dueDate: '2023-12-05',
-        createdAt: '2023-12-01 16:00:00',
+        createTime: '2023-12-01 16:00:00',
         createdBy: '张馨',
         assignedTo: '销售经理',
         relatedId: '1',
@@ -173,7 +173,7 @@ export const todoData: ITodo[] = [
         priority: 'normal',
         status: 'pending',
         dueDate: '2023-12-08',
-        createdAt: '2023-12-02 14:00:00',
+        createTime: '2023-12-02 14:00:00',
         createdBy: '李工',
         assignedTo: '技术负责人',
         relatedId: '1',
@@ -188,7 +188,7 @@ export const todoData: ITodo[] = [
         priority: 'normal',
         status: 'completed',
         dueDate: '2023-12-04',
-        createdAt: '2023-12-03 11:00:00',
+        createTime: '2023-12-03 11:00:00',
         createdBy: '张馨',
         assignedTo: '王经理',
         relatedId: '3',

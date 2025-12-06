@@ -4,6 +4,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, KeyOutlined } from '@ant-de
 import { userData as initialData, roleData } from '../../mock/system';
 import { employeeData } from '../../mock/personnel';
 import type { IUser } from '../../mock/system';
+import dayjs from 'dayjs';
 
 const UserManagement: React.FC = () => {
     const [dataSource, setDataSource] = useState<IUser[]>(initialData);
@@ -85,6 +86,12 @@ const UserManagement: React.FC = () => {
                 </Space>
             ),
         },
+        {
+            title: '创建时间',
+            dataIndex: 'createTime',
+            key: 'createTime',
+            width: 170,
+        },
     ];
 
     const handleAdd = () => {
@@ -116,7 +123,7 @@ const UserManagement: React.FC = () => {
                 const newUser: IUser = {
                     id: String(Date.now()),
                     ...values,
-                    createTime: new Date().toISOString().split('T')[0],
+                    createTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
                     status: 'active'
                 };
                 setDataSource(prev => [...prev, newUser]);

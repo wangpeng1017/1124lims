@@ -459,7 +459,7 @@ export const sampleCollectionData: ISampleCollection[] = [
         testItems: ['抗压强度', '抗折强度'],
         expectedReturnDate: '2023-11-10',
         status: 'in_use',
-        createTime: '2023-11-02T08:00:00Z'
+        createTime: '2023-11-02 08:00:00'
     },
     {
         id: 'COL002',
@@ -477,7 +477,7 @@ export const sampleCollectionData: ISampleCollection[] = [
         actualReturnDate: '2023-11-07',
         returnedQuantity: 5,
         status: 'fully_returned',
-        createTime: '2023-11-03T09:00:00Z'
+        createTime: '2023-11-03 09:00:00'
     }
 ];
 

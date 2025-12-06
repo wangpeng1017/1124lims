@@ -4,6 +4,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined } from '@ant-design/icons';
 import { calibrationPlanData, calibrationRecordData, deviceData } from '../../mock/devices';
 import type { ICalibrationPlan, ICalibrationRecord } from '../../mock/devices';
+import dayjs from 'dayjs';
 
 const PlanList: React.FC = () => {
     const [dataSource, setDataSource] = useState<ICalibrationPlan[]>([]);
@@ -52,8 +53,8 @@ const PlanList: React.FC = () => {
                     ...values,
                     deviceName: device?.name || '',
                     status: 'active',
-                    createTime: new Date().toISOString(),
-                    updateTime: new Date().toISOString()
+                    createTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                    updateTime: dayjs().format('YYYY-MM-DD HH:mm:ss')
                 };
                 setDataSource(prev => [newPlan, ...prev]);
                 message.success('添加成功');
@@ -97,6 +98,7 @@ const PlanList: React.FC = () => {
                 </Space>
             ),
         },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
     ];
 
     return (
