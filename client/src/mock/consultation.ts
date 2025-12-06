@@ -12,7 +12,7 @@ export interface FollowUpRecord {
 export interface IConsultation {
     id: string;                          // 咨询编号
     consultationNo: string;              // 咨询单号 (如: ZX20231201001)
-    createDate: string;                  // 创建日期
+    createTime: string;                  // 创建时间
 
     // 客户信息
     clientCompany: string;               // 客户公司名称
@@ -110,7 +110,7 @@ export const consultationData: IConsultation[] = [
     {
         id: '1',
         consultationNo: 'ZX20231201001',
-        createDate: '2023-12-01',
+        createTime: '2023-12-01 10:00:00',
         clientCompany: '奇瑞汽车股份有限公司',
         clientContact: '李工',
         clientTel: '13800138000',
@@ -164,7 +164,7 @@ export const consultationData: IConsultation[] = [
     {
         id: '2',
         consultationNo: 'ZX20231202001',
-        createDate: '2023-12-02',
+        createTime: '2023-12-02 14:00:00',
         clientCompany: '长安汽车股份有限公司',
         clientContact: '王经理',
         clientTel: '13900139001',
@@ -209,7 +209,7 @@ export const consultationData: IConsultation[] = [
     {
         id: '3',
         consultationNo: 'ZX20231203001',
-        createDate: '2023-12-03',
+        createTime: '2023-12-03 11:00:00',
         clientCompany: '吉利汽车集团有限公司',
         clientContact: '赵工',
         clientTel: '13700137002',
@@ -245,7 +245,7 @@ export const consultationData: IConsultation[] = [
     {
         id: '4',
         consultationNo: 'ZX20231204001',
-        createDate: '2023-12-04',
+        createTime: '2023-12-04 09:00:00',
         clientCompany: '比亚迪汽车工业有限公司',
         clientContact: '孙工',
         clientTel: '13600136003',
@@ -269,7 +269,7 @@ export const consultationData: IConsultation[] = [
     {
         id: '5',
         consultationNo: 'ZX20231205001',
-        createDate: '2023-12-05',
+        createTime: '2023-12-05 10:00:00',
         clientCompany: '长城汽车股份有限公司',
         clientContact: '周工',
         clientTel: '13500135004',
@@ -321,7 +321,7 @@ export const consultationData: IConsultation[] = [
     {
         id: '6',
         consultationNo: 'ZX20231206001',
-        createDate: '2023-12-06',
+        createTime: '2023-12-06 14:00:00',
         clientCompany: '上海汽车集团股份有限公司',
         clientContact: '赵主管',
         clientTel: '13400134005',
@@ -362,7 +362,7 @@ export const consultationData: IConsultation[] = [
     {
         id: '7',
         consultationNo: 'ZX20231207001',
-        createDate: '2023-12-07',
+        createTime: '2023-12-07 09:00:00',
         clientCompany: '广州汽车集团股份有限公司',
         clientContact: '钱工',
         clientTel: '13300133006',
@@ -407,7 +407,7 @@ export const consultationData: IConsultation[] = [
     {
         id: '8',
         consultationNo: 'ZX20231208001',
-        createDate: '2023-12-08',
+        createTime: '2023-12-08 16:00:00',
         clientCompany: '东风汽车集团有限公司',
         clientContact: '孙经理',
         clientTel: '13200132007',

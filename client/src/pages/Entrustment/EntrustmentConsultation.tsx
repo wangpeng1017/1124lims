@@ -64,7 +64,7 @@ const EntrustmentConsultation: React.FC = () => {
             const startDate = dateRangeValue[0].format('YYYY-MM-DD');
             const endDate = dateRangeValue[1].format('YYYY-MM-DD');
             filtered = filtered.filter(item =>
-                item.createDate >= startDate && item.createDate <= endDate
+                item.createTime >= startDate && item.createTime <= endDate
             );
         }
 
@@ -197,12 +197,12 @@ const EntrustmentConsultation: React.FC = () => {
             // 新建模式
             const newConsultation: IConsultation = {
                 id: String(dataSource.length + 1),
-                consultationNo: `ZX${new Date().toISOString().slice(0, 10).replace(/-/g, '')}${String(dataSource.length + 1).padStart(3, '0')}`,
-                createDate: new Date().toISOString().slice(0, 10),
+                consultationNo: `ZX${dayjs().format('YYYYMMDD')}${String(dataSource.length + 1).padStart(3, '0')}`,
+                createTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
                 status: 'pending',
                 followUpRecords: [],
                 createdBy: '当前用户',
-                updatedAt: new Date().toISOString(),
+                updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
                 ...values
             } as IConsultation;
             const newData = [newConsultation, ...dataSource];
@@ -236,11 +236,11 @@ const EntrustmentConsultation: React.FC = () => {
             )
         },
         {
-            title: '创建日期',
-            dataIndex: 'createDate',
-            key: 'createDate',
-            width: 120,
-            sorter: (a, b) => a.createDate.localeCompare(b.createDate)
+            title: '创建时间',
+            dataIndex: 'createTime',
+            key: 'createTime',
+            width: 170,
+            sorter: (a, b) => a.createTime.localeCompare(b.createTime)
         },
         {
             title: '客户公司',
