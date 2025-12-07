@@ -4,8 +4,11 @@ import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, SearchOutlined, AlertOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { consumablesData, type IConsumableInfo } from '../../mock/consumables';
+import { useAuth } from '../../hooks/useAuth';
 
 const ConsumableInfo: React.FC = () => {
+    const { canDelete } = useAuth();
+
     const [dataSource, setDataSource] = useState<IConsumableInfo[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<IConsumableInfo | null>(null);
@@ -150,11 +153,13 @@ const ConsumableInfo: React.FC = () => {
                     >
                         编辑
                     </Button>
-                    <Popconfirm title="确定删除?" onConfirm={() => handleDelete(record.id)}>
-                        <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-                            删除
-                        </Button>
-                    </Popconfirm>
+                    {canDelete && (
+                        <Popconfirm title="确定删除?" onConfirm={() => handleDelete(record.id)}>
+                            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
+                                删除
+                            </Button>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },

@@ -3,8 +3,11 @@ import { Card, Table, Button, Space, Modal, Form, Input, Select, message, Popcon
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { reportCategoryData, type IReportCategory } from '../../../mock/report';
+import { useAuth } from '../../../hooks/useAuth';
 
 const ReportCategories: React.FC = () => {
+    const { canDelete } = useAuth();
+
     const [dataSource, setDataSource] = useState(reportCategoryData);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<IReportCategory | null>(null);
@@ -76,16 +79,18 @@ const ReportCategories: React.FC = () => {
                     >
                         编辑
                     </Button>
-                    <Popconfirm title="确定删除?" onConfirm={() => handleDelete(record.id)}>
-                        <Button
-                            type="link"
-                            size="small"
-                            danger
-                            icon={<DeleteOutlined />}
-                        >
-                            删除
-                        </Button>
-                    </Popconfirm>
+                    {canDelete && (
+                        <Popconfirm title="确定删除?" onConfirm={() => handleDelete(record.id)}>
+                            <Button
+                                type="link"
+                                size="small"
+                                danger
+                                icon={<DeleteOutlined />}
+                            >
+                                删除
+                            </Button>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },

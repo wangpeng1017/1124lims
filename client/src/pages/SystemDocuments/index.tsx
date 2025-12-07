@@ -5,8 +5,11 @@ import type { ColumnsType } from 'antd/es/table';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { systemDocumentsData } from '../../mock/systemDocuments';
 import type { ISystemDocument } from '../../mock/systemDocuments';
+import { useAuth } from '../../hooks/useAuth';
 
 const SystemDocuments: React.FC = () => {
+    const { canDelete } = useAuth();
+
     const [dataSource, setDataSource] = useState<ISystemDocument[]>(systemDocumentsData);
     const [searchText, setSearchText] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -120,9 +123,11 @@ const SystemDocuments: React.FC = () => {
                     <Tooltip title="编辑">
                         <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
                     </Tooltip>
-                    <Popconfirm title="确定删除?" onConfirm={() => handleDelete(record.id)}>
-                        <Button type="text" danger icon={<DeleteOutlined />} />
-                    </Popconfirm>
+                    {canDelete && (
+                        <Popconfirm title="确定删除?" onConfirm={() => handleDelete(record.id)}>
+                            <Button type="text" danger icon={<DeleteOutlined />} />
+                        </Popconfirm>
+                    )}
                 </Space>
             )
         }

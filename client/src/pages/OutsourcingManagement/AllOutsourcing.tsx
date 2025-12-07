@@ -8,10 +8,13 @@ import { sampleDetailData } from '../../mock/sample';
 import { employeeData } from '../../mock/personnel';
 import PersonSelector from '../../components/PersonSelector';
 import dayjs from 'dayjs';
+import { useAuth } from '../../hooks/useAuth';
 
 const { Option } = Select;
 
 const AllOutsourcing: React.FC = () => {
+    const { canDelete } = useAuth();
+
     const [dataSource, setDataSource] = useState<IOutsourceTask[]>(outsourceTaskData);
     const [searchText, setSearchText] = useState('');
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
@@ -276,14 +279,16 @@ const AllOutsourcing: React.FC = () => {
                             >
                                 编辑
                             </Button>
-                            <Popconfirm
-                                title="确定删除此委外任务吗?"
-                                onConfirm={() => handleDelete(record.id)}
-                            >
-                                <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-                                    删除
-                                </Button>
-                            </Popconfirm>
+                            {canDelete && (
+                                <Popconfirm
+                                    title="确定删除此委外任务吗?"
+                                    onConfirm={() => handleDelete(record.id)}
+                                >
+                                    <Button type="link" size="small" danger icon={<DeleteOutlined />}>
+                                        删除
+                                    </Button>
+                                </Popconfirm>
+                            )}
                         </>
                     )}
                 </Space>

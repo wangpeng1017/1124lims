@@ -5,10 +5,13 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, UploadOutlined
 import { testTemplatesData, type TestTemplate } from '../../../mock/testTemplates';
 import { inspectionStandardsData } from '../../../mock/basicParameters';
 import DynamicFormRenderer from '../../../components/DynamicFormRenderer';
+import { useAuth } from '../../../hooks/useAuth';
 
 
 
 const TestTemplateManagement: React.FC = () => {
+    const { canDelete } = useAuth();
+
     const [dataSource, setDataSource] = useState<TestTemplate[]>(testTemplatesData);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<TestTemplate | null>(null);
@@ -97,9 +100,11 @@ const TestTemplateManagement: React.FC = () => {
                 <Space size="small">
                     <Button type="link" icon={<EyeOutlined />} onClick={() => handlePreview(record)}>预览</Button>
                     <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
-                    <Popconfirm title="确定删除吗?" onConfirm={() => handleDelete(record.id)}>
-                        <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
-                    </Popconfirm>
+                    {canDelete && (
+                        <Popconfirm title="确定删除吗?" onConfirm={() => handleDelete(record.id)}>
+                            <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },
