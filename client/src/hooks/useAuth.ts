@@ -1,105 +1,257 @@
 /**
  * 用户认证和权限控制 Hook
  * 
- * 目前使用 localStorage 存储模拟用户信息
- * 实际生产环境应从后端获取用户信息
+ * 功能：
+ * - 用户登录状态管理
+ * - 操作权限检查（增删改查等）
+ * - 模块权限检查
+ * - 数据权限检查
+ * - 审批权限检查
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+    userData,
+    roleData,
+    departmentData,
+    getRoleById,
+    getDepartmentById,
+    type IUser,
+    type IRole,
+    type IDepartment,
+    type IModuleAccess,
+} from '../mock/auth';
 
-export interface User {
-    id: string;
-    username: string;
-    name: string;
-    role: 'admin' | 'manager' | 'user';
-    department?: string;
-    permissions: string[];
+// ==================== 类型定义 ====================
+
+export interface AuthUser extends IUser {
+    role?: IRole;
+    department?: IDepartment;
 }
 
-// 默认管理员用户（模拟）
-const DEFAULT_ADMIN: User = {
-    id: 'user-001',
-    username: 'admin',
-    name: '系统管理员',
-    role: 'admin',
-    department: '信息技术部',
-    permissions: ['create', 'read', 'update', 'delete', 'manage_users', 'manage_system'],
-};
+export interface AuthContextValue {
+    // 用户信息
+    user: AuthUser | null;
+    isLoggedIn: boolean;
 
-// 默认普通用户（模拟）
-const DEFAULT_USER: User = {
-    id: 'user-002',
-    username: 'user',
-    name: '普通用户',
-    role: 'user',
-    department: '检测部',
-    permissions: ['create', 'read', 'update'],
-};
+    // 角色检查
+    isAdmin: boolean;
+    isManager: boolean;
 
-const STORAGE_KEY = 'lims_current_user';
+    // 操作权限
+    canCreate: boolean;
+    canRead: boolean;
+    canUpdate: boolean;
+    canDelete: boolean;      // 仅管理员
+    canExport: boolean;
+    canImport: boolean;
+    canApprove: boolean;
+    canPrint: boolean;
 
-/**
- * 获取当前用户
- */
-const getCurrentUserFromStorage = (): User => {
-    try {
+    // 权限检查方法
+    hasPermission: (permission: string) => boolean;
+    hasModuleAccess: (moduleKey: string, minAccess?: IModuleAccess['access']) => boolean;
+    canApproveBusinessType: (businessType: string) => boolean;
+    getDataScope: () => 'all' | 'department' | 'self';
+
+    // 用户操作
+    login: (username: string, password: string) => Promise<boolean>;
+    logout: () => void;
+    switchUser: (userId: string) => void;
+
+    // 开发用 - 快速切换角色
+    switchToAdmin: () => void;
+    switchToUser: () => void;
+    availableUsers: IUser[];
+}
+
+// ==================== 常量 ====================
+
+const STORAGE_KEY = 'lims_current_user_id';
+
+// ==================== Hook 实现 ====================
+
+export const useAuth = (): AuthContextValue => {
+    const [userId, setUserId] = useState<string | null>(() => {
+        // 从 localStorage 读取用户ID，默认使用管理员
         const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            return JSON.parse(stored);
+        return stored || 'user-001'; // 默认管理员
+    });
+
+    // 获取当前用户完整信息
+    const user = useMemo<AuthUser | null>(() => {
+        if (!userId) return null;
+        const baseUser = userData.find(u => u.id === userId);
+        if (!baseUser) return null;
+
+        const role = getRoleById(baseUser.roleId);
+        const department = getDepartmentById(baseUser.departmentId);
+
+        return {
+            ...baseUser,
+            role,
+            department,
+        };
+    }, [userId]);
+
+    // 保存用户ID到localStorage
+    useEffect(() => {
+        if (userId) {
+            localStorage.setItem(STORAGE_KEY, userId);
+        } else {
+            localStorage.removeItem(STORAGE_KEY);
         }
-    } catch (e) {
-        console.error('Failed to parse stored user:', e);
-    }
-    // 默认使用管理员用户（开发模式）
-    return DEFAULT_ADMIN;
-};
+    }, [userId]);
 
-/**
- * 用户认证 Hook
- */
-export const useAuth = () => {
-    const [user, setUser] = useState<User>(getCurrentUserFromStorage);
+    // ==================== 角色检查 ====================
 
-    // 检查是否是管理员
-    const isAdmin = user.role === 'admin';
+    const isLoggedIn = !!user;
+    const isAdmin = user?.role?.code === 'admin';
+    const isManager = isAdmin || ['lab_director', 'sales_manager', 'quality_manager', 'technical_director'].includes(user?.role?.code || '');
 
-    // 检查是否是管理员或经理
-    const isManager = user.role === 'admin' || user.role === 'manager';
+    // ==================== 操作权限 ====================
 
-    // 检查是否有特定权限
+    const permissions = user?.role?.permissions || [];
+
+    const canCreate = permissions.includes('create');
+    const canRead = permissions.includes('read');
+    const canUpdate = permissions.includes('update');
+    const canDelete = isAdmin; // 仅管理员可删除
+    const canExport = permissions.includes('export');
+    const canImport = permissions.includes('import');
+    const canApprove = permissions.includes('approve');
+    const canPrint = permissions.includes('print');
+
+    // ==================== 权限检查方法 ====================
+
+    /**
+     * 检查是否有特定操作权限
+     */
     const hasPermission = useCallback((permission: string): boolean => {
-        return user.permissions.includes(permission);
-    }, [user.permissions]);
+        // 删除权限特殊处理
+        if (permission === 'delete') return isAdmin;
+        return permissions.includes(permission);
+    }, [permissions, isAdmin]);
 
-    // 检查是否可以删除（只有管理员才能删除）
-    const canDelete = isAdmin;
+    /**
+     * 检查模块访问权限
+     * @param moduleKey 模块标识
+     * @param minAccess 最低访问级别，默认 'read'
+     */
+    const hasModuleAccess = useCallback((moduleKey: string, minAccess: IModuleAccess['access'] = 'read'): boolean => {
+        if (isAdmin) return true;
 
-    // 切换用户（用于测试）
-    const switchToAdmin = useCallback(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_ADMIN));
-        setUser(DEFAULT_ADMIN);
+        const moduleAccess = user?.role?.moduleAccess || [];
+        const access = moduleAccess.find(m => m.moduleKey === moduleKey);
+
+        if (!access || access.access === 'none') return false;
+
+        const accessLevels: IModuleAccess['access'][] = ['none', 'read', 'operate', 'approve', 'full'];
+        const currentLevel = accessLevels.indexOf(access.access);
+        const requiredLevel = accessLevels.indexOf(minAccess);
+
+        return currentLevel >= requiredLevel;
+    }, [user, isAdmin]);
+
+    /**
+     * 检查是否可以审批特定业务类型
+     */
+    const canApproveBusinessType = useCallback((businessType: string): boolean => {
+        if (isAdmin) return true;
+
+        const approvalPerms = user?.role?.approvalPermissions || [];
+        const perm = approvalPerms.find(p => p.businessType === businessType);
+
+        return perm?.canApprove || false;
+    }, [user, isAdmin]);
+
+    /**
+     * 获取数据权限范围
+     */
+    const getDataScope = useCallback((): 'all' | 'department' | 'self' => {
+        if (isAdmin) return 'all';
+        return user?.role?.dataScope || 'self';
+    }, [user, isAdmin]);
+
+    // ==================== 用户操作 ====================
+
+    /**
+     * 登录
+     */
+    const login = useCallback(async (username: string, _password: string): Promise<boolean> => {
+        // 模拟登录验证
+        const foundUser = userData.find(u => u.username === username && u.status === 'active');
+        if (foundUser) {
+            setUserId(foundUser.id);
+            return true;
+        }
+        return false;
     }, []);
 
-    const switchToUser = useCallback(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_USER));
-        setUser(DEFAULT_USER);
-    }, []);
-
-    // 登出
+    /**
+     * 登出
+     */
     const logout = useCallback(() => {
-        localStorage.removeItem(STORAGE_KEY);
-        setUser(DEFAULT_USER);
+        setUserId(null);
     }, []);
+
+    /**
+     * 切换用户（开发用）
+     */
+    const switchUser = useCallback((newUserId: string) => {
+        setUserId(newUserId);
+    }, []);
+
+    /**
+     * 快速切换到管理员
+     */
+    const switchToAdmin = useCallback(() => {
+        setUserId('user-001');
+    }, []);
+
+    /**
+     * 快速切换到普通用户
+     */
+    const switchToUser = useCallback(() => {
+        setUserId('user-007');
+    }, []);
+
+    // ==================== 返回值 ====================
 
     return {
+        // 用户信息
         user,
+        isLoggedIn,
+
+        // 角色检查
         isAdmin,
         isManager,
-        hasPermission,
+
+        // 操作权限
+        canCreate,
+        canRead,
+        canUpdate,
         canDelete,
+        canExport,
+        canImport,
+        canApprove,
+        canPrint,
+
+        // 权限检查方法
+        hasPermission,
+        hasModuleAccess,
+        canApproveBusinessType,
+        getDataScope,
+
+        // 用户操作
+        login,
+        logout,
+        switchUser,
+
+        // 开发用
         switchToAdmin,
         switchToUser,
-        logout,
+        availableUsers: userData,
     };
 };
 

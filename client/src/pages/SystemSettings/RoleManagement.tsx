@@ -3,8 +3,10 @@ import { Card, Table, Button, Space, Modal, Form, Input, Select, Tag, message, P
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { roleData as initialData, permissionTreeData } from '../../mock/system';
 import type { IRole } from '../../mock/system';
+import { useAuth } from '../../hooks/useAuth';
 
 const RoleManagement: React.FC = () => {
+    const { canDelete } = useAuth();
     const [dataSource, setDataSource] = useState<IRole[]>(initialData);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<IRole | null>(null);
@@ -49,14 +51,16 @@ const RoleManagement: React.FC = () => {
                     >
                         编辑
                     </Button>
-                    <Popconfirm
-                        title="确定要删除该角色吗?"
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="确定"
-                        cancelText="取消"
-                    >
-                        <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
-                    </Popconfirm>
+                    {canDelete && (
+                        <Popconfirm
+                            title="确定要删除该角色吗?"
+                            onConfirm={() => handleDelete(record.id)}
+                            okText="确定"
+                            cancelText="取消"
+                        >
+                            <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },

@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 import { employeeData } from '../../mock/personnel';
 import PersonSelector from '../../components/PersonSelector';
 import { useEntrustmentService } from '../../services/useDataService';
+import { useAuth } from '../../hooks/useAuth';
 
 const orgUsers = [
     {
@@ -38,9 +39,12 @@ const orgUsers = [
 const outsourcingSuppliers = supplierData.filter(s => s.categories.includes('CAT001'));
 
 const Entrustment: React.FC = () => {
+    // 权限控制
+    const { canDelete } = useAuth();
     // 使用API服务
     const { loading, data: apiData, total, fetchList, create, update, remove } = useEntrustmentService();
     const [dataSource, setDataSource] = useState<IEntrustmentRecord[]>([]);
+
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<IEntrustmentRecord | null>(null);
     const [form] = Form.useForm();
@@ -518,8 +522,8 @@ const Entrustment: React.FC = () => {
                             <List.Item
                                 actions={[
                                     <Button type="text" size="small" icon={<EditOutlined />} onClick={() => handleEditProject(item)} />,
-                                    <Button type="text" danger size="small" icon={<DeleteOutlined />} onClick={() => handleDeleteProject(item.id)} />
-                                ]}
+                                    canDelete && <Button type="text" danger size="small" icon={<DeleteOutlined />} onClick={() => handleDeleteProject(item.id)} />
+                                ].filter(Boolean)}
                             >
                                 <List.Item.Meta
                                     title={

@@ -4,9 +4,11 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, KeyOutlined } from '@ant-de
 import { userData as initialData, roleData } from '../../mock/system';
 import { employeeData } from '../../mock/personnel';
 import type { IUser } from '../../mock/system';
+import { useAuth } from '../../hooks/useAuth';
 import dayjs from 'dayjs';
 
 const UserManagement: React.FC = () => {
+    const { canDelete } = useAuth();
     const [dataSource, setDataSource] = useState<IUser[]>(initialData);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<IUser | null>(null);
@@ -81,14 +83,16 @@ const UserManagement: React.FC = () => {
                     >
                         重置密码
                     </Button>
-                    <Popconfirm
-                        title="确定要删除该用户吗?"
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="确定"
-                        cancelText="取消"
-                    >
-                        <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
-                    </Popconfirm>
+                    {canDelete && (
+                        <Popconfirm
+                            title="确定要删除该用户吗?"
+                            onConfirm={() => handleDelete(record.id)}
+                            okText="确定"
+                            cancelText="取消"
+                        >
+                            <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },

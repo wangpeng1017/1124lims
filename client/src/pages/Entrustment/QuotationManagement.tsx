@@ -11,6 +11,7 @@ import { saveAs } from 'file-saver';
 import QuotationPDF from '../../components/QuotationPDF';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { IConsultation } from '../../mock/consultation';
+import { useAuth } from '../../hooks/useAuth';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -18,6 +19,7 @@ const { Option } = Select;
 const QuotationManagement: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { canDelete } = useAuth();
     const [dataSource, setDataSource] = useState<Quotation[]>(quotationData);
     const [filteredData, setFilteredData] = useState<Quotation[]>(quotationData);
     const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -457,7 +459,8 @@ const QuotationManagement: React.FC = () => {
                 }
 
                 // 草稿状态 - 可删除
-                if (record.status === 'draft') {
+                // 删除按钮 - 仅管理员可见
+                if (canDelete && record.status === 'draft') {
                     actions.push(
                         <Popconfirm
                             key="delete"
