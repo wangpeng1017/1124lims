@@ -16,7 +16,7 @@ export interface IUser {
     email?: string;
     avatar?: string;
     departmentId: string;
-    roleId: string;
+    roleIds: string[];          // 支持多角色
     status: 'active' | 'disabled';
     createTime: string;
     lastLoginTime?: string;
@@ -63,6 +63,7 @@ export interface IRole {
     description?: string;
     isSystem: boolean;          // 系统预设角色不可删除
     permissions: string[];      // 操作权限: create, read, update, delete, export, import, approve, print
+    deletePermissions: string[]; // 模块级删除权限: ['entrustment', 'sample', ...]
     moduleAccess: IModuleAccess[];
     dataScope: 'all' | 'department' | 'self';
     approvalPermissions: IApprovalPermission[];
@@ -164,6 +165,7 @@ export const roleData: IRole[] = [
         description: '拥有所有权限，管理用户和系统配置',
         isSystem: true,
         permissions: ['create', 'read', 'update', 'delete', 'export', 'import', 'approve', 'print'],
+        deletePermissions: ['entrustment', 'sample', 'test', 'report', 'device', 'consumable', 'outsourcing', 'supplier', 'personnel', 'finance', 'statistics', 'system'], // 管理员可删除所有模块
         moduleAccess: SYSTEM_MODULES.map(m => ({ moduleKey: m.key, moduleName: m.name, access: 'full' as const })),
         dataScope: 'all',
         approvalPermissions: APPROVAL_BUSINESS_TYPES.map(t => ({ businessType: t.key, businessName: t.name, canApprove: true })),
@@ -177,6 +179,7 @@ export const roleData: IRole[] = [
         description: '审批报告，管理检测流程',
         isSystem: true,
         permissions: ['create', 'read', 'update', 'export', 'approve', 'print'],
+        deletePermissions: ['report', 'outsourcing'], // 实验室主任可删除报告和委外
         moduleAccess: [
             { moduleKey: 'entrustment', moduleName: '业务管理', access: 'approve' },
             { moduleKey: 'sample', moduleName: '样品管理', access: 'read' },
@@ -206,6 +209,7 @@ export const roleData: IRole[] = [
         description: '客户管理，合同审批',
         isSystem: true,
         permissions: ['create', 'read', 'update', 'export', 'approve', 'print'],
+        deletePermissions: ['entrustment'], // 业务经理可删除业务数据
         moduleAccess: [
             { moduleKey: 'entrustment', moduleName: '业务管理', access: 'full' },
             { moduleKey: 'sample', moduleName: '样品管理', access: 'read' },
@@ -235,6 +239,7 @@ export const roleData: IRole[] = [
         description: '执行检测任务，数据录入',
         isSystem: true,
         permissions: ['create', 'read', 'update'],
+        deletePermissions: [], // 检测工程师无删除权限
         moduleAccess: [
             { moduleKey: 'entrustment', moduleName: '业务管理', access: 'read' },
             { moduleKey: 'sample', moduleName: '样品管理', access: 'operate' },
@@ -261,6 +266,7 @@ export const roleData: IRole[] = [
         description: '样品接收、流转、存储',
         isSystem: true,
         permissions: ['create', 'read', 'update'],
+        deletePermissions: ['sample'], // 样品管理员可删除样品
         moduleAccess: [
             { moduleKey: 'entrustment', moduleName: '业务管理', access: 'read' },
             { moduleKey: 'sample', moduleName: '样品管理', access: 'full' },
@@ -287,6 +293,7 @@ export const roleData: IRole[] = [
         description: '财务管理，收款确认',
         isSystem: true,
         permissions: ['create', 'read', 'update', 'export', 'approve'],
+        deletePermissions: ['finance'], // 财务人员可删除财务数据
         moduleAccess: [
             { moduleKey: 'entrustment', moduleName: '业务管理', access: 'read' },
             { moduleKey: 'sample', moduleName: '样品管理', access: 'none' },
@@ -315,6 +322,7 @@ export const roleData: IRole[] = [
         description: '只读权限，查看报告',
         isSystem: true,
         permissions: ['read'],
+        deletePermissions: [], // 普通用户无删除权限
         moduleAccess: [
             { moduleKey: 'entrustment', moduleName: '业务管理', access: 'read' },
             { moduleKey: 'sample', moduleName: '样品管理', access: 'read' },
@@ -347,7 +355,7 @@ export const userData: IUser[] = [
         phone: '13800000001',
         email: 'admin@lims.com',
         departmentId: 'dept-007',
-        roleId: 'role-001',
+        roleIds: ['role-001'],
         status: 'active',
         createTime: '2024-01-01',
         lastLoginTime: '2024-12-07T10:00:00',
@@ -359,7 +367,7 @@ export const userData: IUser[] = [
         phone: '13800000002',
         email: 'director@lims.com',
         departmentId: 'dept-001',
-        roleId: 'role-002',
+        roleIds: ['role-002'],
         status: 'active',
         createTime: '2024-01-01',
         lastLoginTime: '2024-12-06T15:30:00',
@@ -371,7 +379,7 @@ export const userData: IUser[] = [
         phone: '13800000003',
         email: 'sales@lims.com',
         departmentId: 'dept-004',
-        roleId: 'role-003',
+        roleIds: ['role-003'],
         status: 'active',
         createTime: '2024-01-01',
         lastLoginTime: '2024-12-06T09:00:00',
@@ -383,7 +391,7 @@ export const userData: IUser[] = [
         phone: '13800000004',
         email: 'engineer1@lims.com',
         departmentId: 'dept-002',
-        roleId: 'role-004',
+        roleIds: ['role-004'],
         status: 'active',
         createTime: '2024-01-01',
         lastLoginTime: '2024-12-07T08:30:00',
@@ -395,7 +403,7 @@ export const userData: IUser[] = [
         phone: '13800000005',
         email: 'sample@lims.com',
         departmentId: 'dept-008',
-        roleId: 'role-005',
+        roleIds: ['role-005'],
         status: 'active',
         createTime: '2024-01-01',
         lastLoginTime: '2024-12-07T08:00:00',
@@ -407,7 +415,7 @@ export const userData: IUser[] = [
         phone: '13800000006',
         email: 'finance@lims.com',
         departmentId: 'dept-006',
-        roleId: 'role-006',
+        roleIds: ['role-006'],
         status: 'active',
         createTime: '2024-01-01',
         lastLoginTime: '2024-12-06T17:00:00',
@@ -419,7 +427,7 @@ export const userData: IUser[] = [
         phone: '13800000007',
         email: 'guest@lims.com',
         departmentId: 'dept-001',
-        roleId: 'role-007',
+        roleIds: ['role-007'],
         status: 'active',
         createTime: '2024-01-01',
         lastLoginTime: '2024-12-01T10:00:00',
@@ -456,12 +464,12 @@ export const getUserWithDetails = (userId: string) => {
     const user = getUserById(userId);
     if (!user) return null;
 
-    const role = getRoleById(user.roleId);
+    const roles = user.roleIds.map(roleId => getRoleById(roleId)).filter(Boolean) as IRole[];
     const department = getDepartmentById(user.departmentId);
 
     return {
         ...user,
-        role,
+        roles,
         department,
     };
 };

@@ -76,7 +76,7 @@ const Login: React.FC = () => {
                     }}>
                         <Text>当前登录：</Text>
                         <Tag color="green">{user.name}</Tag>
-                        <Tag color="blue">{getRoleById(user.roleId)?.name}</Tag>
+                        <Tag color="blue">{getRoleById(user.roleIds?.[0] || '')?.name}</Tag>
                         <Button
                             type="link"
                             size="small"
@@ -131,7 +131,7 @@ const Login: React.FC = () => {
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                     {availableUsers.map(u => {
-                        const role = getRoleById(u.roleId);
+                        const role = getRoleById(u.roleIds?.[0] || '');
                         const dept = getDepartmentById(u.departmentId);
                         const isCurrentUser = user?.id === u.id;
                         const colorMap: Record<string, string> = {

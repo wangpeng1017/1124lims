@@ -25,7 +25,7 @@ import {
 // ==================== 类型定义 ====================
 
 export interface AuthUser extends IUser {
-    role?: IRole;
+    roles: IRole[];           // 支持多角色
     department?: IDepartment;
 }
 
@@ -42,7 +42,7 @@ export interface AuthContextValue {
     canCreate: boolean;
     canRead: boolean;
     canUpdate: boolean;
-    canDelete: boolean;      // 仅管理员
+    canDelete: boolean;      // 任何角色有删除权限
     canExport: boolean;
     canImport: boolean;
     canApprove: boolean;
@@ -51,6 +51,7 @@ export interface AuthContextValue {
     // 权限检查方法
     hasPermission: (permission: string) => boolean;
     hasModuleAccess: (moduleKey: string, minAccess?: IModuleAccess['access']) => boolean;
+    canDeleteModule: (moduleKey: string) => boolean;  // 新增: 按模块检查删除权限
     canApproveBusinessType: (businessType: string) => boolean;
     getDataScope: () => 'all' | 'department' | 'self';
 
@@ -78,18 +79,21 @@ export const useAuth = (): AuthContextValue => {
         return stored || 'user-001'; // 默认管理员
     });
 
-    // 获取当前用户完整信息
+    // 获取当前用户完整信息 (支持多角色)
     const user = useMemo<AuthUser | null>(() => {
         if (!userId) return null;
         const baseUser = userData.find(u => u.id === userId);
         if (!baseUser) return null;
 
-        const role = getRoleById(baseUser.roleId);
+        // 获取所有角色
+        const roles = baseUser.roleIds
+            .map(roleId => getRoleById(roleId))
+            .filter(Boolean) as IRole[];
         const department = getDepartmentById(baseUser.departmentId);
 
         return {
             ...baseUser,
-            role,
+            roles,
             department,
         };
     }, [userId]);
@@ -103,24 +107,46 @@ export const useAuth = (): AuthContextValue => {
         }
     }, [userId]);
 
+    // ==================== 多角色权限合并 ====================
+
+    // 合并所有角色的操作权限
+    const mergedPermissions = useMemo(() => {
+        const roles = user?.roles || [];
+        const allPerms = new Set<string>();
+        roles.forEach(role => {
+            role.permissions.forEach(p => allPerms.add(p));
+        });
+        return Array.from(allPerms);
+    }, [user]);
+
+    // 合并所有角色的删除权限
+    const mergedDeletePermissions = useMemo(() => {
+        const roles = user?.roles || [];
+        const allDeletePerms = new Set<string>();
+        roles.forEach(role => {
+            (role.deletePermissions || []).forEach(p => allDeletePerms.add(p));
+        });
+        return Array.from(allDeletePerms);
+    }, [user]);
+
     // ==================== 角色检查 ====================
 
     const isLoggedIn = !!user;
-    const isAdmin = user?.role?.code === 'admin';
-    const isManager = isAdmin || ['lab_director', 'sales_manager', 'quality_manager', 'technical_director'].includes(user?.role?.code || '');
+    const isAdmin = user?.roles?.some(r => r.code === 'admin') || false;
+    const isManager = isAdmin || user?.roles?.some(r =>
+        ['lab_director', 'sales_manager', 'quality_manager', 'technical_director'].includes(r.code)
+    ) || false;
 
     // ==================== 操作权限 ====================
 
-    const permissions = user?.role?.permissions || [];
-
-    const canCreate = permissions.includes('create');
-    const canRead = permissions.includes('read');
-    const canUpdate = permissions.includes('update');
-    const canDelete = isAdmin; // 仅管理员可删除
-    const canExport = permissions.includes('export');
-    const canImport = permissions.includes('import');
-    const canApprove = permissions.includes('approve');
-    const canPrint = permissions.includes('print');
+    const canCreate = mergedPermissions.includes('create');
+    const canRead = mergedPermissions.includes('read');
+    const canUpdate = mergedPermissions.includes('update');
+    const canDelete = mergedDeletePermissions.length > 0 || isAdmin; // 有任何删除权限或是管理员
+    const canExport = mergedPermissions.includes('export');
+    const canImport = mergedPermissions.includes('import');
+    const canApprove = mergedPermissions.includes('approve');
+    const canPrint = mergedPermissions.includes('print');
 
     // ==================== 权限检查方法 ====================
 
@@ -128,49 +154,74 @@ export const useAuth = (): AuthContextValue => {
      * 检查是否有特定操作权限
      */
     const hasPermission = useCallback((permission: string): boolean => {
-        // 删除权限特殊处理
-        if (permission === 'delete') return isAdmin;
-        return permissions.includes(permission);
-    }, [permissions, isAdmin]);
+        if (isAdmin) return true;
+        return mergedPermissions.includes(permission);
+    }, [mergedPermissions, isAdmin]);
 
     /**
-     * 检查模块访问权限
+     * 检查模块访问权限 (多角色合并: 取最高权限)
      * @param moduleKey 模块标识
      * @param minAccess 最低访问级别，默认 'read'
      */
     const hasModuleAccess = useCallback((moduleKey: string, minAccess: IModuleAccess['access'] = 'read'): boolean => {
         if (isAdmin) return true;
 
-        const moduleAccess = user?.role?.moduleAccess || [];
-        const access = moduleAccess.find(m => m.moduleKey === moduleKey);
-
-        if (!access || access.access === 'none') return false;
-
         const accessLevels: IModuleAccess['access'][] = ['none', 'read', 'operate', 'approve', 'full'];
-        const currentLevel = accessLevels.indexOf(access.access);
         const requiredLevel = accessLevels.indexOf(minAccess);
 
-        return currentLevel >= requiredLevel;
+        // 遍历所有角色，取最高权限
+        const roles = user?.roles || [];
+        let maxLevel = 0;
+        for (const role of roles) {
+            const access = role.moduleAccess?.find(m => m.moduleKey === moduleKey);
+            if (access) {
+                const level = accessLevels.indexOf(access.access);
+                if (level > maxLevel) maxLevel = level;
+            }
+        }
+
+        return maxLevel >= requiredLevel;
     }, [user, isAdmin]);
 
     /**
-     * 检查是否可以审批特定业务类型
+     * 检查是否可以删除特定模块的数据 (新增)
+     * @param moduleKey 模块标识
+     */
+    const canDeleteModule = useCallback((moduleKey: string): boolean => {
+        if (isAdmin) return true;
+        return mergedDeletePermissions.includes(moduleKey);
+    }, [mergedDeletePermissions, isAdmin]);
+
+    /**
+     * 检查是否可以审批特定业务类型 (多角色合并)
      */
     const canApproveBusinessType = useCallback((businessType: string): boolean => {
         if (isAdmin) return true;
 
-        const approvalPerms = user?.role?.approvalPermissions || [];
-        const perm = approvalPerms.find(p => p.businessType === businessType);
-
-        return perm?.canApprove || false;
+        const roles = user?.roles || [];
+        for (const role of roles) {
+            const perm = role.approvalPermissions?.find(p => p.businessType === businessType);
+            if (perm?.canApprove) return true;
+        }
+        return false;
     }, [user, isAdmin]);
 
     /**
-     * 获取数据权限范围
+     * 获取数据权限范围 (多角色合并: 取最宽范围)
      */
     const getDataScope = useCallback((): 'all' | 'department' | 'self' => {
         if (isAdmin) return 'all';
-        return user?.role?.dataScope || 'self';
+
+        const scopeOrder: ('all' | 'department' | 'self')[] = ['self', 'department', 'all'];
+        const roles = user?.roles || [];
+        let maxScopeIndex = 0;
+
+        for (const role of roles) {
+            const scopeIndex = scopeOrder.indexOf(role.dataScope || 'self');
+            if (scopeIndex > maxScopeIndex) maxScopeIndex = scopeIndex;
+        }
+
+        return scopeOrder[maxScopeIndex];
     }, [user, isAdmin]);
 
     // ==================== 用户操作 ====================
@@ -240,6 +291,7 @@ export const useAuth = (): AuthContextValue => {
         // 权限检查方法
         hasPermission,
         hasModuleAccess,
+        canDeleteModule,
         canApproveBusinessType,
         getDataScope,
 

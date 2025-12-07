@@ -52,11 +52,10 @@ const UserManagement: React.FC = () => {
         },
         {
             title: '角色',
-            dataIndex: 'roleId',
-            key: 'roleId',
-            width: 150,
-            render: (roleId: string) => {
-                const role = getRoleById(roleId);
+            dataIndex: 'roleIds',
+            key: 'roleIds',
+            width: 200,
+            render: (roleIds: string[]) => {
                 const colorMap: Record<string, string> = {
                     admin: 'red',
                     lab_director: 'purple',
@@ -66,9 +65,16 @@ const UserManagement: React.FC = () => {
                     finance: 'cyan',
                     user: 'default',
                 };
-                return role ? (
-                    <Tag color={colorMap[role.code] || 'default'}>{role.name}</Tag>
-                ) : '-';
+                return (
+                    <Space wrap size={[0, 4]}>
+                        {(roleIds || []).map(roleId => {
+                            const role = getRoleById(roleId);
+                            return role ? (
+                                <Tag key={roleId} color={colorMap[role.code] || 'default'}>{role.name}</Tag>
+                            ) : null;
+                        })}
+                    </Space>
+                );
             },
         },
         {
@@ -147,7 +153,7 @@ const UserManagement: React.FC = () => {
         form.resetFields();
         form.setFieldsValue({
             status: 'active',
-            roleId: 'role-007',  // 默认普通用户
+            roleIds: ['role-007'],  // 默认普通用户
             departmentId: 'dept-001',
         });
         setIsModalOpen(true);
@@ -282,11 +288,11 @@ const UserManagement: React.FC = () => {
                         </Select>
                     </Form.Item>
                     <Form.Item
-                        name="roleId"
+                        name="roleIds"
                         label="角色"
                         rules={[{ required: true, message: '请选择角色' }]}
                     >
-                        <Select placeholder="选择角色">
+                        <Select mode="multiple" placeholder="选择角色(可多选)">
                             {roleData.map(role => (
                                 <Select.Option key={role.id} value={role.id}>
                                     <Space>
@@ -334,12 +340,12 @@ const UserManagement: React.FC = () => {
                                 {getDepartmentById(detailRecord.departmentId)?.name || '-'}
                             </Descriptions.Item>
                             <Descriptions.Item label="角色">
-                                {(() => {
-                                    const role = getRoleById(detailRecord.roleId);
-                                    return role ? (
-                                        <Tag color="blue">{role.name}</Tag>
-                                    ) : '-';
-                                })()}
+                                <Space wrap size={[0, 4]}>
+                                    {(detailRecord.roleIds || []).map(roleId => {
+                                        const role = getRoleById(roleId);
+                                        return role ? <Tag key={roleId} color="blue">{role.name}</Tag> : null;
+                                    })}
+                                </Space>
                             </Descriptions.Item>
                             <Descriptions.Item label="创建时间">{detailRecord.createTime}</Descriptions.Item>
                             <Descriptions.Item label="最后登录">
@@ -349,17 +355,12 @@ const UserManagement: React.FC = () => {
 
                         <div style={{ marginTop: 24 }}>
                             <h4>角色权限</h4>
-                            {(() => {
-                                const role = getRoleById(detailRecord.roleId);
-                                if (!role) return <span>-</span>;
-                                return (
-                                    <Space wrap>
-                                        {role.permissions.map(p => (
-                                            <Tag key={p}>{p}</Tag>
-                                        ))}
-                                    </Space>
-                                );
-                            })()}
+                            <Space wrap>
+                                {(detailRecord.roleIds || []).flatMap(roleId => {
+                                    const role = getRoleById(roleId);
+                                    return role ? role.permissions.map(p => <Tag key={`${roleId}-${p}`}>{p}</Tag>) : [];
+                                })}
+                            </Space>
                         </div>
                     </>
                 )}
