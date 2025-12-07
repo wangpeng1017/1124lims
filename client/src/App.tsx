@@ -58,17 +58,20 @@ import SystemSettings from './pages/SystemSettings';
 import UserManagement from './pages/SystemSettings/UserManagement';
 import RoleManagement from './pages/SystemSettings/RoleManagement';
 import PermissionConfig from './pages/SystemSettings/PermissionConfig';
+import DepartmentManagement from './pages/SystemSettings/DepartmentManagement';
 import ApprovalWorkflowConfig from './pages/SystemSettings/ApprovalWorkflowConfig';
 import SupplierCategory from './pages/SupplierManagement/SupplierCategory';
 import EvaluationTemplate from './pages/SupplierManagement/EvaluationTemplate';
 import PerformanceEvaluation from './pages/SupplierManagement/PerformanceEvaluation';
 import ApprovalCenter from './pages/ApprovalCenter';
+import Login from './pages/Login';
 
 
 const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<Login />} />
         <Route path="/fill/:entrustmentId" element={<EntrustmentFill />} />
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
@@ -144,7 +147,7 @@ const App: React.FC = () => {
             <Route index element={<SystemSettings />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="roles" element={<RoleManagement />} />
-            <Route path="departments" element={<DepartmentInfo />} />
+            <Route path="departments" element={<DepartmentManagement />} />
             <Route path="permission" element={<PermissionConfig />} />
           </Route>
           <Route path="approval-workflow" element={<ApprovalWorkflowConfig />} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   UserOutlined,
   ExperimentOutlined,
@@ -10,33 +10,41 @@ import {
   SafetyCertificateOutlined,
   AuditOutlined,
   ProfileOutlined,
-  DollarOutlined,
-  FileTextOutlined,
-  SwapOutlined,
-  InboxOutlined,
-  ProjectOutlined,
-  TeamOutlined as SupplierOutlined,
-  CheckCircleOutlined,
-  FileSearchOutlined,
-  FormOutlined,
-  FileDoneOutlined,
-  HistoryOutlined,
-  HistoryOutlined as ReportAuditOutlined,
-  AccountBookOutlined,
-  TransactionOutlined,
-  AppstoreOutlined,
-  BarChartOutlined,
   SettingOutlined,
+  HomeOutlined,
+  FileTextOutlined,
+  BarChartOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  HomeOutlined
+  ContainerOutlined,
+  InboxOutlined,
+  DollarOutlined,
+  FileSearchOutlined,
+  SolutionOutlined,
+  FileDoneOutlined,
+  FieldTimeOutlined,
+  DatabaseOutlined,
+  AppstoreOutlined,
+  StockOutlined,
+  ShareAltOutlined,
+  IdcardOutlined,
+  FormOutlined,
+  SwapOutlined,
+  ProjectOutlined,
+  CheckCircleOutlined,
+  HistoryOutlined,
+  AccountBookOutlined,
+  TransactionOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Layout, Menu, theme, Avatar, Typography } from 'antd';
+import { Breadcrumb, Layout, Menu, theme, Avatar, Typography, Space, Dropdown, Tag } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { getRoleById } from '../mock/auth';
 
 const { Header, Content, Footer, Sider } = Layout;
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -53,6 +61,9 @@ function getItem(
     label,
   } as MenuItem;
 }
+
+const SupplierOutlined = TeamOutlined;
+const ReportAuditOutlined = HistoryOutlined;
 
 const items: MenuItem[] = [
   getItem('首页', '/dashboard', <HomeOutlined />),
@@ -98,7 +109,6 @@ const items: MenuItem[] = [
     getItem('耗材信息', '/consumables-management/info', <ProfileOutlined />),
     getItem('出入库管理', '/consumables-management/transactions', <SwapOutlined />),
   ]),
-
   getItem('供应商管理', '/supplier-management', <ApartmentOutlined />, [
     getItem('供应商分类', '/supplier-management/category', <AppstoreOutlined />),
     getItem('供应商信息', '/supplier-management/info', <ProfileOutlined />),
@@ -121,7 +131,6 @@ const items: MenuItem[] = [
     getItem('检测模版管理', '/basic-params/test-templates', <FormOutlined />),
     getItem('检查标准/依据', '/basic-params/standards', <FileTextOutlined />),
     getItem('样品报告分类', '/report-management/categories', <AppstoreOutlined />),
-
     getItem('资质管理', '/basic-params/qualification', <SafetyCertificateOutlined />, [
       getItem('人员资质配置', '/basic-params/qualification/value', <SafetyCertificateOutlined />),
       getItem('能力评审', '/basic-params/qualification/review', <AuditOutlined />),
@@ -135,6 +144,7 @@ const items: MenuItem[] = [
     getItem('权限配置', '/system-settings/permission', <SafetyCertificateOutlined />),
   ]),
 ];
+
 const MainLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const {
@@ -142,14 +152,89 @@ const MainLayout: React.FC = () => {
   } = theme.useToken();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout, hasModuleAccess, isAdmin } = useAuth();
+
+  // 根据用户权限过滤菜单
+  const filteredItems = useMemo(() => {
+    if (isAdmin) return items; // 管理员看所有菜单
+
+    // 模块key与菜单路径的映射
+    const moduleRouteMap: Record<string, string[]> = {
+      entrustment: ['/entrustment'],
+      sample: ['/sample-management'],
+      test: ['/test-management', '/task-management'],
+      report: ['/report-management'],
+      device: ['/device-management'],
+      consumable: ['/consumables-management'],
+      outsourcing: ['/outsourcing-management'],
+      supplier: ['/supplier-management'],
+      personnel: ['/basic-params/qualification'],
+      finance: ['/finance-management'],
+      statistics: ['/statistics-report'],
+      system: ['/system-settings', '/approval-workflow'],
+    };
+
+    const filterMenuItems = (menuItems: MenuItem[]): MenuItem[] => {
+      return menuItems.filter(item => {
+        if (!item || !('key' in item)) return false;
+        const key = item.key as string;
+
+        // 首页、体系文件、基础数据配置始终可见
+        if (key === '/dashboard' || key === '/system-documents' || key === '/basic-params') return true;
+
+        // 检查是否有模块访问权限
+        for (const [moduleKey, routes] of Object.entries(moduleRouteMap)) {
+          if (routes.some(route => key.startsWith(route))) {
+            return hasModuleAccess(moduleKey, 'read');
+          }
+        }
+        return true;
+      }).map(item => {
+        // 递归过滤子菜单
+        if (item && 'children' in item && item.children) {
+          return {
+            ...item,
+            children: filterMenuItems(item.children as MenuItem[]),
+          };
+        }
+        return item;
+      });
+    };
+
+    return filterMenuItems(items);
+  }, [isAdmin, hasModuleAccess]);
+
+  // 用户下拉菜单
+  const userMenuItems: MenuProps['items'] = [
+    {
+      key: 'profile',
+      label: '个人信息',
+      icon: <UserOutlined />,
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'logout',
+      label: '退出登录',
+      icon: <LogoutOutlined />,
+      danger: true,
+    },
+  ];
+
+  const handleUserMenuClick: MenuProps['onClick'] = ({ key }) => {
+    if (key === 'logout') {
+      logout();
+      navigate('/login');
+    }
+  };
 
   const getCurrentTitle = (): string => {
     // Helper function to recursively find the label for the current path
-    const findLabel = (items: MenuItem[] | undefined, path: string): string | undefined => {
-      if (!items) return undefined;
-      for (const item of items) {
+    const findLabel = (menuItems: MenuItem[] | undefined, path: string): string | undefined => {
+      if (!menuItems) return undefined;
+      for (const item of menuItems) {
         if (item && 'key' in item && item.key === path) {
-          // Type guard to ensure we have a label
           if ('label' in item && item.label) {
             return item.label as string;
           }
@@ -163,8 +248,10 @@ const MainLayout: React.FC = () => {
     };
 
     const title = findLabel(items, location.pathname);
-    return title || 'Home';
+    return title || 'LIMS';
   };
+
+  const role = user ? getRoleById(user.roleId) : null;
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -192,35 +279,39 @@ const MainLayout: React.FC = () => {
           defaultSelectedKeys={[location.pathname]}
           selectedKeys={[location.pathname]}
           mode="inline"
-          items={items}
+          items={filteredItems}
           onClick={({ key }) => navigate(key.toString())}
         />
       </Sider>
       <Layout style={{ marginLeft: collapsed ? 80 : 200, transition: 'margin-left 0.2s' }}>
         <Header style={{
-          padding: '0 16px',
+          padding: '0 24px',
           background: colorBgContainer,
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
-          position: 'sticky',
-          top: 0,
-          zIndex: 1,
-          width: '100%',
-          boxShadow: '0 1px 4px rgba(0,21,41,.08)'
+          justifyContent: 'space-between',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Space>
             {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
               className: 'trigger',
               onClick: () => setCollapsed(!collapsed),
-              style: { fontSize: '18px', marginRight: 16, cursor: 'pointer' }
+              style: { fontSize: 18, cursor: 'pointer' }
             })}
-            <Breadcrumb style={{ margin: '16px 0' }} items={[{ title: 'LIMS' }, { title: getCurrentTitle() }]} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>Admin User</span>
-            <Avatar icon={<UserOutlined />} />
-          </div>
+            <Breadcrumb items={[{ title: 'LIMS' }, { title: getCurrentTitle() }]} />
+          </Space>
+
+          {/* 用户信息 */}
+          <Dropdown menu={{ items: userMenuItems, onClick: handleUserMenuClick }} placement="bottomRight">
+            <Space style={{ cursor: 'pointer' }}>
+              <Avatar icon={<UserOutlined />} />
+              {user && (
+                <>
+                  <Text>{user.name}</Text>
+                  {role && <Tag color="blue">{role.name}</Tag>}
+                </>
+              )}
+            </Space>
+          </Dropdown>
         </Header>
         <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
           <div
@@ -235,7 +326,7 @@ const MainLayout: React.FC = () => {
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
-          LIMS ©{new Date().getFullYear()}
+          LIMS ©{new Date().getFullYear()} Created by Your Company
         </Footer>
       </Layout>
     </Layout>
