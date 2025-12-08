@@ -15,10 +15,10 @@
 /app/src/main/java/com/lims/mapper/TestTaskMapper.java
 /app/src/main/java/com/lims/entity/Sample.java
 /app/src/main/java/com/lims/mapper/SysUserMapper.java
-/app/src/main/java/com/lims/common/GlobalExceptionHandler.java
 /app/src/main/java/com/lims/entity/Client.java
 /app/src/main/java/com/lims/controller/QuotationController.java
 /app/src/main/java/com/lims/controller/ElnTemplateController.java
+/app/src/main/java/com/lims/security/UserDetailsServiceImpl.java
 /app/src/main/java/com/lims/entity/ElnTemplate.java
 /app/src/main/java/com/lims/mapper/SysDeptMapper.java
 /app/src/main/java/com/lims/controller/SupplierController.java
@@ -30,6 +30,7 @@
 /app/src/main/java/com/lims/entity/Supplier.java
 /app/src/main/java/com/lims/service/impl/ApprovalServiceImpl.java
 /app/src/main/java/com/lims/entity/Signature.java
+/app/src/main/java/com/lims/security/LoginUserDetails.java
 /app/src/main/java/com/lims/entity/SysRole.java
 /app/src/main/java/com/lims/entity/ApprovalNode.java
 /app/src/main/java/com/lims/config/OpenApiConfig.java
@@ -53,6 +54,7 @@
 /app/src/main/java/com/lims/controller/ClientController.java
 /app/src/main/java/com/lims/controller/SignatureController.java
 /app/src/main/java/com/lims/service/impl/SampleServiceImpl.java
+/app/src/main/java/com/lims/security/JwtAuthenticationFilter.java
 /app/src/main/java/com/lims/mapper/SysRoleMapper.java
 /app/src/main/java/com/lims/controller/FileController.java
 /app/src/main/java/com/lims/exception/GlobalExceptionHandler.java
@@ -62,6 +64,7 @@
 /app/src/main/java/com/lims/mapper/QuotationMapper.java
 /app/src/main/java/com/lims/mapper/SampleMapper.java
 /app/src/main/java/com/lims/mapper/ApprovalFlowMapper.java
+/app/src/main/java/com/lims/security/PermissionService.java
 /app/src/main/java/com/lims/common/ResultCode.java
 /app/src/main/java/com/lims/mapper/SupplierMapper.java
 /app/src/main/java/com/lims/mapper/ContractMapper.java

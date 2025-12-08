@@ -6,10 +6,12 @@ com/lims/entity/SysRole.class
 com/lims/controller/ApprovalController$FlowCreateDTO.class
 com/lims/entity/Client.class
 com/lims/service/TestReportService.class
+com/lims/security/UserDetailsServiceImpl.class
 com/lims/config/MybatisPlusConfig.class
 com/lims/controller/SupplierController.class
 com/lims/controller/TestTaskController.class
 com/lims/service/SysUserService.class
+com/lims/security/LoginUserDetails.class
 com/lims/controller/ApprovalController$FlowDetailVO.class
 com/lims/entity/Entrustment.class
 com/lims/entity/TestTask.class
@@ -30,9 +32,9 @@ com/lims/controller/SampleController.class
 com/lims/dto/LoginResponse.class
 com/lims/mapper/EntrustmentMapper.class
 com/lims/mapper/SysDeptMapper.class
+com/lims/security/JwtAuthenticationFilter.class
 com/lims/entity/ApprovalFlow.class
 com/lims/common/Result.class
-com/lims/common/GlobalExceptionHandler.class
 com/lims/service/FileStorageService.class
 com/lims/entity/Device.class
 com/lims/controller/TestReportController.class
@@ -80,6 +82,7 @@ com/lims/common/PageResult.class
 com/lims/config/OpenApiConfig.class
 com/lims/entity/ApprovalLog.class
 com/lims/mapper/QuotationMapper.class
+com/lims/security/PermissionService.class
 com/lims/entity/ApprovalRecord.class
 com/lims/entity/Contract.class
 com/lims/mapper/SysUserMapper.class

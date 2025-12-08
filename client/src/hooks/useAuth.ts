@@ -51,9 +51,14 @@ export interface AuthContextValue {
     // 权限检查方法
     hasPermission: (permission: string) => boolean;
     hasModuleAccess: (moduleKey: string, minAccess?: IModuleAccess['access']) => boolean;
-    canDeleteModule: (moduleKey: string) => boolean;  // 新增: 按模块检查删除权限
+    canDeleteModule: (moduleKey: string) => boolean;  // 按模块检查删除权限
     canApproveBusinessType: (businessType: string) => boolean;
-    getDataScope: () => 'all' | 'department' | 'self';
+    getDataScope: () => 'all' | 'department_and_children' | 'department' | 'self' | 'custom';
+    getAccessibleDeptIds: () => string[];  // 获取可访问的部门ID列表
+    filterByDataScope: <T extends { deptId?: string; departmentId?: string; creatorId?: string; createBy?: string }>(
+        data: T[],
+        options?: { deptField?: 'deptId' | 'departmentId'; userField?: 'creatorId' | 'createBy' }
+    ) => T[];  // 按数据权限过滤
 
     // 用户操作
     login: (username: string, password: string) => Promise<boolean>;
@@ -208,11 +213,14 @@ export const useAuth = (): AuthContextValue => {
 
     /**
      * 获取数据权限范围 (多角色合并: 取最宽范围)
+     * 优先级: all > department_and_children > department > custom > self
      */
-    const getDataScope = useCallback((): 'all' | 'department' | 'self' => {
+    const getDataScope = useCallback((): 'all' | 'department_and_children' | 'department' | 'self' | 'custom' => {
         if (isAdmin) return 'all';
 
-        const scopeOrder: ('all' | 'department' | 'self')[] = ['self', 'department', 'all'];
+        // 按权限范围从窄到宽排序
+        const scopeOrder: ('self' | 'custom' | 'department' | 'department_and_children' | 'all')[] =
+            ['self', 'custom', 'department', 'department_and_children', 'all'];
         const roles = user?.roles || [];
         let maxScopeIndex = 0;
 
@@ -223,6 +231,98 @@ export const useAuth = (): AuthContextValue => {
 
         return scopeOrder[maxScopeIndex];
     }, [user, isAdmin]);
+
+    /**
+     * 获取当前用户可访问的部门ID列表
+     * 用于数据权限过滤
+     */
+    const getAccessibleDeptIds = useCallback((): string[] => {
+        const scope = getDataScope();
+
+        if (scope === 'all') {
+            return []; // 空数组表示不限制
+        }
+
+        if (scope === 'self') {
+            return []; // 按用户过滤，不按部门过滤
+        }
+
+        if (scope === 'department') {
+            return user?.departmentId ? [user.departmentId] : [];
+        }
+
+        if (scope === 'department_and_children') {
+            // 获取当前部门及其所有子部门
+            const deptId = user?.departmentId;
+            if (!deptId) return [];
+
+            const findChildDepts = (parentId: string): string[] => {
+                const children = departmentData.filter(d => d.parentId === parentId);
+                let result: string[] = [];
+                for (const child of children) {
+                    result.push(child.id);
+                    result = result.concat(findChildDepts(child.id));
+                }
+                return result;
+            };
+
+            return [deptId, ...findChildDepts(deptId)];
+        }
+
+        if (scope === 'custom') {
+            // 合并所有角色的自定义部门
+            const roles = user?.roles || [];
+            const deptIds = new Set<string>();
+            for (const role of roles) {
+                if (role.customDeptIds) {
+                    role.customDeptIds.forEach(id => deptIds.add(id));
+                }
+            }
+            return Array.from(deptIds);
+        }
+
+        return [];
+    }, [getDataScope, user]);
+
+    /**
+     * 根据数据权限过滤数据
+     * @param data 数据列表
+     * @param options 过滤选项
+     */
+    const filterByDataScope = useCallback(<T extends { deptId?: string; departmentId?: string; creatorId?: string; createBy?: string }>(
+        data: T[],
+        options?: {
+            deptField?: 'deptId' | 'departmentId'; // 部门字段名
+            userField?: 'creatorId' | 'createBy';  // 用户字段名
+        }
+    ): T[] => {
+        const scope = getDataScope();
+
+        if (scope === 'all') {
+            return data;
+        }
+
+        const deptField = options?.deptField || 'deptId';
+        const userField = options?.userField || 'creatorId';
+
+        if (scope === 'self') {
+            // 仅本人数据
+            const userId = user?.id;
+            return data.filter(item => item[userField] === userId);
+        }
+
+        // 按部门过滤
+        const deptIds = getAccessibleDeptIds();
+        if (deptIds.length === 0) {
+            return data;
+        }
+
+        return data.filter(item => {
+            const itemDeptId = item[deptField] || (item as any).departmentId;
+            return deptIds.includes(itemDeptId);
+        });
+    }, [getDataScope, getAccessibleDeptIds, user]);
+
 
     // ==================== 用户操作 ====================
 
@@ -294,6 +394,8 @@ export const useAuth = (): AuthContextValue => {
         canDeleteModule,
         canApproveBusinessType,
         getDataScope,
+        getAccessibleDeptIds,
+        filterByDataScope,
 
         // 用户操作
         login,

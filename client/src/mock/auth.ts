@@ -54,6 +54,12 @@ export interface IApprovalPermission {
 }
 
 /**
+ * 数据权限范围类型
+ * 1-全部 2-本部门及以下 3-本部门 4-仅本人 5-自定义
+ */
+export type DataScopeType = 'all' | 'department_and_children' | 'department' | 'self' | 'custom';
+
+/**
  * 角色
  */
 export interface IRole {
@@ -65,7 +71,8 @@ export interface IRole {
     permissions: string[];      // 操作权限: create, read, update, delete, export, import, approve, print
     deletePermissions: string[]; // 模块级删除权限: ['entrustment', 'sample', ...]
     moduleAccess: IModuleAccess[];
-    dataScope: 'all' | 'department' | 'self';
+    dataScope: DataScopeType;   // 数据权限范围
+    customDeptIds?: string[];   // 自定义部门ID列表 (当 dataScope 为 'custom' 时使用)
     approvalPermissions: IApprovalPermission[];
     createTime: string;
     updateTime: string;
@@ -106,12 +113,14 @@ export const SYSTEM_MODULES = [
 ] as const;
 
 /**
- * 数据权限范围
+ * 数据权限范围 (与后端对应: 1-全部 2-本部门及以下 3-本部门 4-仅本人 5-自定义)
  */
 export const DATA_SCOPE_OPTIONS = [
-    { value: 'all', label: '全部数据' },
-    { value: 'department', label: '本部门数据' },
-    { value: 'self', label: '仅本人数据' },
+    { value: 'all', label: '全部数据', code: 1 },
+    { value: 'department_and_children', label: '本部门及以下', code: 2 },
+    { value: 'department', label: '本部门数据', code: 3 },
+    { value: 'self', label: '仅本人数据', code: 4 },
+    { value: 'custom', label: '自定义部门', code: 5 },
 ] as const;
 
 /**

@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS sys_role (
     role_name VARCHAR(50) NOT NULL COMMENT '角色名称',
     role_code VARCHAR(50) NOT NULL COMMENT '角色编码',
     description VARCHAR(255) COMMENT '角色描述',
+    data_scope TINYINT DEFAULT 1 COMMENT '数据权限范围 1-全部 2-本部门及以下 3-本部门 4-仅本人 5-自定义',
+    dept_ids VARCHAR(500) DEFAULT NULL COMMENT '自定义数据权限部门ID列表',
     status TINYINT DEFAULT 1 COMMENT '状态 0-禁用 1-启用',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -47,6 +49,7 @@ CREATE TABLE IF NOT EXISTS sys_dept (
     dept_name VARCHAR(50) NOT NULL COMMENT '部门名称',
     dept_code VARCHAR(50) COMMENT '部门编码',
     parent_id BIGINT DEFAULT 0 COMMENT '父部门ID',
+    ancestors VARCHAR(500) DEFAULT '' COMMENT '祖先部门ID路径，如 0,1,2',
     sort INT DEFAULT 0 COMMENT '排序',
     leader VARCHAR(50) COMMENT '负责人',
     phone VARCHAR(20) COMMENT '联系电话',
@@ -94,20 +97,20 @@ CREATE TABLE IF NOT EXISTS sys_role_permission (
 -- ============================================
 
 -- 插入默认部门
-INSERT INTO sys_dept (dept_name, dept_code, parent_id, sort) VALUES 
-('总公司', 'ROOT', 0, 1),
-('检测部', 'TESTING', 1, 1),
-('市场部', 'MARKETING', 1, 2),
-('财务部', 'FINANCE', 1, 3),
-('行政部', 'ADMIN', 1, 4);
+INSERT INTO sys_dept (dept_name, dept_code, parent_id, ancestors, sort) VALUES 
+('总公司', 'ROOT', 0, '0', 1),
+('检测部', 'TESTING', 1, '0,1', 1),
+('市场部', 'MARKETING', 1, '0,1', 2),
+('财务部', 'FINANCE', 1, '0,1', 3),
+('行政部', 'ADMIN', 1, '0,1', 4);
 
--- 插入默认角色
-INSERT INTO sys_role (role_name, role_code, description) VALUES 
-('系统管理员', 'admin', '拥有系统所有权限'),
-('实验室主管', 'lab_manager', '负责实验室业务管理'),
-('检测人员', 'tester', '负责任务执行和数据录入'),
-('销售人员', 'sales', '负责委托管理和客户管理'),
-('财务人员', 'finance', '负责财务结算');
+-- 插入默认角色 (包含数据权限范围)
+INSERT INTO sys_role (role_name, role_code, description, data_scope) VALUES 
+('系统管理员', 'admin', '拥有系统所有权限', 1),
+('实验室主管', 'lab_manager', '负责实验室业务管理', 2),
+('检测人员', 'tester', '负责任务执行和数据录入', 4),
+('销售人员', 'sales', '负责委托管理和客户管理', 3),
+('财务人员', 'finance', '负责财务结算', 3);
 
 -- 插入默认管理员 (密码: admin123, BCrypt加密)
 INSERT INTO sys_user (username, password, real_name, email, phone, dept_id, status) VALUES 
@@ -116,7 +119,7 @@ INSERT INTO sys_user (username, password, real_name, email, phone, dept_id, stat
 -- 关联管理员角色
 INSERT INTO sys_user_role (user_id, role_id) VALUES (1, 1);
 
--- 插入基础权限
+-- 插入基础权限 (菜单权限)
 INSERT INTO sys_permission (permission_name, permission_code, parent_id, type, path, icon, sort) VALUES 
 ('首页', 'dashboard', 0, 1, '/dashboard', 'HomeOutlined', 1),
 ('业务管理', 'entrustment', 0, 1, '/entrustment', 'FileTextOutlined', 2),
@@ -126,3 +129,25 @@ INSERT INTO sys_permission (permission_name, permission_code, parent_id, type, p
 ('报告管理', 'report', 0, 1, '/report', 'FileProtectOutlined', 6),
 ('设备管理', 'device', 0, 1, '/device', 'DesktopOutlined', 7),
 ('系统设置', 'system', 0, 1, '/system', 'SettingOutlined', 99);
+
+-- 插入操作权限 (按钮权限)
+INSERT INTO sys_permission (permission_name, permission_code, parent_id, type, sort) VALUES 
+('委托单-新增', 'entrustment:create', 2, 2, 1),
+('委托单-编辑', 'entrustment:update', 2, 2, 2),
+('委托单-删除', 'entrustment:delete', 2, 2, 3),
+('委托单-导出', 'entrustment:export', 2, 2, 4),
+('样品-新增', 'sample:create', 3, 2, 1),
+('样品-编辑', 'sample:update', 3, 2, 2),
+('样品-删除', 'sample:delete', 3, 2, 3),
+('任务-分配', 'task:assign', 4, 2, 1),
+('任务-执行', 'task:execute', 4, 2, 2),
+('报告-审批', 'report:approve', 6, 2, 1),
+('报告-签发', 'report:issue', 6, 2, 2),
+('用户管理', 'system:user', 8, 2, 1),
+('角色管理', 'system:role', 8, 2, 2),
+('权限管理', 'system:permission', 8, 2, 3);
+
+-- 为管理员角色分配所有权限
+INSERT INTO sys_role_permission (role_id, permission_id) 
+SELECT 1, id FROM sys_permission;
+

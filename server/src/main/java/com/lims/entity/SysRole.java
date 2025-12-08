@@ -34,6 +34,17 @@ public class SysRole implements Serializable {
     private String description;
 
     /**
+     * 数据权限范围
+     * 1-全部数据 2-本部门及以下 3-本部门 4-仅本人 5-自定义
+     */
+    private Integer dataScope;
+
+    /**
+     * 自定义数据权限部门ID列表 (逗号分隔)
+     */
+    private String deptIds;
+
+    /**
      * 状态 0-禁用 1-启用
      */
     private Integer status;
@@ -57,3 +68,4 @@ public class SysRole implements Serializable {
     @TableField(fill = FieldFill.INSERT)
     private Integer deleted;
 }
+

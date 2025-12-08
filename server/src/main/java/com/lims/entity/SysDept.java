@@ -34,6 +34,11 @@ public class SysDept implements Serializable {
     private Long parentId;
 
     /**
+     * 祖先部门ID路径，如 0,1,2
+     */
+    private String ancestors;
+
+    /**
      * 排序
      */
     private Integer sort;
@@ -72,3 +77,4 @@ public class SysDept implements Serializable {
     @TableField(fill = FieldFill.INSERT)
     private Integer deleted;
 }
+
