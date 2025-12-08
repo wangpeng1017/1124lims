@@ -1,4 +1,4 @@
-import axios, { AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios, { type AxiosResponse, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 // API基础配置
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
