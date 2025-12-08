@@ -1,3 +1,4 @@
+com/lims/controller/SysRoleController.class
 com/lims/entity/OutsourceOrder.class
 com/lims/controller/ElnTemplateController.class
 com/lims/mapper/SysRoleMapper.class
@@ -92,6 +93,7 @@ com/lims/controller/ClientController.class
 com/lims/service/impl/TestTaskServiceImpl.class
 com/lims/entity/ElnTemplate.class
 com/lims/mapper/DeviceMapper.class
+com/lims/controller/SysDeptController.class
 com/lims/mapper/SampleMapper.class
 com/lims/entity/Signature.class
 com/lims/controller/SysUserController.class

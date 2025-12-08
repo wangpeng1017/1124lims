@@ -9,6 +9,7 @@ import com.lims.service.SysUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +26,7 @@ public class SysUserController {
 
     @Operation(summary = "分页查询用户列表")
     @GetMapping("/page")
+    @PreAuthorize("@ss.hasPermission('system:user:list')")
     public Result<PageResult<SysUser>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -54,6 +56,7 @@ public class SysUserController {
 
     @Operation(summary = "获取用户详情")
     @GetMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('system:user:query')")
     public Result<SysUser> getById(@PathVariable Long id) {
         SysUser user = userService.getById(id);
         if (user != null) {
@@ -64,6 +67,7 @@ public class SysUserController {
 
     @Operation(summary = "新增用户")
     @PostMapping
+    @PreAuthorize("@ss.hasPermission('system:user:create')")
     public Result<Void> create(@RequestBody SysUser user) {
         userService.createUser(user);
         return Result.successMsg("创建成功");
@@ -71,6 +75,7 @@ public class SysUserController {
 
     @Operation(summary = "更新用户")
     @PutMapping
+    @PreAuthorize("@ss.hasPermission('system:user:update')")
     public Result<Void> update(@RequestBody SysUser user) {
         userService.updateUser(user);
         return Result.successMsg("更新成功");
@@ -78,6 +83,7 @@ public class SysUserController {
 
     @Operation(summary = "删除用户")
     @DeleteMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('system:user:delete')")
     public Result<Void> delete(@PathVariable Long id) {
         userService.removeById(id);
         return Result.successMsg("删除成功");
@@ -85,6 +91,7 @@ public class SysUserController {
 
     @Operation(summary = "修改用户状态")
     @PutMapping("/{id}/status")
+    @PreAuthorize("@ss.hasPermission('system:user:update')")
     public Result<Void> updateStatus(@PathVariable Long id, @RequestParam Integer status) {
         SysUser user = new SysUser();
         user.setId(id);
@@ -95,6 +102,7 @@ public class SysUserController {
 
     @Operation(summary = "重置密码")
     @PutMapping("/{id}/reset-password")
+    @PreAuthorize("@ss.hasPermission('system:user:update')")
     public Result<Void> resetPassword(@PathVariable Long id) {
         SysUser user = userService.getById(id);
         if (user != null) {
@@ -105,3 +113,4 @@ public class SysUserController {
         return Result.successMsg("密码已重置为: 123456");
     }
 }
+

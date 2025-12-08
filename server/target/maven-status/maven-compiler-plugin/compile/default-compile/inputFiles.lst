@@ -56,6 +56,8 @@
 /app/src/main/java/com/lims/controller/ClientController.java
 /app/src/main/java/com/lims/controller/SignatureController.java
 /app/src/main/java/com/lims/service/impl/SampleServiceImpl.java
+/app/src/main/java/com/lims/controller/SysDeptController.java
+/app/src/main/java/com/lims/controller/SysRoleController.java
 /app/src/main/java/com/lims/security/JwtAuthenticationFilter.java
 /app/src/main/java/com/lims/mapper/SysRoleMapper.java
 /app/src/main/java/com/lims/controller/FileController.java
