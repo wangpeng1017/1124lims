@@ -30,6 +30,8 @@ export {
     useReportService,
     useDeviceService,
     useAuthService,
-    useDashboardService
+    useDashboardService,
+    useFinanceService,
+    useStatisticsService
 } from './useDataService';
 export type { PageParams, PageData } from './useDataService';

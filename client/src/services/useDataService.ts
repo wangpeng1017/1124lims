@@ -540,3 +540,168 @@ export function useDashboardService() {
 
     return { loading, statistics, todos, fetchStatistics, fetchTodos };
 }
+
+// ==================== 财务管理 Hook ====================
+export function useFinanceService() {
+    const [loading, setLoading] = useState(false);
+    const [receivables, setReceivables] = useState<any[]>([]);
+    const [payments, setPayments] = useState<any[]>([]);
+    const [invoices, setInvoices] = useState<any[]>([]);
+    const [statistics, setStatistics] = useState<any>(null);
+
+    const fetchReceivables = useCallback(async (params: PageParams = {}) => {
+        if (!USE_API) {
+            const { receivableData } = await import('../mock/finance');
+            setReceivables(receivableData);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const { financeApi } = await import('./financeApi');
+            const res = await financeApi.receivable.page(params);
+            setReceivables(res.data.records);
+        } catch (error: any) {
+            message.error(error.message || '获取应收列表失败');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchPayments = useCallback(async (params: PageParams = {}) => {
+        if (!USE_API) {
+            const { paymentRecordData } = await import('../mock/finance');
+            setPayments(paymentRecordData);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const { financeApi } = await import('./financeApi');
+            const res = await financeApi.payment.page(params);
+            setPayments(res.data.records);
+        } catch (error: any) {
+            message.error(error.message || '获取收款列表失败');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchInvoices = useCallback(async (params: PageParams = {}) => {
+        if (!USE_API) {
+            const { invoiceData } = await import('../mock/finance');
+            setInvoices(invoiceData);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const { financeApi } = await import('./financeApi');
+            const res = await financeApi.invoice.page(params);
+            setInvoices(res.data.records);
+        } catch (error: any) {
+            message.error(error.message || '获取发票列表失败');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchStatistics = useCallback(async () => {
+        if (!USE_API) {
+            setStatistics({ totalAmount: 500000, paidTotal: 350000, unpaidTotal: 150000, overdueCount: 3 });
+            return;
+        }
+
+        try {
+            const { financeApi } = await import('./financeApi');
+            const res = await financeApi.receivable.statistics();
+            setStatistics(res.data);
+        } catch (error: any) {
+            message.error(error.message || '获取财务统计失败');
+        }
+    }, []);
+
+    return { loading, receivables, payments, invoices, statistics, fetchReceivables, fetchPayments, fetchInvoices, fetchStatistics };
+}
+
+// ==================== 统计报表 Hook ====================
+export function useStatisticsService() {
+    const [loading, setLoading] = useState(false);
+    const [entrustmentStats, setEntrustmentStats] = useState<any>(null);
+    const [sampleStats, setSampleStats] = useState<any>(null);
+    const [taskStats, setTaskStats] = useState<any>(null);
+    const [reportStats, setReportStats] = useState<any>(null);
+    const [trend, setTrend] = useState<any[]>([]);
+
+    const fetchEntrustmentStats = useCallback(async (params: { startDate?: string; endDate?: string } = {}) => {
+        if (!USE_API) {
+            setEntrustmentStats({ total: 156, byStatus: { pending: 20, approved: 50, testing: 30, completed: 56 }, totalAmount: 1500000 });
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const { statisticsApi } = await import('./statisticsApi');
+            const res = await statisticsApi.entrustment.overview(params);
+            setEntrustmentStats(res.data);
+        } catch (error: any) {
+            message.error(error.message || '获取委托统计失败');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchTaskStats = useCallback(async (params: { startDate?: string; endDate?: string } = {}) => {
+        if (!USE_API) {
+            setTaskStats({ total: 89, completed: 67, completionRate: 75.3, onTimeCount: 60, onTimeRate: 89.5, overdueCount: 7 });
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const { statisticsApi } = await import('./statisticsApi');
+            const res = await statisticsApi.task.completionRate(params);
+            setTaskStats(res.data);
+        } catch (error: any) {
+            message.error(error.message || '获取任务统计失败');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchTrend = useCallback(async (days: number = 7, type: 'entrustment' | 'sample' | 'task' = 'entrustment') => {
+        if (!USE_API) {
+            setTrend([
+                { date: '2024-01-01', count: 10 },
+                { date: '2024-01-02', count: 15 },
+                { date: '2024-01-03', count: 8 },
+                { date: '2024-01-04', count: 20 },
+                { date: '2024-01-05', count: 12 },
+                { date: '2024-01-06', count: 18 },
+                { date: '2024-01-07', count: 14 }
+            ]);
+            return;
+        }
+
+        try {
+            const { statisticsApi } = await import('./statisticsApi');
+            let res;
+            switch (type) {
+                case 'entrustment':
+                    res = await statisticsApi.entrustment.trend(days);
+                    break;
+                case 'sample':
+                    res = await statisticsApi.sample.trend(days);
+                    break;
+                case 'task':
+                    res = await statisticsApi.task.trend(days);
+                    break;
+            }
+            setTrend(res?.data || []);
+        } catch (error: any) {
+            message.error(error.message || '获取趋势数据失败');
+        }
+    }, []);
+
+    return { loading, entrustmentStats, sampleStats, taskStats, reportStats, trend, fetchEntrustmentStats, fetchTaskStats, fetchTrend };
+}
