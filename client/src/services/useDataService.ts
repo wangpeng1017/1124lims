@@ -1,10 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { message } from 'antd';
 import { entrustmentApi, sampleApi, taskApi, reportApi, deviceApi, dashboardApi, authApi } from './businessApi';
 import type { Entrustment, Sample, TestTask, TestReport, Device, User } from './businessApi';
-
-// 配置是否使用API (环境变量控制)
-const USE_API = import.meta.env.VITE_USE_API === 'true';
 
 // 通用分页参数
 export interface PageParams {
@@ -28,15 +25,6 @@ export function useEntrustmentService() {
     const [total, setTotal] = useState(0);
 
     const fetchList = useCallback(async (params: PageParams = {}) => {
-        if (!USE_API) {
-            // Mock模式 - 使用本地数据
-            const { entrustmentData } = await import('../mock/entrustment');
-            setData(entrustmentData as any);
-            setTotal(entrustmentData.length);
-            return;
-        }
-
-        // API模式
         setLoading(true);
         try {
             const res = await entrustmentApi.page({
@@ -54,10 +42,6 @@ export function useEntrustmentService() {
     }, []);
 
     const create = useCallback(async (data: Partial<Entrustment>) => {
-        if (!USE_API) {
-            message.success('创建成功(mock)');
-            return { success: true };
-        }
         try {
             await entrustmentApi.create(data);
             message.success('创建成功');
@@ -69,10 +53,6 @@ export function useEntrustmentService() {
     }, []);
 
     const update = useCallback(async (data: Partial<Entrustment>) => {
-        if (!USE_API) {
-            message.success('更新成功(mock)');
-            return { success: true };
-        }
         try {
             await entrustmentApi.update(data);
             message.success('更新成功');
@@ -84,10 +64,6 @@ export function useEntrustmentService() {
     }, []);
 
     const remove = useCallback(async (id: number) => {
-        if (!USE_API) {
-            message.success('删除成功(mock)');
-            return { success: true };
-        }
         try {
             await entrustmentApi.delete(id);
             message.success('删除成功');
@@ -108,13 +84,6 @@ export function useSampleService() {
     const [total, setTotal] = useState(0);
 
     const fetchList = useCallback(async (params: PageParams = {}) => {
-        if (!USE_API) {
-            const { sampleDetailData } = await import('../mock/sample');
-            setData(sampleDetailData as any);
-            setTotal(sampleDetailData.length);
-            return;
-        }
-
         setLoading(true);
         try {
             const res = await sampleApi.page({
@@ -132,10 +101,6 @@ export function useSampleService() {
     }, []);
 
     const create = useCallback(async (data: Partial<Sample>) => {
-        if (!USE_API) {
-            message.success('创建成功(mock)');
-            return { success: true };
-        }
         try {
             await sampleApi.create(data);
             message.success('创建成功');
@@ -147,10 +112,6 @@ export function useSampleService() {
     }, []);
 
     const update = useCallback(async (data: Partial<Sample>) => {
-        if (!USE_API) {
-            message.success('更新成功(mock)');
-            return { success: true };
-        }
         try {
             await sampleApi.update(data);
             message.success('更新成功');
@@ -162,10 +123,6 @@ export function useSampleService() {
     }, []);
 
     const remove = useCallback(async (id: number) => {
-        if (!USE_API) {
-            message.success('删除成功(mock)');
-            return { success: true };
-        }
         try {
             await sampleApi.delete(id);
             message.success('删除成功');
@@ -186,13 +143,6 @@ export function useTaskService() {
     const [total, setTotal] = useState(0);
 
     const fetchList = useCallback(async (params: PageParams = {}) => {
-        if (!USE_API) {
-            const { testTaskData } = await import('../mock/test');
-            setData(testTaskData as any);
-            setTotal(testTaskData.length);
-            return;
-        }
-
         setLoading(true);
         try {
             const res = await taskApi.page({
@@ -210,14 +160,6 @@ export function useTaskService() {
     }, []);
 
     const fetchMyTasks = useCallback(async (params: PageParams = {}) => {
-        if (!USE_API) {
-            const { testTaskData } = await import('../mock/test');
-            // 模拟过滤我的任务
-            setData(testTaskData.filter((t: any) => t.assigneeId === 3) as any);
-            setTotal(testTaskData.filter((t: any) => t.assigneeId === 3).length);
-            return;
-        }
-
         setLoading(true);
         try {
             const res = await taskApi.myTasks({
@@ -235,10 +177,6 @@ export function useTaskService() {
     }, []);
 
     const assign = useCallback(async (taskId: number, assigneeId: number, assigneeName: string) => {
-        if (!USE_API) {
-            message.success('分配成功(mock)');
-            return { success: true };
-        }
         try {
             await taskApi.assign(taskId, assigneeId, assigneeName);
             message.success('分配成功');
@@ -250,10 +188,6 @@ export function useTaskService() {
     }, []);
 
     const start = useCallback(async (taskId: number) => {
-        if (!USE_API) {
-            message.success('任务已开始(mock)');
-            return { success: true };
-        }
         try {
             await taskApi.start(taskId);
             message.success('任务已开始');
@@ -265,10 +199,6 @@ export function useTaskService() {
     }, []);
 
     const complete = useCallback(async (taskId: number) => {
-        if (!USE_API) {
-            message.success('任务已完成(mock)');
-            return { success: true };
-        }
         try {
             await taskApi.complete(taskId);
             message.success('任务已完成');
@@ -289,13 +219,6 @@ export function useReportService() {
     const [total, setTotal] = useState(0);
 
     const fetchList = useCallback(async (params: PageParams = {}) => {
-        if (!USE_API) {
-            const { testReportData } = await import('../mock/report');
-            setData(testReportData as any);
-            setTotal(testReportData.length);
-            return;
-        }
-
         setLoading(true);
         try {
             const res = await reportApi.page({
@@ -313,10 +236,6 @@ export function useReportService() {
     }, []);
 
     const submitReview = useCallback(async (reportId: number) => {
-        if (!USE_API) {
-            message.success('提交审核成功(mock)');
-            return { success: true };
-        }
         try {
             await reportApi.submitReview(reportId);
             message.success('提交审核成功');
@@ -328,10 +247,6 @@ export function useReportService() {
     }, []);
 
     const approve = useCallback(async (reportId: number, approverId: number, approverName: string) => {
-        if (!USE_API) {
-            message.success('审批成功(mock)');
-            return { success: true };
-        }
         try {
             await reportApi.approve(reportId, approverId, approverName);
             message.success('审批成功');
@@ -352,13 +267,6 @@ export function useDeviceService() {
     const [total, setTotal] = useState(0);
 
     const fetchList = useCallback(async (params: PageParams = {}) => {
-        if (!USE_API) {
-            const { deviceData } = await import('../mock/devices');
-            setData(deviceData as any);
-            setTotal(deviceData.length);
-            return;
-        }
-
         setLoading(true);
         try {
             const res = await deviceApi.page({
@@ -376,10 +284,6 @@ export function useDeviceService() {
     }, []);
 
     const create = useCallback(async (data: Partial<Device>) => {
-        if (!USE_API) {
-            message.success('创建成功(mock)');
-            return { success: true };
-        }
         try {
             await deviceApi.create(data);
             message.success('创建成功');
@@ -391,10 +295,6 @@ export function useDeviceService() {
     }, []);
 
     const update = useCallback(async (data: Partial<Device>) => {
-        if (!USE_API) {
-            message.success('更新成功(mock)');
-            return { success: true };
-        }
         try {
             await deviceApi.update(data);
             message.success('更新成功');
@@ -406,10 +306,6 @@ export function useDeviceService() {
     }, []);
 
     const remove = useCallback(async (id: number) => {
-        if (!USE_API) {
-            message.success('删除成功(mock)');
-            return { success: true };
-        }
         try {
             await deviceApi.delete(id);
             message.success('删除成功');
@@ -429,16 +325,6 @@ export function useAuthService() {
     const [user, setUser] = useState<User | null>(null);
 
     const login = useCallback(async (username: string, password: string) => {
-        if (!USE_API) {
-            // Mock登录
-            const mockUser = { id: 1, username, realName: '管理员', status: 1 };
-            localStorage.setItem('token', 'mock-token');
-            localStorage.setItem('user', JSON.stringify(mockUser));
-            setUser(mockUser);
-            message.success('登录成功');
-            return { success: true };
-        }
-
         setLoading(true);
         try {
             const res = await authApi.login(username, password);
@@ -456,12 +342,10 @@ export function useAuthService() {
     }, []);
 
     const logout = useCallback(async () => {
-        if (USE_API) {
-            try {
-                await authApi.logout();
-            } catch (e) {
-                // ignore
-            }
+        try {
+            await authApi.logout();
+        } catch {
+            // ignore
         }
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -496,19 +380,6 @@ export function useDashboardService() {
     const [todos, setTodos] = useState<any[]>([]);
 
     const fetchStatistics = useCallback(async () => {
-        if (!USE_API) {
-            // Mock数据
-            setStatistics({
-                entrustmentCount: 156,
-                sampleCount: 423,
-                taskCount: 89,
-                reportCount: 67,
-                entrustmentTrend: 12.5,
-                taskCompletionRate: 85.3
-            });
-            return;
-        }
-
         setLoading(true);
         try {
             const res = await dashboardApi.getStatistics();
@@ -521,15 +392,6 @@ export function useDashboardService() {
     }, []);
 
     const fetchTodos = useCallback(async () => {
-        if (!USE_API) {
-            setTodos([
-                { id: 1, title: '待审核委托单', count: 5, type: 'entrustment' },
-                { id: 2, title: '待分配任务', count: 8, type: 'task' },
-                { id: 3, title: '待审批报告', count: 3, type: 'report' }
-            ]);
-            return;
-        }
-
         try {
             const res = await dashboardApi.getTodos();
             setTodos(res.data);
@@ -550,12 +412,6 @@ export function useFinanceService() {
     const [statistics, setStatistics] = useState<any>(null);
 
     const fetchReceivables = useCallback(async (params: PageParams = {}) => {
-        if (!USE_API) {
-            const { receivableData } = await import('../mock/finance');
-            setReceivables(receivableData);
-            return;
-        }
-
         setLoading(true);
         try {
             const { financeApi } = await import('./financeApi');
@@ -569,12 +425,6 @@ export function useFinanceService() {
     }, []);
 
     const fetchPayments = useCallback(async (params: PageParams = {}) => {
-        if (!USE_API) {
-            const { paymentRecordData } = await import('../mock/finance');
-            setPayments(paymentRecordData);
-            return;
-        }
-
         setLoading(true);
         try {
             const { financeApi } = await import('./financeApi');
@@ -588,12 +438,6 @@ export function useFinanceService() {
     }, []);
 
     const fetchInvoices = useCallback(async (params: PageParams = {}) => {
-        if (!USE_API) {
-            const { invoiceData } = await import('../mock/finance');
-            setInvoices(invoiceData);
-            return;
-        }
-
         setLoading(true);
         try {
             const { financeApi } = await import('./financeApi');
@@ -607,11 +451,6 @@ export function useFinanceService() {
     }, []);
 
     const fetchStatistics = useCallback(async () => {
-        if (!USE_API) {
-            setStatistics({ totalAmount: 500000, paidTotal: 350000, unpaidTotal: 150000, overdueCount: 3 });
-            return;
-        }
-
         try {
             const { financeApi } = await import('./financeApi');
             const res = await financeApi.receivable.statistics();
@@ -634,11 +473,6 @@ export function useStatisticsService() {
     const [trend, setTrend] = useState<any[]>([]);
 
     const fetchEntrustmentStats = useCallback(async (params: { startDate?: string; endDate?: string } = {}) => {
-        if (!USE_API) {
-            setEntrustmentStats({ total: 156, byStatus: { pending: 20, approved: 50, testing: 30, completed: 56 }, totalAmount: 1500000 });
-            return;
-        }
-
         setLoading(true);
         try {
             const { statisticsApi } = await import('./statisticsApi');
@@ -652,11 +486,6 @@ export function useStatisticsService() {
     }, []);
 
     const fetchTaskStats = useCallback(async (params: { startDate?: string; endDate?: string } = {}) => {
-        if (!USE_API) {
-            setTaskStats({ total: 89, completed: 67, completionRate: 75.3, onTimeCount: 60, onTimeRate: 89.5, overdueCount: 7 });
-            return;
-        }
-
         setLoading(true);
         try {
             const { statisticsApi } = await import('./statisticsApi');
@@ -670,19 +499,6 @@ export function useStatisticsService() {
     }, []);
 
     const fetchTrend = useCallback(async (days: number = 7, type: 'entrustment' | 'sample' | 'task' = 'entrustment') => {
-        if (!USE_API) {
-            setTrend([
-                { date: '2024-01-01', count: 10 },
-                { date: '2024-01-02', count: 15 },
-                { date: '2024-01-03', count: 8 },
-                { date: '2024-01-04', count: 20 },
-                { date: '2024-01-05', count: 12 },
-                { date: '2024-01-06', count: 18 },
-                { date: '2024-01-07', count: 14 }
-            ]);
-            return;
-        }
-
         try {
             const { statisticsApi } = await import('./statisticsApi');
             let res;
