@@ -3,6 +3,7 @@ com/lims/controller/ElnTemplateController.class
 com/lims/mapper/SysRoleMapper.class
 com/lims/service/impl/ApprovalServiceImpl.class
 com/lims/entity/SysRole.class
+com/lims/aspect/DataScopeAspect.class
 com/lims/controller/ApprovalController$FlowCreateDTO.class
 com/lims/entity/Client.class
 com/lims/service/TestReportService.class
@@ -58,6 +59,7 @@ com/lims/service/TestTaskService.class
 com/lims/entity/Sample.class
 com/lims/mapper/ElnTemplateMapper.class
 com/lims/mapper/OutsourceOrderMapper.class
+com/lims/annotation/DataScope.class
 com/lims/common/BusinessException$ErrorCode.class
 com/lims/controller/ApprovalController$RecordDetailVO.class
 com/lims/service/impl/TestReportServiceImpl.class

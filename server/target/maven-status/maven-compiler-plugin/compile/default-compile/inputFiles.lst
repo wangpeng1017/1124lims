@@ -32,6 +32,7 @@
 /app/src/main/java/com/lims/entity/Signature.java
 /app/src/main/java/com/lims/security/LoginUserDetails.java
 /app/src/main/java/com/lims/entity/SysRole.java
+/app/src/main/java/com/lims/annotation/DataScope.java
 /app/src/main/java/com/lims/entity/ApprovalNode.java
 /app/src/main/java/com/lims/config/OpenApiConfig.java
 /app/src/main/java/com/lims/service/SysUserService.java
@@ -40,6 +41,7 @@
 /app/src/main/java/com/lims/controller/OutsourceOrderController.java
 /app/src/main/java/com/lims/mapper/DeviceMapper.java
 /app/src/main/java/com/lims/entity/TestData.java
+/app/src/main/java/com/lims/aspect/DataScopeAspect.java
 /app/src/main/java/com/lims/mapper/ClientMapper.java
 /app/src/main/java/com/lims/service/impl/TestTaskServiceImpl.java
 /app/src/main/java/com/lims/config/MinioConfig.java

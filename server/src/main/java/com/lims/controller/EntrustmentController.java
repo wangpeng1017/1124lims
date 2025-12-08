@@ -8,6 +8,7 @@ import com.lims.service.EntrustmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -23,6 +24,7 @@ public class EntrustmentController {
 
     @Operation(summary = "分页查询委托单")
     @GetMapping("/page")
+    @PreAuthorize("@ss.hasPermission('entrustment:list')")
     public Result<PageResult<Entrustment>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -42,12 +44,14 @@ public class EntrustmentController {
 
     @Operation(summary = "获取委托单详情")
     @GetMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('entrustment:query')")
     public Result<Entrustment> getById(@PathVariable Long id) {
         return Result.success(entrustmentService.getById(id));
     }
 
     @Operation(summary = "新增委托单")
     @PostMapping
+    @PreAuthorize("@ss.hasPermission('entrustment:create')")
     public Result<Entrustment> create(@RequestBody Entrustment entrustment) {
         Entrustment created = entrustmentService.createEntrustment(entrustment);
         return Result.success("创建成功", created);
@@ -55,6 +59,7 @@ public class EntrustmentController {
 
     @Operation(summary = "更新委托单")
     @PutMapping
+    @PreAuthorize("@ss.hasPermission('entrustment:update')")
     public Result<Void> update(@RequestBody Entrustment entrustment) {
         entrustmentService.updateById(entrustment);
         return Result.successMsg("更新成功");
@@ -62,6 +67,7 @@ public class EntrustmentController {
 
     @Operation(summary = "删除委托单")
     @DeleteMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('entrustment:delete')")
     public Result<Void> delete(@PathVariable Long id) {
         entrustmentService.removeById(id);
         return Result.successMsg("删除成功");
@@ -69,6 +75,7 @@ public class EntrustmentController {
 
     @Operation(summary = "审核委托单")
     @PostMapping("/{id}/approve")
+    @PreAuthorize("@ss.hasPermission('entrustment:approve')")
     public Result<Void> approve(
             @PathVariable Long id,
             @RequestParam boolean approved,
@@ -79,8 +86,10 @@ public class EntrustmentController {
 
     @Operation(summary = "获取统计数据")
     @GetMapping("/statistics")
+    @PreAuthorize("@ss.hasPermission('entrustment:list')")
     public Result<Object> statistics() {
         // TODO: 实现统计逻辑
         return Result.success();
     }
 }
+
