@@ -1,60 +1,118 @@
-# LIMS - Laboratory Information Management System
+# LIMS - 实验室信息管理系统
+
+> **Laboratory Information Management System**
 
 ## 项目简介
-这是一个基于 React + TypeScript + Ant Design 的实验室信息管理系统（LIMS）前端Demo。
+
+基于现代化技术栈的实验室信息管理系统，覆盖检测业务全流程。
 
 ## 技术栈
-- **框架**: React 18 + Vite
-- **语言**: TypeScript
-- **UI库**: Ant Design 5
-- **路由**: React Router v6
-- **图表**: ECharts + echarts-for-react
 
-## 核心功能模块
-1. **设备管理** - 设备列表、状态监控、利用率分析
-2. **环境管理** - 实验室环境监控（温湿度）
-3. **易耗品管理** - 库存管理、低库存预警
-4. **方法管理** - 检测标准方法管理
-5. **委托信息** - 检测委托单管理
+| 层级 | 技术 |
+|------|------|
+| 前端 | React 18 + TypeScript + Ant Design 5 + Vite |
+| 后端 | Spring Boot 3 + MyBatis-Plus + Spring Security |
+| 数据库 | MySQL 8.0 |
+| 缓存 | Redis 7 |
+| 文件存储 | MinIO |
+| 部署 | Docker + Docker Compose |
 
-## 本地开发
+## 核心功能
 
-### 安装依赖
+### 业务管理
+- ✅ 委托咨询 → 报价 → 合同 → 委托单
+- ✅ 客户单位管理
+
+### 样品管理
+- ✅ 样品收样/登记
+- ✅ 样品明细追踪
+- ✅ 样品领用/归还
+
+### 任务管理
+- ✅ 任务分配 (手动/自动)
+- ✅ 任务进度跟踪
+- ✅ 委外任务管理
+
+### 检测管理
+- ✅ ELN 电子实验记录
+- ✅ 检测数据录入
+
+### 报告管理
+- ✅ 报告生成/编辑
+- ✅ 三级审批流程
+- ✅ 报告模板管理
+
+### 设备管理
+- ✅ 设备台账
+- ✅ 保养/维修/定检计划
+
+### 财务管理
+- ✅ 应收账款
+- ✅ 收款/开票
+
+### 统计报表
+- ✅ 委托/样品/任务统计
+- ✅ 趋势分析图表
+
+### 系统管理
+- ✅ 用户/角色/权限
+- ✅ 部门管理
+- ✅ 审批流程配置
+
+## 快速开始
+
+### Docker 一键部署
+
 ```bash
-cd client
-npm install
+# 克隆项目
+git clone https://github.com/wangpeng1017/1124lims.git
+cd 1124lims
+
+# 启动所有服务
+docker-compose up -d
+
+# 访问
+# 前端: http://localhost
+# 后端: http://localhost:8080
+# MinIO: http://localhost:9001
 ```
 
-### 启动开发服务器
+### 本地开发
+
 ```bash
-npm run dev
+# 启动基础服务
+docker-compose up -d mysql redis minio
+
+# 后端
+cd server && mvn spring-boot:run
+
+# 前端
+cd client && npm install && npm run dev
 ```
 
-### 构建生产版本
-```bash
-npm run build
-```
+## 默认账号
+
+| 用户 | 密码 | 角色 |
+|------|------|------|
+| admin | 123456 | 管理员 |
+
+## 项目文档
+
+- [功能说明](docs/FEATURES.md) - 完整功能列表
+- [开发指南](docs/DEVELOPMENT.md) - 开发规范
+
+## 开发进度
+
+- [x] Phase 1: 前端 UI 开发
+- [x] Phase 2: 后端 API 开发
+- [x] Phase 3: 前后端对接
+- [x] Phase 4: Docker 部署
+- [ ] Phase 5: 生产优化
 
 ## 在线演示
+
 https://1124lims.vercel.app/
 
-## 项目结构
-```
-client/
-├── src/
-│   ├── layouts/        # 布局组件
-│   ├── pages/          # 页面组件
-│   │   ├── DeviceManagement/
-│   │   ├── EnvironmentManagement/
-│   │   ├── Consumables/
-│   │   ├── MethodManagement/
-│   │   └── Entrustment/
-│   ├── mock/           # 模拟数据
-│   └── App.tsx         # 主应用
-└── package.json
-```
+## License
 
-## 开发计划
-- [x] Phase 1: 前端Demo开发
-- [ ] Phase 2: 后端API开发
-- [ ] Phase 3: 数据库集成
+MIT
