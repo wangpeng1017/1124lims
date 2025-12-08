@@ -9,6 +9,7 @@ import com.lims.mapper.QuotationMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,7 @@ public class QuotationController {
 
     @Operation(summary = "分页查询报价单")
     @GetMapping("/page")
+    @PreAuthorize("@ss.hasPermission('quotation:list')")
     public Result<PageResult<Quotation>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -56,6 +58,7 @@ public class QuotationController {
 
     @Operation(summary = "获取报价单详情")
     @GetMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('quotation:query')")
     public Result<Quotation> getById(@PathVariable Long id) {
         return Result.success(quotationMapper.selectById(id));
     }
@@ -71,6 +74,7 @@ public class QuotationController {
 
     @Operation(summary = "新增报价单")
     @PostMapping
+    @PreAuthorize("@ss.hasPermission('quotation:create')")
     public Result<Quotation> create(@RequestBody Quotation quotation) {
         quotation.setQuotationNo(generateQuotationNo());
         quotation.setStatus("draft");
@@ -87,6 +91,7 @@ public class QuotationController {
 
     @Operation(summary = "更新报价单")
     @PutMapping
+    @PreAuthorize("@ss.hasPermission('quotation:update')")
     public Result<Void> update(@RequestBody Quotation quotation) {
         // 重新计算实际金额
         if (quotation.getTotalAmount() != null && quotation.getDiscountAmount() != null) {
@@ -98,6 +103,7 @@ public class QuotationController {
 
     @Operation(summary = "删除报价单")
     @DeleteMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('quotation:delete')")
     public Result<Void> delete(@PathVariable Long id) {
         quotationMapper.deleteById(id);
         return Result.successMsg("删除成功");
@@ -105,6 +111,7 @@ public class QuotationController {
 
     @Operation(summary = "提交报价单")
     @PostMapping("/{id}/submit")
+    @PreAuthorize("@ss.hasPermission('quotation:update')")
     public Result<Void> submit(@PathVariable Long id) {
         Quotation quotation = new Quotation();
         quotation.setId(id);
@@ -115,6 +122,7 @@ public class QuotationController {
 
     @Operation(summary = "审批报价单")
     @PostMapping("/{id}/approve")
+    @PreAuthorize("@ss.hasPermission('quotation:approve')")
     public Result<Void> approve(
             @PathVariable Long id,
             @RequestParam boolean approved,

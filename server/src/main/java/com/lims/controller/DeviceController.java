@@ -9,6 +9,7 @@ import com.lims.mapper.DeviceMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class DeviceController {
 
     @Operation(summary = "分页查询设备")
     @GetMapping("/page")
+    @PreAuthorize("@ss.hasPermission('device:list')")
     public Result<PageResult<Device>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -57,12 +59,14 @@ public class DeviceController {
 
     @Operation(summary = "获取设备详情")
     @GetMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('device:query')")
     public Result<Device> getById(@PathVariable Long id) {
         return Result.success(deviceMapper.selectById(id));
     }
 
     @Operation(summary = "新增设备")
     @PostMapping
+    @PreAuthorize("@ss.hasPermission('device:create')")
     public Result<Void> create(@RequestBody Device device) {
         device.setCode(generateDeviceCode());
         device.setStatus("idle");
@@ -72,6 +76,7 @@ public class DeviceController {
 
     @Operation(summary = "更新设备")
     @PutMapping
+    @PreAuthorize("@ss.hasPermission('device:update')")
     public Result<Void> update(@RequestBody Device device) {
         deviceMapper.updateById(device);
         return Result.successMsg("更新成功");
@@ -79,6 +84,7 @@ public class DeviceController {
 
     @Operation(summary = "删除设备")
     @DeleteMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('device:delete')")
     public Result<Void> delete(@PathVariable Long id) {
         deviceMapper.deleteById(id);
         return Result.successMsg("删除成功");
@@ -86,6 +92,7 @@ public class DeviceController {
 
     @Operation(summary = "更新设备状态")
     @PutMapping("/{id}/status")
+    @PreAuthorize("@ss.hasPermission('device:update')")
     public Result<Void> updateStatus(@PathVariable Long id, @RequestParam String status) {
         Device device = new Device();
         device.setId(id);
@@ -96,6 +103,7 @@ public class DeviceController {
 
     @Operation(summary = "查询可用设备")
     @GetMapping("/available")
+    @PreAuthorize("@ss.hasPermission('device:list')")
     public Result<List<Device>> getAvailable() {
         List<Device> devices = deviceMapper.selectList(new LambdaQueryWrapper<Device>()
                 .in(Device::getStatus, "running", "idle")
@@ -105,6 +113,7 @@ public class DeviceController {
 
     @Operation(summary = "查询即将定检的设备")
     @GetMapping("/calibration-due")
+    @PreAuthorize("@ss.hasPermission('device:list')")
     public Result<List<Device>> getCalibrationDue(@RequestParam(defaultValue = "30") Integer days) {
         LocalDate dueDate = LocalDate.now().plusDays(days);
         List<Device> devices = deviceMapper.selectList(new LambdaQueryWrapper<Device>()
@@ -120,3 +129,4 @@ public class DeviceController {
         return prefix + String.format("%04d", count + 1);
     }
 }
+

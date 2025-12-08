@@ -9,6 +9,7 @@ import com.lims.mapper.OutsourceOrderMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,7 @@ public class OutsourceOrderController {
 
     @Operation(summary = "分页查询委外订单")
     @GetMapping("/page")
+    @PreAuthorize("@ss.hasPermission('outsource:list')")
     public Result<PageResult<OutsourceOrder>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -56,6 +58,7 @@ public class OutsourceOrderController {
 
     @Operation(summary = "获取委外订单详情")
     @GetMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('outsource:query')")
     public Result<OutsourceOrder> getById(@PathVariable Long id) {
         return Result.success(orderMapper.selectById(id));
     }
@@ -79,6 +82,7 @@ public class OutsourceOrderController {
 
     @Operation(summary = "新增委外订单")
     @PostMapping
+    @PreAuthorize("@ss.hasPermission('outsource:create')")
     public Result<OutsourceOrder> create(@RequestBody OutsourceOrder order) {
         order.setOrderNo(generateOrderNo());
         order.setStatus("draft");
@@ -88,6 +92,7 @@ public class OutsourceOrderController {
 
     @Operation(summary = "更新委外订单")
     @PutMapping
+    @PreAuthorize("@ss.hasPermission('outsource:update')")
     public Result<Void> update(@RequestBody OutsourceOrder order) {
         orderMapper.updateById(order);
         return Result.successMsg("更新成功");
@@ -95,6 +100,7 @@ public class OutsourceOrderController {
 
     @Operation(summary = "删除委外订单")
     @DeleteMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('outsource:delete')")
     public Result<Void> delete(@PathVariable Long id) {
         orderMapper.deleteById(id);
         return Result.successMsg("删除成功");
@@ -102,6 +108,7 @@ public class OutsourceOrderController {
 
     @Operation(summary = "提交审批")
     @PostMapping("/{id}/submit")
+    @PreAuthorize("@ss.hasPermission('outsource:update')")
     public Result<Void> submit(@PathVariable Long id) {
         OutsourceOrder order = new OutsourceOrder();
         order.setId(id);
@@ -112,6 +119,7 @@ public class OutsourceOrderController {
 
     @Operation(summary = "审批委外订单")
     @PostMapping("/{id}/approve")
+    @PreAuthorize("@ss.hasPermission('outsource:approve')")
     public Result<Void> approve(
             @PathVariable Long id,
             @RequestParam Long approverId,

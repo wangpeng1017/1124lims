@@ -2,6 +2,8 @@ com/lims/controller/SysRoleController.class
 com/lims/entity/OutsourceOrder.class
 com/lims/controller/ElnTemplateController.class
 com/lims/mapper/SysRoleMapper.class
+com/lims/mapper/FinancePaymentMapper.class
+com/lims/entity/FinanceInvoice.class
 com/lims/service/impl/ApprovalServiceImpl.class
 com/lims/entity/SysRole.class
 com/lims/aspect/DataScopeAspect.class
@@ -14,6 +16,7 @@ com/lims/controller/SupplierController.class
 com/lims/controller/TestTaskController.class
 com/lims/service/SysUserService.class
 com/lims/security/LoginUserDetails.class
+com/lims/controller/FinanceController.class
 com/lims/controller/ApprovalController$FlowDetailVO.class
 com/lims/entity/Entrustment.class
 com/lims/entity/TestTask.class
@@ -43,6 +46,7 @@ com/lims/controller/TestReportController.class
 com/lims/mapper/ClientMapper.class
 com/lims/service/impl/MinioFileStorageServiceImpl.class
 com/lims/service/impl/EntrustmentServiceImpl.class
+com/lims/mapper/FinanceReceivableMapper.class
 com/lims/controller/ApprovalController.class
 com/lims/controller/EntrustmentController.class
 com/lims/controller/DeviceController.class
@@ -52,6 +56,7 @@ com/lims/common/ResultCode.class
 com/lims/entity/TestData.class
 com/lims/mapper/TestReportMapper.class
 com/lims/controller/DashboardController$TodoList.class
+com/lims/mapper/FinanceInvoiceMapper.class
 com/lims/config/SecurityConfig.class
 com/lims/controller/FileController$FileUploadResult.class
 com/lims/exception/BusinessException.class
@@ -63,6 +68,7 @@ com/lims/mapper/OutsourceOrderMapper.class
 com/lims/annotation/DataScope.class
 com/lims/common/BusinessException$ErrorCode.class
 com/lims/controller/ApprovalController$RecordDetailVO.class
+com/lims/entity/FinancePayment.class
 com/lims/service/impl/TestReportServiceImpl.class
 com/lims/controller/ContractController.class
 com/lims/controller/QuotationController.class
@@ -79,6 +85,7 @@ com/lims/controller/AuthController.class
 com/lims/config/MybatisPlusConfig$1.class
 com/lims/entity/SysDept.class
 com/lims/service/ApprovalService.class
+com/lims/entity/FinanceReceivable.class
 com/lims/common/BusinessException.class
 com/lims/mapper/SupplierMapper.class
 com/lims/common/PageResult.class

@@ -8,6 +8,7 @@ import com.lims.service.TestReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -23,6 +24,7 @@ public class TestReportController {
 
     @Operation(summary = "分页查询报告")
     @GetMapping("/page")
+    @PreAuthorize("@ss.hasPermission('report:list')")
     public Result<PageResult<TestReport>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -42,12 +44,14 @@ public class TestReportController {
 
     @Operation(summary = "获取报告详情")
     @GetMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('report:query')")
     public Result<TestReport> getById(@PathVariable Long id) {
         return Result.success(reportService.getById(id));
     }
 
     @Operation(summary = "新增报告")
     @PostMapping
+    @PreAuthorize("@ss.hasPermission('report:create')")
     public Result<TestReport> create(@RequestBody TestReport report) {
         TestReport created = reportService.createReport(report);
         return Result.success("创建成功", created);
@@ -55,6 +59,7 @@ public class TestReportController {
 
     @Operation(summary = "更新报告")
     @PutMapping
+    @PreAuthorize("@ss.hasPermission('report:update')")
     public Result<Void> update(@RequestBody TestReport report) {
         reportService.updateById(report);
         return Result.successMsg("更新成功");
@@ -62,6 +67,7 @@ public class TestReportController {
 
     @Operation(summary = "删除报告")
     @DeleteMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('report:delete')")
     public Result<Void> delete(@PathVariable Long id) {
         reportService.removeById(id);
         return Result.successMsg("删除成功");
@@ -69,6 +75,7 @@ public class TestReportController {
 
     @Operation(summary = "提交审核")
     @PostMapping("/{id}/submit-review")
+    @PreAuthorize("@ss.hasPermission('report:update')")
     public Result<Void> submitReview(@PathVariable Long id) {
         reportService.submitReview(id);
         return Result.successMsg("已提交审核");
@@ -76,6 +83,7 @@ public class TestReportController {
 
     @Operation(summary = "审核报告")
     @PostMapping("/{id}/review")
+    @PreAuthorize("@ss.hasPermission('report:approve')")
     public Result<Void> review(
             @PathVariable Long id,
             @RequestParam Long reviewerId,
@@ -88,6 +96,7 @@ public class TestReportController {
 
     @Operation(summary = "批准报告")
     @PostMapping("/{id}/approve")
+    @PreAuthorize("@ss.hasPermission('report:approve')")
     public Result<Void> approve(
             @PathVariable Long id,
             @RequestParam Long approverId,
@@ -98,6 +107,7 @@ public class TestReportController {
 
     @Operation(summary = "发布报告")
     @PostMapping("/{id}/issue")
+    @PreAuthorize("@ss.hasPermission('report:issue')")
     public Result<Void> issue(@PathVariable Long id) {
         reportService.issue(id);
         return Result.successMsg("发布成功");
@@ -105,6 +115,7 @@ public class TestReportController {
 
     @Operation(summary = "添加签名盖章")
     @PostMapping("/{id}/signature-stamp")
+    @PreAuthorize("@ss.hasPermission('report:update')")
     public Result<Void> addSignatureAndStamp(
             @PathVariable Long id,
             @RequestParam(required = false) String signatureImage,
@@ -115,6 +126,7 @@ public class TestReportController {
 
     @Operation(summary = "根据任务查询报告")
     @GetMapping("/by-task/{taskId}")
+    @PreAuthorize("@ss.hasPermission('report:list')")
     public Result<TestReport> getByTask(@PathVariable Long taskId) {
         TestReport report = reportService.lambdaQuery()
                 .eq(TestReport::getTaskId, taskId)
@@ -124,6 +136,7 @@ public class TestReportController {
 
     @Operation(summary = "根据委托单查询报告列表")
     @GetMapping("/by-entrustment/{entrustmentId}")
+    @PreAuthorize("@ss.hasPermission('report:list')")
     public Result<java.util.List<TestReport>> getByEntrustment(@PathVariable Long entrustmentId) {
         java.util.List<TestReport> reports = reportService.lambdaQuery()
                 .eq(TestReport::getEntrustmentId, entrustmentId)
@@ -131,3 +144,4 @@ public class TestReportController {
         return Result.success(reports);
     }
 }
+

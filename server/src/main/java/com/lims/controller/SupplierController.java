@@ -9,6 +9,7 @@ import com.lims.mapper.SupplierMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class SupplierController {
 
     @Operation(summary = "分页查询供应商")
     @GetMapping("/page")
+    @PreAuthorize("@ss.hasPermission('supplier:list')")
     public Result<PageResult<Supplier>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -57,6 +59,7 @@ public class SupplierController {
 
     @Operation(summary = "获取所有供应商（下拉选择）")
     @GetMapping("/list")
+    @PreAuthorize("@ss.hasPermission('supplier:list')")
     public Result<List<Supplier>> list() {
         List<Supplier> list = supplierMapper.selectList(new LambdaQueryWrapper<Supplier>()
                 .eq(Supplier::getStatus, 1)
@@ -76,12 +79,14 @@ public class SupplierController {
 
     @Operation(summary = "获取供应商详情")
     @GetMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('supplier:query')")
     public Result<Supplier> getById(@PathVariable Long id) {
         return Result.success(supplierMapper.selectById(id));
     }
 
     @Operation(summary = "新增供应商")
     @PostMapping
+    @PreAuthorize("@ss.hasPermission('supplier:create')")
     public Result<Void> create(@RequestBody Supplier supplier) {
         supplier.setCode(generateSupplierCode());
         supplier.setStatus(1);
@@ -94,6 +99,7 @@ public class SupplierController {
 
     @Operation(summary = "更新供应商")
     @PutMapping
+    @PreAuthorize("@ss.hasPermission('supplier:update')")
     public Result<Void> update(@RequestBody Supplier supplier) {
         supplierMapper.updateById(supplier);
         return Result.successMsg("更新成功");
@@ -101,6 +107,7 @@ public class SupplierController {
 
     @Operation(summary = "删除供应商")
     @DeleteMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('supplier:delete')")
     public Result<Void> delete(@PathVariable Long id) {
         supplierMapper.deleteById(id);
         return Result.successMsg("删除成功");
@@ -108,6 +115,7 @@ public class SupplierController {
 
     @Operation(summary = "切换供应商状态")
     @PutMapping("/{id}/status")
+    @PreAuthorize("@ss.hasPermission('supplier:update')")
     public Result<Void> toggleStatus(@PathVariable Long id, @RequestParam Integer status) {
         Supplier supplier = new Supplier();
         supplier.setId(id);
@@ -118,6 +126,7 @@ public class SupplierController {
 
     @Operation(summary = "更新供应商评分")
     @PutMapping("/{id}/score")
+    @PreAuthorize("@ss.hasPermission('supplier:update')")
     public Result<Void> updateScore(@PathVariable Long id, @RequestParam Integer score) {
         Supplier supplier = new Supplier();
         supplier.setId(id);

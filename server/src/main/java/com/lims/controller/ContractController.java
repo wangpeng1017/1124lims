@@ -9,6 +9,7 @@ import com.lims.mapper.ContractMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class ContractController {
 
     @Operation(summary = "分页查询合同")
     @GetMapping("/page")
+    @PreAuthorize("@ss.hasPermission('contract:list')")
     public Result<PageResult<Contract>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -55,6 +57,7 @@ public class ContractController {
 
     @Operation(summary = "获取合同详情")
     @GetMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('contract:query')")
     public Result<Contract> getById(@PathVariable Long id) {
         return Result.success(contractMapper.selectById(id));
     }
@@ -78,6 +81,7 @@ public class ContractController {
 
     @Operation(summary = "新增合同")
     @PostMapping
+    @PreAuthorize("@ss.hasPermission('contract:create')")
     public Result<Contract> create(@RequestBody Contract contract) {
         contract.setContractNo(generateContractNo());
         contract.setStatus("draft");
@@ -87,6 +91,7 @@ public class ContractController {
 
     @Operation(summary = "更新合同")
     @PutMapping
+    @PreAuthorize("@ss.hasPermission('contract:update')")
     public Result<Void> update(@RequestBody Contract contract) {
         contractMapper.updateById(contract);
         return Result.successMsg("更新成功");
@@ -94,6 +99,7 @@ public class ContractController {
 
     @Operation(summary = "删除合同")
     @DeleteMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('contract:delete')")
     public Result<Void> delete(@PathVariable Long id) {
         contractMapper.deleteById(id);
         return Result.successMsg("删除成功");
@@ -101,6 +107,7 @@ public class ContractController {
 
     @Operation(summary = "提交审批")
     @PostMapping("/{id}/submit")
+    @PreAuthorize("@ss.hasPermission('contract:update')")
     public Result<Void> submit(@PathVariable Long id) {
         Contract contract = new Contract();
         contract.setId(id);
@@ -111,6 +118,7 @@ public class ContractController {
 
     @Operation(summary = "审批合同")
     @PostMapping("/{id}/approve")
+    @PreAuthorize("@ss.hasPermission('contract:approve')")
     public Result<Void> approve(
             @PathVariable Long id,
             @RequestParam boolean approved,

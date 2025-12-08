@@ -8,6 +8,7 @@ import com.lims.service.TestTaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class TestTaskController {
 
     @Operation(summary = "分页查询所有任务")
     @GetMapping("/page")
+    @PreAuthorize("@ss.hasPermission('task:list')")
     public Result<PageResult<TestTask>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -45,6 +47,7 @@ public class TestTaskController {
 
     @Operation(summary = "查询我的任务")
     @GetMapping("/my")
+    @PreAuthorize("@ss.hasPermission('task:list')")
     public Result<PageResult<TestTask>> myTasks(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -63,12 +66,14 @@ public class TestTaskController {
 
     @Operation(summary = "获取任务详情")
     @GetMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('task:query')")
     public Result<TestTask> getById(@PathVariable Long id) {
         return Result.success(taskService.getById(id));
     }
 
     @Operation(summary = "新增任务")
     @PostMapping
+    @PreAuthorize("@ss.hasPermission('task:create')")
     public Result<TestTask> create(@RequestBody TestTask task) {
         TestTask created = taskService.createTask(task);
         return Result.success("创建成功", created);
@@ -76,6 +81,7 @@ public class TestTaskController {
 
     @Operation(summary = "更新任务")
     @PutMapping
+    @PreAuthorize("@ss.hasPermission('task:update')")
     public Result<Void> update(@RequestBody TestTask task) {
         taskService.updateById(task);
         return Result.successMsg("更新成功");
@@ -83,6 +89,7 @@ public class TestTaskController {
 
     @Operation(summary = "删除任务")
     @DeleteMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('task:delete')")
     public Result<Void> delete(@PathVariable Long id) {
         taskService.removeById(id);
         return Result.successMsg("删除成功");
@@ -90,6 +97,7 @@ public class TestTaskController {
 
     @Operation(summary = "分配任务")
     @PostMapping("/{id}/assign")
+    @PreAuthorize("@ss.hasPermission('task:assign')")
     public Result<Void> assign(
             @PathVariable Long id,
             @RequestParam Long assigneeId,
@@ -100,6 +108,7 @@ public class TestTaskController {
 
     @Operation(summary = "批量分配任务")
     @PostMapping("/batch-assign")
+    @PreAuthorize("@ss.hasPermission('task:assign')")
     public Result<Void> batchAssign(
             @RequestBody List<Long> taskIds,
             @RequestParam Long assigneeId,
@@ -110,6 +119,7 @@ public class TestTaskController {
 
     @Operation(summary = "开始任务")
     @PostMapping("/{id}/start")
+    @PreAuthorize("@ss.hasPermission('task:execute')")
     public Result<Void> start(@PathVariable Long id) {
         taskService.startTask(id);
         return Result.successMsg("任务已开始");
@@ -117,6 +127,7 @@ public class TestTaskController {
 
     @Operation(summary = "完成任务")
     @PostMapping("/{id}/complete")
+    @PreAuthorize("@ss.hasPermission('task:execute')")
     public Result<Void> complete(@PathVariable Long id) {
         taskService.completeTask(id);
         return Result.successMsg("任务已完成");
@@ -124,6 +135,7 @@ public class TestTaskController {
 
     @Operation(summary = "转交任务")
     @PostMapping("/{id}/transfer")
+    @PreAuthorize("@ss.hasPermission('task:assign')")
     public Result<Void> transfer(
             @PathVariable Long id,
             @RequestParam Long newAssigneeId,
@@ -135,6 +147,7 @@ public class TestTaskController {
 
     @Operation(summary = "更新任务进度")
     @PutMapping("/{id}/progress")
+    @PreAuthorize("@ss.hasPermission('task:execute')")
     public Result<Void> updateProgress(@PathVariable Long id, @RequestParam Integer progress) {
         TestTask task = new TestTask();
         task.setId(id);
@@ -143,3 +156,4 @@ public class TestTaskController {
         return Result.successMsg("进度更新成功");
     }
 }
+

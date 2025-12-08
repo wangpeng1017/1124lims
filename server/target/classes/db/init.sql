@@ -151,3 +151,65 @@ INSERT INTO sys_permission (permission_name, permission_code, parent_id, type, s
 INSERT INTO sys_role_permission (role_id, permission_id) 
 SELECT 1, id FROM sys_permission;
 
+-- ============================================
+-- 财务管理模块
+-- ============================================
+
+-- 应收记录表
+CREATE TABLE IF NOT EXISTS fin_receivable (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID',
+    entrustment_id BIGINT COMMENT '关联委托单ID',
+    entrustment_no VARCHAR(50) COMMENT '委托单号',
+    contract_id BIGINT COMMENT '关联合同ID',
+    contract_no VARCHAR(50) COMMENT '合同编号',
+    client_id BIGINT COMMENT '客户ID',
+    client_name VARCHAR(100) COMMENT '客户名称',
+    amount DECIMAL(12,2) DEFAULT 0 COMMENT '应收金额',
+    paid_amount DECIMAL(12,2) DEFAULT 0 COMMENT '已收金额',
+    unpaid_amount DECIMAL(12,2) DEFAULT 0 COMMENT '未收金额',
+    payment_type VARCHAR(20) DEFAULT 'postpay' COMMENT '账期类型：prepay预付/postpay后付',
+    due_date DATE COMMENT '到期日期',
+    status VARCHAR(20) DEFAULT 'pending' COMMENT '状态：pending待收/partial部分/paid已收/overdue逾期',
+    remark TEXT COMMENT '备注',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='财务应收记录表';
+
+-- 收款记录表
+CREATE TABLE IF NOT EXISTS fin_payment (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID',
+    payment_no VARCHAR(50) COMMENT '收款编号',
+    receivable_id BIGINT COMMENT '关联应收记录ID',
+    entrustment_id BIGINT COMMENT '关联委托单ID',
+    client_id BIGINT COMMENT '客户ID',
+    client_name VARCHAR(100) COMMENT '客户名称',
+    amount DECIMAL(12,2) DEFAULT 0 COMMENT '收款金额',
+    payment_date DATE COMMENT '收款日期',
+    payment_method VARCHAR(20) DEFAULT 'bank' COMMENT '收款方式：bank银行/cash现金/check支票/other其他',
+    bank_account VARCHAR(50) COMMENT '银行账号',
+    handler_id BIGINT COMMENT '经办人ID',
+    handler VARCHAR(50) COMMENT '经办人',
+    remark TEXT COMMENT '备注',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='收款记录表';
+
+-- 发票记录表
+CREATE TABLE IF NOT EXISTS fin_invoice (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID',
+    invoice_no VARCHAR(50) COMMENT '发票号码',
+    invoice_type VARCHAR(20) DEFAULT 'normal' COMMENT '发票类型：normal普通/special专用',
+    client_id BIGINT COMMENT '客户ID',
+    client_name VARCHAR(100) COMMENT '客户名称',
+    tax_no VARCHAR(50) COMMENT '纳税人识别号',
+    amount DECIMAL(12,2) DEFAULT 0 COMMENT '开票金额',
+    tax_rate DECIMAL(5,2) DEFAULT 0 COMMENT '税率',
+    tax_amount DECIMAL(12,2) DEFAULT 0 COMMENT '税额',
+    invoice_date DATE COMMENT '开票日期',
+    status VARCHAR(20) DEFAULT 'draft' COMMENT '状态：draft草稿/issued已开/cancelled作废',
+    entrustment_ids VARCHAR(500) COMMENT '关联委托单IDs',
+    creator VARCHAR(50) COMMENT '开票人',
+    remark TEXT COMMENT '备注',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='发票记录表';

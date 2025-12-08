@@ -9,6 +9,7 @@ import com.lims.mapper.ClientMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class ClientController {
 
     @Operation(summary = "分页查询客户")
     @GetMapping("/page")
+    @PreAuthorize("@ss.hasPermission('client:list')")
     public Result<PageResult<Client>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -56,6 +58,7 @@ public class ClientController {
 
     @Operation(summary = "获取所有客户（下拉选择）")
     @GetMapping("/list")
+    @PreAuthorize("@ss.hasPermission('client:list')")
     public Result<List<Client>> list() {
         List<Client> list = clientMapper.selectList(new LambdaQueryWrapper<Client>()
                 .eq(Client::getStatus, 1)
@@ -65,12 +68,14 @@ public class ClientController {
 
     @Operation(summary = "获取客户详情")
     @GetMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('client:query')")
     public Result<Client> getById(@PathVariable Long id) {
         return Result.success(clientMapper.selectById(id));
     }
 
     @Operation(summary = "新增客户")
     @PostMapping
+    @PreAuthorize("@ss.hasPermission('client:create')")
     public Result<Void> create(@RequestBody Client client) {
         client.setCode(generateClientCode());
         client.setStatus(1);
@@ -80,6 +85,7 @@ public class ClientController {
 
     @Operation(summary = "更新客户")
     @PutMapping
+    @PreAuthorize("@ss.hasPermission('client:update')")
     public Result<Void> update(@RequestBody Client client) {
         clientMapper.updateById(client);
         return Result.successMsg("更新成功");
@@ -87,6 +93,7 @@ public class ClientController {
 
     @Operation(summary = "删除客户")
     @DeleteMapping("/{id}")
+    @PreAuthorize("@ss.hasPermission('client:delete')")
     public Result<Void> delete(@PathVariable Long id) {
         clientMapper.deleteById(id);
         return Result.successMsg("删除成功");
@@ -94,6 +101,7 @@ public class ClientController {
 
     @Operation(summary = "切换客户状态")
     @PutMapping("/{id}/status")
+    @PreAuthorize("@ss.hasPermission('client:update')")
     public Result<Void> toggleStatus(@PathVariable Long id, @RequestParam Integer status) {
         Client client = new Client();
         client.setId(id);
