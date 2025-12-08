@@ -22,6 +22,7 @@ com/lims/entity/Entrustment.class
 com/lims/entity/TestTask.class
 com/lims/controller/FileController.class
 com/lims/controller/TestDataController.class
+com/lims/controller/StatisticsController.class
 com/lims/service/impl/SampleServiceImpl.class
 com/lims/controller/DashboardController$MyWorkStats.class
 com/lims/controller/SignatureController.class

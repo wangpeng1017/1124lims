@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -33,6 +34,7 @@ public class DashboardController {
 
     @Operation(summary = "获取概览统计")
     @GetMapping("/overview")
+    @PreAuthorize("@ss.hasPermission('dashboard:view')")
     public Result<OverviewStats> getOverview() {
         OverviewStats stats = new OverviewStats();
         
@@ -65,6 +67,7 @@ public class DashboardController {
 
     @Operation(summary = "获取任务统计")
     @GetMapping("/task-stats")
+    @PreAuthorize("@ss.hasPermission('dashboard:view')")
     public Result<Map<String, Long>> getTaskStats() {
         Map<String, Long> stats = new HashMap<>();
         
@@ -80,6 +83,7 @@ public class DashboardController {
 
     @Operation(summary = "获取报告统计")
     @GetMapping("/report-stats")
+    @PreAuthorize("@ss.hasPermission('dashboard:view')")
     public Result<Map<String, Long>> getReportStats() {
         Map<String, Long> stats = new HashMap<>();
         
@@ -97,6 +101,7 @@ public class DashboardController {
 
     @Operation(summary = "获取本周工作量趋势")
     @GetMapping("/weekly-trend")
+    @PreAuthorize("@ss.hasPermission('dashboard:view')")
     public Result<List<Map<String, Object>>> getWeeklyTrend() {
         // 简化实现：返回最近7天每天的任务完成数
         // 实际需要自定义SQL查询
@@ -105,6 +110,7 @@ public class DashboardController {
 
     @Operation(summary = "获取待办事项")
     @GetMapping("/todos")
+    @PreAuthorize("@ss.hasPermission('dashboard:view')")
     public Result<TodoList> getTodos(@RequestParam(required = false) Long userId) {
         TodoList todos = new TodoList();
         
@@ -134,6 +140,7 @@ public class DashboardController {
 
     @Operation(summary = "获取我的工作统计")
     @GetMapping("/my-stats")
+    @PreAuthorize("@ss.hasPermission('dashboard:view')")
     public Result<MyWorkStats> getMyStats(@RequestParam Long userId) {
         MyWorkStats stats = new MyWorkStats();
         

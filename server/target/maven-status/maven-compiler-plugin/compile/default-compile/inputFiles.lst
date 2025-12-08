@@ -68,6 +68,7 @@
 /app/src/main/java/com/lims/mapper/SysDeptMapper.java
 /app/src/main/java/com/lims/service/impl/MinioFileStorageServiceImpl.java
 /app/src/main/java/com/lims/LimsApplication.java
+/app/src/main/java/com/lims/controller/StatisticsController.java
 /app/src/main/java/com/lims/entity/Entrustment.java
 /app/src/main/java/com/lims/entity/Quotation.java
 /app/src/main/java/com/lims/service/impl/ApprovalServiceImpl.java
