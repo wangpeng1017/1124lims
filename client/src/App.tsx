@@ -65,6 +65,7 @@ import EvaluationTemplate from './pages/SupplierManagement/EvaluationTemplate';
 import PerformanceEvaluation from './pages/SupplierManagement/PerformanceEvaluation';
 import ApprovalCenter from './pages/ApprovalCenter';
 import Login from './pages/Login';
+import PublicReportQuery from './pages/PublicReportQuery';
 
 
 const App: React.FC = () => {
@@ -72,6 +73,7 @@ const App: React.FC = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/report/verify" element={<PublicReportQuery />} />
         <Route path="/fill/:entrustmentId" element={<EntrustmentFill />} />
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />

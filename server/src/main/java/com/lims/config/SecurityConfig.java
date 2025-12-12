@@ -40,6 +40,7 @@ public class SecurityConfig {
             "/auth/login",
             "/auth/register",
             "/auth/captcha",
+            "/public/**",
             "/doc.html",
             "/swagger-ui/**",
             "/v3/api-docs/**",

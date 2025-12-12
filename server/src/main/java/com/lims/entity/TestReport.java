@@ -155,6 +155,16 @@ public class TestReport implements Serializable {
     private String remark;
 
     /**
+     * 防伪验证码（用于二维码校验）
+     */
+    private String verificationCode;
+
+    /**
+     * 二维码图片URL
+     */
+    private String qrCodeUrl;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)

@@ -1,58 +1,141 @@
-import React from 'react';
-import { Card, Row, Col, Statistic, Table, Tag, Space, Progress, Badge, List } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Card, Row, Col, Statistic, Table, Tag, Space, Progress, Badge, List, Spin, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
     CheckCircleOutlined,
     ClockCircleOutlined,
     ExclamationCircleOutlined,
     FileTextOutlined,
-    TeamOutlined,
     ExperimentOutlined,
     DollarOutlined,
     RiseOutlined,
 } from '@ant-design/icons';
-import { todoData, getTodoStats, TODO_TYPE_MAP, type ITodo } from '../mock/todo';
-import { testTaskData } from '../mock/test';
-import { quotationData } from '../mock/quotationData';
-import { contractData } from '../mock/contract';
 import { useNavigate } from 'react-router-dom';
+import todoApi, { type ITodo, type ITodoStats, TODO_TYPE_MAP } from '../services/todoApi';
+import { request } from '../services/api';
+
+// Dashboard统计接口
+interface DashboardStats {
+    taskStats: {
+        pending: number;
+        in_progress: number;
+        completed: number;
+        total: number;
+    };
+    reportStats: {
+        draft: number;
+        pending_review: number;
+        approved: number;
+        issued: number;
+        total: number;
+    };
+}
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
-    const todoStats = getTodoStats(todoData);
+    const [loading, setLoading] = useState(true);
+    const [todoStats, setTodoStats] = useState<ITodoStats>({
+        total: 0,
+        pending: 0,
+        inProgress: 0,
+        completed: 0,
+        overdue: 0,
+        urgent: 0,
+    });
+    const [urgentTodos, setUrgentTodos] = useState<ITodo[]>([]);
+    const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
+        taskStats: { pending: 0, in_progress: 0, completed: 0, total: 0 },
+        reportStats: { draft: 0, pending_review: 0, approved: 0, issued: 0, total: 0 },
+    });
 
-    // 任务统计
-    const taskStats = {
-        total: testTaskData.length,
-        pending: testTaskData.filter(t => t.status === '待开始').length,
-        inProgress: testTaskData.filter(t => t.status === '进行中').length,
-        completed: testTaskData.filter(t => t.status === '已完成').length,
+    // 获取当前用户ID
+    const getCurrentUserId = (): number => {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                return user.id || 1;
+            } catch {
+                return 1;
+            }
+        }
+        return 1;
     };
 
-    // 报价单统计
-    const quotationStats = {
-        total: quotationData.length,
-        pending: quotationData.filter(q => q.status.includes('pending')).length,
-        approved: quotationData.filter(q => q.status === 'approved').length,
-        rejected: quotationData.filter(q => q.status === 'rejected').length,
-    };
+    // 加载数据
+    useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            try {
+                const userId = getCurrentUserId();
 
-    // 合同统计
-    const contractStats = {
-        total: contractData.length,
-        draft: contractData.filter(c => c.status === 'draft').length,
-        signed: contractData.filter(c => c.status === 'signed').length,
-        executing: contractData.filter(c => c.status === 'executing').length,
-    };
+                // 并行请求多个API
+                const [todoStatsRes, myTodosRes, taskStatsRes, reportStatsRes] = await Promise.all([
+                    todoApi.getStats(userId),
+                    todoApi.myTodos({ userId, size: 5, status: 'pending' }),
+                    request.get<Record<string, number>>('/dashboard/task-stats'),
+                    request.get<Record<string, number>>('/dashboard/report-stats'),
+                ]);
 
-    // 待办事项列表（只显示前5条）
-    const urgentTodos = todoData
-        .filter(t => t.status === 'pending' || t.status === 'in_progress')
-        .sort((a, b) => {
-            const priorityOrder = { urgent: 0, high: 1, normal: 2, low: 3 };
-            return priorityOrder[a.priority] - priorityOrder[b.priority];
-        })
-        .slice(0, 5);
+                // 处理待办统计
+                if (todoStatsRes.code === 200 && todoStatsRes.data) {
+                    setTodoStats(todoStatsRes.data);
+                }
+
+                // 处理紧急待办列表
+                if (myTodosRes.code === 200 && myTodosRes.data?.records) {
+                    // 按优先级排序，取前5条
+                    const sortedTodos = [...myTodosRes.data.records]
+                        .filter(t => t.status === 'pending' || t.status === 'in_progress')
+                        .sort((a, b) => {
+                            const priorityOrder: Record<string, number> = { urgent: 0, high: 1, normal: 2, low: 3 };
+                            return (priorityOrder[a.priority] ?? 2) - (priorityOrder[b.priority] ?? 2);
+                        })
+                        .slice(0, 5);
+                    setUrgentTodos(sortedTodos);
+                }
+
+                // 处理任务统计
+                if (taskStatsRes.code === 200 && taskStatsRes.data) {
+                    const stats = taskStatsRes.data;
+                    const total = (stats.pending || 0) + (stats.in_progress || 0) + (stats.completed || 0);
+                    setDashboardStats(prev => ({
+                        ...prev,
+                        taskStats: {
+                            pending: stats.pending || 0,
+                            in_progress: stats.in_progress || 0,
+                            completed: stats.completed || 0,
+                            total,
+                        },
+                    }));
+                }
+
+                // 处理报告统计
+                if (reportStatsRes.code === 200 && reportStatsRes.data) {
+                    const stats = reportStatsRes.data;
+                    const total = (stats.draft || 0) + (stats.pending_review || 0) +
+                                  (stats.approved || 0) + (stats.issued || 0);
+                    setDashboardStats(prev => ({
+                        ...prev,
+                        reportStats: {
+                            draft: stats.draft || 0,
+                            pending_review: stats.pending_review || 0,
+                            approved: stats.approved || 0,
+                            issued: stats.issued || 0,
+                            total,
+                        },
+                    }));
+                }
+            } catch (error) {
+                console.error('加载Dashboard数据失败:', error);
+                message.error('加载数据失败，请刷新页面重试');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadData();
+    }, []);
 
     const todoColumns: ColumnsType<ITodo> = [
         {
@@ -60,9 +143,12 @@ const Dashboard: React.FC = () => {
             dataIndex: 'type',
             key: 'type',
             width: 120,
-            render: (type: keyof typeof TODO_TYPE_MAP) => {
+            render: (type: string) => {
                 const typeInfo = TODO_TYPE_MAP[type];
-                return <Tag color={typeInfo.color}>{typeInfo.icon} {typeInfo.text}</Tag>;
+                if (typeInfo) {
+                    return <Tag color={typeInfo.color}>{typeInfo.text}</Tag>;
+                }
+                return <Tag>{type}</Tag>;
             },
         },
         {
@@ -86,6 +172,16 @@ const Dashboard: React.FC = () => {
             ),
         },
     ];
+
+    if (loading) {
+        return (
+            <div style={{ padding: '24px', textAlign: 'center' }}>
+                <Spin size="large" tip="加载中..." />
+            </div>
+        );
+    }
+
+    const { taskStats, reportStats } = dashboardStats;
 
     return (
         <div style={{ padding: '24px' }}>
@@ -114,7 +210,7 @@ const Dashboard: React.FC = () => {
                     <Card>
                         <Statistic
                             title="检测任务"
-                            value={taskStats.inProgress}
+                            value={taskStats.in_progress}
                             prefix={<ExperimentOutlined />}
                             suffix={
                                 <span style={{ fontSize: 14, color: '#999' }}>
@@ -125,7 +221,9 @@ const Dashboard: React.FC = () => {
                         />
                         <div style={{ marginTop: 8 }}>
                             <Progress
-                                percent={Math.round((taskStats.completed / taskStats.total) * 100)}
+                                percent={taskStats.total > 0
+                                    ? Math.round((taskStats.completed / taskStats.total) * 100)
+                                    : 0}
                                 size="small"
                                 status="active"
                             />
@@ -135,38 +233,38 @@ const Dashboard: React.FC = () => {
                 <Col span={6}>
                     <Card>
                         <Statistic
-                            title="报价单"
-                            value={quotationStats.pending}
+                            title="报告审核"
+                            value={reportStats.pending_review}
                             prefix={<FileTextOutlined />}
                             suffix={
                                 <span style={{ fontSize: 14, color: '#999' }}>
-                                    待审批
+                                    待审核
                                 </span>
                             }
                             valueStyle={{ color: '#faad14' }}
                         />
                         <div style={{ marginTop: 8 }}>
-                            <Tag color="success">已批准: {quotationStats.approved}</Tag>
-                            <Tag color="error">已拒绝: {quotationStats.rejected}</Tag>
+                            <Tag color="success">已批准: {reportStats.approved}</Tag>
+                            <Tag color="blue">已签发: {reportStats.issued}</Tag>
                         </div>
                     </Card>
                 </Col>
                 <Col span={6}>
                     <Card>
                         <Statistic
-                            title="委托合同"
-                            value={contractStats.executing}
+                            title="任务统计"
+                            value={taskStats.pending}
                             prefix={<DollarOutlined />}
                             suffix={
                                 <span style={{ fontSize: 14, color: '#999' }}>
-                                    执行中
+                                    待处理
                                 </span>
                             }
                             valueStyle={{ color: '#722ed1' }}
                         />
                         <div style={{ marginTop: 8 }}>
-                            <Tag color="default">草稿: {contractStats.draft}</Tag>
-                            <Tag color="success">已签订: {contractStats.signed}</Tag>
+                            <Tag color="processing">进行中: {taskStats.in_progress}</Tag>
+                            <Tag color="success">已完成: {taskStats.completed}</Tag>
                         </div>
                     </Card>
                 </Col>
@@ -183,7 +281,7 @@ const Dashboard: React.FC = () => {
                                 <Badge count={urgentTodos.length} />
                             </Space>
                         }
-                        extra={null}
+                        extra={<a onClick={() => navigate('/my-todos')}>查看全部</a>}
                     >
                         <Table
                             columns={todoColumns}
@@ -191,6 +289,7 @@ const Dashboard: React.FC = () => {
                             rowKey="id"
                             pagination={false}
                             size="small"
+                            locale={{ emptyText: '暂无紧急待办' }}
                         />
                     </Card>
                 </Col>
@@ -206,7 +305,7 @@ const Dashboard: React.FC = () => {
                         <List
                             grid={{ gutter: 16, column: 2 }}
                             dataSource={[
-                                { title: '报价管理', icon: <FileTextOutlined />, link: '/entrustment/quotation', color: '#1890ff' },
+                                { title: '委托管理', icon: <FileTextOutlined />, link: '/entrustment/list', color: '#1890ff' },
                                 { title: '合同管理', icon: <FileTextOutlined />, link: '/entrustment/contract', color: '#52c41a' },
                                 { title: '任务管理', icon: <ExperimentOutlined />, link: '/task-management/all-tasks', color: '#faad14' },
                                 { title: '样品管理', icon: <ExperimentOutlined />, link: '/sample-management/receipt', color: '#722ed1' },

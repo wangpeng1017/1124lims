@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Table, Tag, Space, Button, Select, Input, Badge, Statistic, Row, Col, Modal, message } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import {
     CheckCircleOutlined,
     ClockCircleOutlined,
@@ -8,7 +8,7 @@ import {
     SearchOutlined,
     FilterOutlined,
 } from '@ant-design/icons';
-import { todoData, type ITodo, TODO_TYPE_MAP, PRIORITY_MAP, TODO_STATUS_MAP, getTodoStats } from '../mock/todo';
+import todoApi, { type ITodo, type ITodoStats, TODO_TYPE_MAP, PRIORITY_MAP, TODO_STATUS_MAP } from '../services/todoApi';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 
@@ -16,11 +16,41 @@ const { Option } = Select;
 
 const MyTodos: React.FC = () => {
     const navigate = useNavigate();
-    const [dataSource, setDataSource] = useState<ITodo[]>(todoData);
+    const [loading, setLoading] = useState(false);
+    const [dataSource, setDataSource] = useState<ITodo[]>([]);
+    const [stats, setStats] = useState<ITodoStats>({ total: 0, pending: 0, inProgress: 0, completed: 0, overdue: 0, urgent: 0 });
+    const [pagination, setPagination] = useState<TablePaginationConfig>({ current: 1, pageSize: 10, total: 0 });
     const [searchText, setSearchText] = useState('');
-    const [typeFilter, setTypeFilter] = useState<string | null>(null);
-    const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
-    const [statusFilter, setStatusFilter] = useState<string | null>(null);
+    const [typeFilter, setTypeFilter] = useState<string | undefined>();
+    const [priorityFilter, setPriorityFilter] = useState<string | undefined>();
+    const [statusFilter, setStatusFilter] = useState<string | undefined>();
+
+    const getCurrentUserId = (): number => {
+        const userStr = localStorage.getItem('user');
+        if (userStr) { try { return JSON.parse(userStr).id || 1; } catch { return 1; } }
+        return 1;
+    };
+
+    const loadData = async (params: { current?: number; size?: number } = {}) => {
+        setLoading(true);
+        try {
+            const userId = getCurrentUserId();
+            const [listRes, statsRes] = await Promise.all([
+                todoApi.myTodos({ current: params.current || pagination.current, size: params.size || pagination.pageSize, userId, status: statusFilter }),
+                todoApi.getStats(userId),
+            ]);
+            if (listRes.code === 200 && listRes.data) {
+                setDataSource(listRes.data.records || []);
+                setPagination(prev => ({ ...prev, current: listRes.data?.current || 1, total: listRes.data?.total || 0 }));
+            }
+            if (statsRes.code === 200 && statsRes.data) { setStats(statsRes.data); }
+        } catch (error) {
+            console.error('加载待办失败:', error);
+            message.error('加载数据失败');
+        } finally { setLoading(false); }
+    };
+
+    useEffect(() => { loadData(); }, [statusFilter]);
 
     // 过滤数据
     const filteredData = dataSource.filter(item => {
@@ -34,8 +64,7 @@ const MyTodos: React.FC = () => {
 
         return matchSearch && matchType && matchPriority && matchStatus;
     });
-
-    const stats = getTodoStats(dataSource);
+
 
     const handleComplete = (record: ITodo) => {
         Modal.confirm({

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Tag, Button, Space, Modal, Descriptions, Divider, List, Form, Input, Select, DatePicker, message, Row, Col, Alert } from 'antd';
+import { Card, Table, Tag, Button, Space, Modal, Descriptions, Divider, List, Form, Input, Select, DatePicker, message, Row, Col, Alert, Dropdown } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { EyeOutlined, DownloadOutlined, FileTextOutlined, PlusOutlined } from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import { EyeOutlined, DownloadOutlined, FileTextOutlined, PlusOutlined, FilePdfOutlined, FileWordOutlined } from '@ant-design/icons';
 import { testReportData, clientReportTemplateData } from '../../mock/report';
 import type { IClientReport, IClientReportTemplate } from '../../mock/report';
 import dayjs from 'dayjs';
 import { useReportService } from '../../services/useDataService';
+import { exportReportPDF } from '../../utils/pdfExport';
+import { request } from '../../services/api';
 
 const ClientReports: React.FC = () => {
     // 使用API服务
@@ -37,6 +40,74 @@ const ClientReports: React.FC = () => {
         setIsPreviewOpen(true);
     };
 
+    // 导出PDF
+    const handleExportPDF = async (record: IClientReport) => {
+        try {
+            // 获取模板
+            const template = clientReportTemplateData.find(t => t.id === record.templateId)
+                || clientReportTemplateData.find(t => t.isDefault);
+
+            if (!template) {
+                message.error('未找到报告模板');
+                return;
+            }
+
+            message.loading({ content: '正在生成PDF...', key: 'pdfExport' });
+            await exportReportPDF(record, template, undefined, `${record.reportNo}.pdf`);
+            message.success({ content: 'PDF导出成功', key: 'pdfExport' });
+        } catch (error) {
+            console.error('PDF导出失败:', error);
+            message.error({ content: 'PDF导出失败，请重试', key: 'pdfExport' });
+        }
+    };
+
+    // 导出Word
+    const handleExportWord = async (record: IClientReport) => {
+        try {
+            message.loading({ content: '正在生成Word文档...', key: 'wordExport' });
+
+            // 调用后端Word导出接口
+            const response = await request.get(`/report/export/word/${record.id}`, {}, {
+                responseType: 'blob'
+            });
+
+            // 创建下载链接
+            const blob = new Blob([response as any], {
+                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${record.reportNo}.docx`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            message.success({ content: 'Word文档导出成功', key: 'wordExport' });
+        } catch (error) {
+            console.error('Word导出失败:', error);
+            message.error({ content: 'Word导出失败，请重试', key: 'wordExport' });
+        }
+    };
+
+    // 获取导出下拉菜单
+    const getExportMenuItems = (record: IClientReport): MenuProps['items'] => [
+        {
+            key: 'pdf',
+            label: '导出PDF',
+            icon: <FilePdfOutlined />,
+            onClick: () => handleExportPDF(record),
+        },
+        {
+            key: 'word',
+            label: '导出Word',
+            icon: <FileWordOutlined />,
+            onClick: () => handleExportWord(record),
+        },
+    ];
+
+    // 保留原有的打印功能作为备用
     const handleDownload = (record: IClientReport) => {
         const printWindow = window.open('', '_blank');
         if (printWindow) {
@@ -289,7 +360,7 @@ const ClientReports: React.FC = () => {
         {
             title: '操作',
             key: 'action',
-            width: 180,
+            width: 200,
             fixed: 'right',
             render: (_, record) => (
                 <Space size="small">
@@ -301,14 +372,15 @@ const ClientReports: React.FC = () => {
                     >
                         预览
                     </Button>
-                    <Button
-                        type="link"
-                        size="small"
-                        icon={<DownloadOutlined />}
-                        onClick={() => handleDownload(record)}
-                    >
-                        下载
-                    </Button>
+                    <Dropdown menu={{ items: getExportMenuItems(record) }} placement="bottomRight">
+                        <Button
+                            type="link"
+                            size="small"
+                            icon={<DownloadOutlined />}
+                        >
+                            导出
+                        </Button>
+                    </Dropdown>
                 </Space>
             ),
         },
@@ -338,12 +410,19 @@ const ClientReports: React.FC = () => {
                 footer={[
                     <Button key="close" onClick={() => setIsPreviewOpen(false)}>关闭</Button>,
                     <Button
-                        key="download"
-                        type="primary"
-                        icon={<DownloadOutlined />}
-                        onClick={() => previewReport && handleDownload(previewReport)}
+                        key="word"
+                        icon={<FileWordOutlined />}
+                        onClick={() => previewReport && handleExportWord(previewReport)}
                     >
-                        下载PDF
+                        导出Word
+                    </Button>,
+                    <Button
+                        key="pdf"
+                        type="primary"
+                        icon={<FilePdfOutlined />}
+                        onClick={() => previewReport && handleExportPDF(previewReport)}
+                    >
+                        导出PDF
                     </Button>
                 ]}
                 width={1000}
