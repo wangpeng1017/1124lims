@@ -113,7 +113,7 @@ public class SystemDocumentController {
             String filePath = DOCUMENT_PATH_PREFIX + storageName;
 
             // 上传文件到MinIO
-            fileStorageService.uploadFile(file, filePath);
+            fileStorageService.upload(file, DOCUMENT_PATH_PREFIX, storageName);
 
             // 保存文件记录
             SystemDocument document = new SystemDocument();
@@ -148,7 +148,7 @@ public class SystemDocumentController {
                 return ResponseEntity.notFound().build();
             }
 
-            InputStream inputStream = fileStorageService.downloadFile(document.getFilePath());
+            InputStream inputStream = fileStorageService.download(document.getFilePath());
 
             String encodedFileName = URLEncoder.encode(document.getOriginalName(), StandardCharsets.UTF_8)
                     .replaceAll("\\+", "%20");
@@ -203,7 +203,7 @@ public class SystemDocumentController {
 
             // 删除旧文件
             try {
-                fileStorageService.deleteFile(existingDoc.getFilePath());
+                fileStorageService.delete(existingDoc.getFilePath());
             } catch (Exception e) {
                 log.warn("删除旧文件失败: {}", existingDoc.getFilePath());
             }
@@ -216,7 +216,7 @@ public class SystemDocumentController {
             String storageName = UUID.randomUUID().toString() + extension;
             String filePath = DOCUMENT_PATH_PREFIX + storageName;
 
-            fileStorageService.uploadFile(file, filePath);
+            fileStorageService.upload(file, DOCUMENT_PATH_PREFIX, storageName);
 
             // 更新记录
             existingDoc.setFilePath(filePath);
@@ -252,7 +252,7 @@ public class SystemDocumentController {
             SystemDocument document = documentMapper.selectById(id);
             if (document != null && document.getFilePath() != null) {
                 try {
-                    fileStorageService.deleteFile(document.getFilePath());
+                    fileStorageService.delete(document.getFilePath());
                 } catch (Exception e) {
                     log.warn("删除文件失败: {}", document.getFilePath());
                 }

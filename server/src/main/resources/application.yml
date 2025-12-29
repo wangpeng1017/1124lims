@@ -96,3 +96,13 @@ logging:
     com.baomidou.mybatisplus: debug
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# LibreOffice配置
+libreoffice:
+  path: /usr/bin/soffice
+  timeout: 60
+
+# 报告配置
+report:
+  output-dir: /tmp/lims/reports
+  template-dir: /tmp/lims/templates

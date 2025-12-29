@@ -1,0 +1,35 @@
+# LIMS Ingress - 配置外部访问
+# 请根据 Leaflow 分配的子域名修改 host
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lims-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: lims.leaflow.net  # 请修改为实际分配的域名
+    http:
+      paths:
+      # API 路由到后端
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: server
+            port:
+              number: 8080
+      # 前端静态资源
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: lims-client
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - lims.leaflow.net  # 请修改为实际分配的域名
+    secretName: lims-tls  # 如果 Leaflow 自动提供 TLS 证书则可删除此项

@@ -1,0 +1,5 @@
+# LIMS Namespace (如果 Leaflow 工作空间已创建则跳过)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lims
