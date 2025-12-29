@@ -15,7 +15,9 @@
 | 数据库 | MySQL 8.0 |
 | 缓存 | Redis 7 |
 | 文件存储 | MinIO |
-| 部署 | Docker + Docker Compose |
+| 部署 | Docker / 直接部署 |
+| 报告生成 | EasyExcel + LibreOffice |
+| 表格组件 | Fortune-sheet |
 
 ## 核心功能
 
@@ -35,7 +37,8 @@
 
 ### 检测管理
 - ✅ ELN 电子实验记录
-- ✅ 检测数据录入
+- ✅ 检测数据录入 (Fortune-sheet 表格)
+- ✅ PDF 报告生成 (EasyExcel + LibreOffice)
 
 ### 报告管理
 - ✅ 报告生成/编辑
@@ -90,11 +93,34 @@ cd server && mvn spring-boot:run
 cd client && npm install && npm run dev
 ```
 
+### 阿里云直接部署
+
+```bash
+# 服务器环境要求: Java 17, MariaDB/MySQL, Redis, Nginx, LibreOffice
+
+# 1. 克隆代码
+git clone https://github.com/wangpeng1017/1124lims.git /root/lims-app
+
+# 2. 构建后端
+cd /root/lims-app/server && mvn clean package -DskipTests
+
+# 3. 构建前端
+cd /root/lims-app/client && npm install && npm run build
+
+# 4. 配置 systemd 服务 (/etc/systemd/system/lims.service)
+# 5. 配置 nginx 反向代理
+# 6. 初始化数据库: mysql lims < server/src/main/resources/db/init.sql
+
+# 访问
+# 前端: http://服务器IP:8082
+# 后端: http://服务器IP:8081/api
+```
+
 ## 默认账号
 
 | 用户 | 密码 | 角色 |
 |------|------|------|
-| admin | 123456 | 管理员 |
+| admin | admin123 | 管理员 |
 
 ## 项目文档
 
