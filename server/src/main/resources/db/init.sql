@@ -137,7 +137,8 @@ INSERT INTO sys_permission (permission_name, permission_code, parent_id, type, p
 ('系统设置', 'system', 0, 1, '/system', 'SettingOutlined', 99);
 
 -- 插入操作权限 (按钮权限)
-INSERT INTO sys_permission (permission_name, permission_code, parent_id, type, sort) VALUES 
+INSERT INTO sys_permission (permission_name, permission_code, parent_id, type, sort) VALUES
+('首页-查看', 'dashboard:view', 1, 2, 1),
 ('委托单-新增', 'entrustment:create', 2, 2, 1),
 ('委托单-编辑', 'entrustment:update', 2, 2, 2),
 ('委托单-删除', 'entrustment:delete', 2, 2, 3),
@@ -152,6 +153,15 @@ INSERT INTO sys_permission (permission_name, permission_code, parent_id, type, s
 ('用户管理', 'system:user', 8, 2, 1),
 ('角色管理', 'system:role', 8, 2, 2),
 ('权限管理', 'system:permission', 8, 2, 3);
+
+-- 插入额外API权限
+INSERT INTO sys_permission (permission_name, permission_code, parent_id, type, sort) VALUES
+('待办-查看', 'todo:view', 0, 3, 1),
+('待办-管理', 'todo:manage', 0, 3, 2),
+('咨询-查看', 'consultation:view', 0, 3, 3),
+('咨询-管理', 'consultation:manage', 0, 3, 4),
+('报价单-查看', 'quotation:view', 0, 3, 5),
+('报价单-管理', 'quotation:manage', 0, 3, 6);
 
 -- 为管理员角色分配所有权限
 INSERT INTO sys_role_permission (role_id, permission_id) 
