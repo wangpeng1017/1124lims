@@ -8,6 +8,12 @@ export interface IContract {
     contractName: string;             // 合同名称
     quotationId: string;              // 关联报价单ID
     quotationNo: string;              // 报价单号
+    // 关联字段 - 咨询单
+    consultationId?: string;
+    consultationNo?: string;
+    // 关联字段 - 委托单
+    entrustmentId?: string;
+    entrustmentNo?: string;
 
     // 甲方信息（客户）
     partyA: {

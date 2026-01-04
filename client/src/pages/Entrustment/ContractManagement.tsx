@@ -172,7 +172,57 @@ const ContractManagement: React.FC = () => {
                 ? { ...item, status: 'executing', updateTime: dayjs().format('YYYY-MM-DD HH:mm:ss') }
                 : item
         ));
-        message.success('合同已进入执行状态');
+        message.success('合同已开始执行');
+    };
+
+    // 生成委托单
+    const handleGenerateEntrustment = (record: IContract) => {
+        // 1. 检查是否已生成委托单（防止重复生成）
+        if (record.entrustmentNo) {
+            message.warning(`该合同已关联委托单 ${record.entrustmentNo}，不能重复生成`);
+            return;
+        }
+
+        // 2. 检查状态是否允许生成委托单（已签订或执行中）
+        if (record.status !== 'signed' && record.status !== 'executing') {
+            message.warning('只有已签订或执行中的合同才能生成委托单');
+            return;
+        }
+
+        // 3. 生成委托单编号
+        const entrustmentNo = `WT${dayjs().format('YYYYMMDD')}${String(Date.now()).slice(-3)}`;
+
+        // 4. 更新合同的委托单关联信息
+        const newData = dataSource.map(item => {
+            if (item.id === record.id) {
+                return {
+                    ...item,
+                    entrustmentNo: entrustmentNo,  // 回写委托单编号
+                    status: 'executing' as const,
+                    updateTime: dayjs().format('YYYY-MM-DD HH:mm:ss')
+                };
+            }
+            return item;
+        });
+        setDataSource(newData);
+
+        // 5. 跳转到委托单管理页面，并传递合同数据
+        navigate('/entrustment/order', {
+            state: {
+                fromContract: {
+                    ...record,
+                    entrustmentNo,
+                    // 传递完整的关联链路
+                    quotationId: record.quotationId,
+                    quotationNo: record.quotationNo,
+                    consultationId: record.consultationId,
+                    consultationNo: record.consultationNo
+                },
+                preGeneratedEntrustmentNo: entrustmentNo,
+                sourceType: 'contract'
+            }
+        });
+        message.success(`正在为合同 ${record.contractNo} 创建委托单`);
     };
 
     const columns: ColumnsType<IContract> = [
@@ -270,6 +320,16 @@ const ContractManagement: React.FC = () => {
                         disabled={selectedRows.length === 0 || selectedRows[0]?.status !== 'signed'}
                     >
                         执行合同
+                    </Button>
+                    <Button
+                        onClick={() => selectedRows[0] && handleGenerateEntrustment(selectedRows[0])}
+                        disabled={
+                            selectedRows.length === 0 ||
+                            (selectedRows[0]?.status !== 'signed' && selectedRows[0]?.status !== 'executing') ||
+                            !!selectedRows[0]?.entrustmentNo
+                        }
+                    >
+                        生成委托单
                     </Button>
                     <Button
                         type="primary"

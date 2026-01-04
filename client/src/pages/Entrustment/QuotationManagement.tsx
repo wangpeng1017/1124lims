@@ -486,11 +486,47 @@ const QuotationManagement: React.FC = () => {
             return;
         }
         const quotation = selectedRows[0];
-        // 跳转到合同管理页面，并传递报价单数据
-        navigate('/entrustment/contract', {
-            state: { fromQuotation: quotation }
+
+        // 1. 检查是否已生成合同（防止重复生成）
+        if (quotation.contractNo) {
+            message.warning(`该报价单已关联合同 ${quotation.contractNo}，不能重复生成`);
+            return;
+        }
+
+        // 2. 检查状态是否允许生成合同（已批准且客户确认OK）
+        if (quotation.status !== 'approved') {
+            message.warning('只有已批准的报价单才能生成合同');
+            return;
+        }
+        if (quotation.clientStatus !== 'ok') {
+            message.warning('客户反馈确认后才能生成合同');
+            return;
+        }
+
+        // 3. 生成合同编号
+        const contractNo = `HT${dayjs().format('YYYYMMDD')}${String(Date.now()).slice(-3)}`;
+
+        // 4. 更新报价单的合同关联信息
+        const newData = dataSource.map(item => {
+            if (item.id === quotation.id) {
+                return {
+                    ...item,
+                    contractNo: contractNo,  // 回写合同编号
+                    status: 'archived' as const
+                };
+            }
+            return item;
         });
-        message.success('正在跳转到合同管理页面...');
+        setDataSource(newData);
+
+        // 5. 跳转到合同管理页面，并传递报价单数据和预生成的合同编号
+        navigate('/entrustment/contract', {
+            state: {
+                fromQuotation: { ...quotation, contractNo },
+                preGeneratedContractNo: contractNo
+            }
+        });
+        message.success(`正在为报价单 ${quotation.quotationNo} 创建合同`);
     };
 
     return (
@@ -521,7 +557,12 @@ const QuotationManagement: React.FC = () => {
                     <Button
                         icon={<FileTextOutlined />}
                         onClick={handleGenerateContract}
-                        disabled={selectedRows.length === 0}
+                        disabled={
+                            selectedRows.length === 0 ||
+                            selectedRows[0]?.status !== 'approved' ||
+                            selectedRows[0]?.clientStatus !== 'ok' ||
+                            !!selectedRows[0]?.contractNo
+                        }
                     >
                         生成合同
                     </Button>

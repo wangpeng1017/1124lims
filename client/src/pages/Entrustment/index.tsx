@@ -3,6 +3,7 @@ import { Table, Card, Tag, Space, Button, Drawer, Form, Input, Popconfirm, messa
 import { LinkOutlined, PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { IEntrustmentRecord, IEntrustmentProject } from '../../mock/entrustment';
+import type { IContract } from '../../mock/contract';
 import { detectionParametersData } from '../../mock/basicParameters';
 import { deviceData } from '../../mock/devices';
 import { supplierData } from '../../mock/supplier';
@@ -11,6 +12,7 @@ import { employeeData } from '../../mock/personnel';
 import PersonSelector from '../../components/PersonSelector';
 import { useEntrustmentService } from '../../services/useDataService';
 import { useAuth } from '../../hooks/useAuth';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const orgUsers = [
     {
@@ -39,6 +41,8 @@ const orgUsers = [
 const outsourcingSuppliers = supplierData.filter(s => s.categories.includes('CAT001'));
 
 const Entrustment: React.FC = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
     // 权限控制
     const { canDelete } = useAuth();
     // 使用API服务
@@ -60,7 +64,53 @@ const Entrustment: React.FC = () => {
             setDataSource(apiData as any);
         }
     }, [apiData]);
-    // const navigate = useNavigate(); // Unused
+
+    // 检查是否从合同跳转过来
+    useEffect(() => {
+        const state = location.state as {
+            fromContract?: IContract & { entrustmentNo?: string };
+            preGeneratedEntrustmentNo?: string;
+            sourceType?: string;
+        };
+        if (state?.fromContract) {
+            const contract = state.fromContract;
+            // 自动填充表单
+            setEditingRecord(null);
+            setProjects([]);
+            form.setFieldsValue({
+                entrustmentId: state.preGeneratedEntrustmentNo || contract.entrustmentNo,
+                contractNo: contract.contractNo,
+                clientName: contract.partyA.company,
+                contactPerson: contract.partyA.contact,
+                sampleName: contract.sampleName,
+                sampleDate: dayjs(),
+                follower: contract.partyB.contact,
+                // 关联字段
+                contractId: contract.id,
+                quotationId: contract.quotationId,
+                quotationNo: contract.quotationNo,
+                consultationId: contract.consultationId,
+                consultationNo: contract.consultationNo,
+                sourceType: 'contract',
+            });
+            // 从合同的检测项目生成委托单项目
+            if (contract.testItems && contract.testItems.length > 0) {
+                const initialProjects: IEntrustmentProject[] = contract.testItems.map((item, index) => ({
+                    id: `P${Date.now()}_${index}`,
+                    name: item.serviceItem,
+                    testItems: [item.serviceItem],
+                    method: item.methodStandard || '',
+                    standard: item.methodStandard || '',
+                    status: 'pending' as const,
+                }));
+                setProjects(initialProjects);
+            }
+            setIsDrawerOpen(true);
+            message.info(`正在为合同 ${contract.contractNo} 创建委托单`);
+            // 清除 location state
+            window.history.replaceState({}, document.title);
+        }
+    }, [location]);
 
     // 项目管理状态
     const [projects, setProjects] = useState<IEntrustmentProject[]>([]);
@@ -384,6 +434,15 @@ const Entrustment: React.FC = () => {
             key: 'follower',
             width: 100,
             render: (text) => <Tag color="geekblue">{text}</Tag>
+        },
+        {
+            title: '关联合同',
+            dataIndex: 'contractNo',
+            key: 'contractNo',
+            width: 140,
+            render: (text) => text ? (
+                <a onClick={() => navigate('/entrustment/contract')}>{text}</a>
+            ) : '-'
         },
         {
             title: '操作',

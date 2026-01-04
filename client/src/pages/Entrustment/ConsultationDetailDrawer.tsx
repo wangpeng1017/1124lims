@@ -3,7 +3,6 @@ import { Drawer, Descriptions, Tag, Button, Space, Timeline, Card, Form, Select,
 import { PhoneOutlined, MailOutlined, UserOutlined, CalendarOutlined, FileTextOutlined, EditOutlined } from '@ant-design/icons';
 import {
     CONSULTATION_STATUS_MAP,
-    URGENCY_LEVEL_MAP,
     TEST_PURPOSE_MAP,
     FOLLOW_UP_TYPE_MAP,
     FEASIBILITY_MAP,
@@ -80,28 +79,43 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
     };
 
     const handleGenerateQuotation = () => {
+        // 1. 检查是否已转化（防止重复生成）
+        if (consultation.quotationNo) {
+            message.warning(`该咨询单已关联报价单 ${consultation.quotationNo}，不能重复生成`);
+            return;
+        }
+
+        // 2. 检查状态是否允许转化
+        if (consultation.status !== 'following') {
+            message.warning('只有跟进中状态的咨询单才能生成报价单');
+            return;
+        }
+
         Modal.confirm({
             title: '生成报价单',
             content: '确定要为此咨询生成报价单吗？',
             okText: '确定',
             cancelText: '取消',
             onOk: () => {
-                // 更新咨询状态为已报价
+                // 3. 生成报价单号
+                const quotationNo = `BJ${new Date().toISOString().slice(0, 10).replace(/-/g, '')}${String(Date.now()).slice(-3)}`;
+
+                // 4. 更新咨询状态和关联信息
                 const updatedConsultation: IConsultation = {
                     ...consultation,
                     status: 'quoted',
-                    quotationId: 'temp_id',
-                    quotationNo: `BJ${new Date().toISOString().slice(0, 10).replace(/-/g, '')}001`,
+                    quotationNo: quotationNo,  // 回写报价单号
                     updatedAt: new Date().toISOString()
                 };
                 onUpdate(updatedConsultation);
                 message.success('报价单已生成，正在跳转...');
 
-                // 跳转到报价单页面（携带咨询信息）
+                // 5. 跳转到报价单页面（携带咨询信息和预生成的报价单号）
                 setTimeout(() => {
                     navigate('/entrustment/quotation', {
                         state: {
-                            fromConsultation: consultation
+                            fromConsultation: updatedConsultation,
+                            preGeneratedQuotationNo: quotationNo
                         }
                     });
                     onClose();
@@ -171,11 +185,6 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
                         <Descriptions.Item label="状态">
                             <Tag color={CONSULTATION_STATUS_MAP[consultation.status].color}>
                                 {CONSULTATION_STATUS_MAP[consultation.status].text}
-                            </Tag>
-                        </Descriptions.Item>
-                        <Descriptions.Item label="紧急程度">
-                            <Tag color={URGENCY_LEVEL_MAP[consultation.urgencyLevel].color}>
-                                {URGENCY_LEVEL_MAP[consultation.urgencyLevel].text}
                             </Tag>
                         </Descriptions.Item>
                         <Descriptions.Item label="跟进人">{consultation.follower}</Descriptions.Item>

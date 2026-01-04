@@ -15,7 +15,18 @@ export interface IEntrustmentProject {
 export interface IEntrustmentRecord {
     id: number;
     entrustmentId: string;
+    // 关联字段 - 合同
+    contractId?: string;
     contractNo?: string;
+    // 关联字段 - 报价单
+    quotationId?: string;
+    quotationNo?: string;
+    // 关联字段 - 咨询单
+    consultationId?: string;
+    consultationNo?: string;
+    // 来源类型
+    sourceType?: 'contract' | 'quotation' | 'direct';
+    // 基本信息
     clientName: string;
     contactPerson?: string;
     sampleDate: string;
@@ -51,6 +62,10 @@ export interface IClientUnit {
     approvalComment?: string;
 }
 
+/**
+ * @deprecated 此接口已废弃，请使用 mock/contract.ts 中的 IContract
+ * 保留此接口仅为兼容旧代码 EntrustmentContract.tsx
+ */
 export interface IEntrustmentContract {
     id: number;
     contractNo: string;
@@ -67,6 +82,7 @@ export const entrustmentData: IEntrustmentRecord[] = [
         id: 1,
         entrustmentId: 'WT20231101001',
         contractNo: 'HT20231101',
+        sourceType: 'contract',
         clientName: '奇瑞汽车股份有限公司',
         contactPerson: '张经理',
         sampleDate: '2023-11-01',
@@ -92,6 +108,7 @@ export const entrustmentData: IEntrustmentRecord[] = [
     {
         id: 2,
         entrustmentId: 'WT20231102002',
+        sourceType: 'direct',
         clientName: '上海汽车集团股份有限公司',
         sampleDate: '2023-11-02',
         follower: '王五',

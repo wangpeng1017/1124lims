@@ -106,7 +106,6 @@ const ConsultationForm: React.FC<ConsultationFormProps> = ({
                 form={form}
                 layout="vertical"
                 initialValues={{
-                    urgencyLevel: 'normal',
                     testPurpose: 'quality_inspection'
                 }}
             >
@@ -117,21 +116,16 @@ const ConsultationForm: React.FC<ConsultationFormProps> = ({
                         <Form.Item
                             name="clientCompany"
                             label="客户公司"
-                            rules={[{ required: true, message: '请输入或选择客户公司' }]}
+                            rules={[{ required: true, message: '请选择客户公司' }]}
                         >
                             <Select
                                 showSearch
-                                placeholder="选择或输入客户公司"
+                                placeholder="请从委托单位库选择"
                                 optionFilterProp="children"
                                 onChange={handleClientSelect}
-                                dropdownRender={menu => (
-                                    <>
-                                        {menu}
-                                        <div style={{ padding: 8, color: '#999', fontSize: 12 }}>
-                                            可从委托单位库选择或直接输入
-                                        </div>
-                                    </>
-                                )}
+                                filterOption={(input, option) =>
+                                    (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
+                                }
                             >
                                 {clientData.map(client => (
                                     <Option key={client.id} value={client.name}>
@@ -259,7 +253,7 @@ const ConsultationForm: React.FC<ConsultationFormProps> = ({
                     </Col>
                 </Row>
                 <Row gutter={16}>
-                    <Col span={8}>
+                    <Col span={12}>
                         <Form.Item
                             name="testPurpose"
                             label="检测目的"
@@ -272,20 +266,7 @@ const ConsultationForm: React.FC<ConsultationFormProps> = ({
                             </Select>
                         </Form.Item>
                     </Col>
-                    <Col span={8}>
-                        <Form.Item
-                            name="urgencyLevel"
-                            label="紧急程度"
-                            rules={[{ required: true, message: '请选择紧急程度' }]}
-                        >
-                            <Select placeholder="请选择紧急程度">
-                                <Option value="normal">普通</Option>
-                                <Option value="urgent">紧急</Option>
-                                <Option value="very_urgent">非常紧急</Option>
-                            </Select>
-                        </Form.Item>
-                    </Col>
-                    <Col span={8}>
+                    <Col span={12}>
                         <Form.Item
                             name="expectedDeadline"
                             label="期望完成时间"

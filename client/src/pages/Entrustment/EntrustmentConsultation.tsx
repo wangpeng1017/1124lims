@@ -169,17 +169,28 @@ const EntrustmentConsultation: React.FC = () => {
     };
 
     const handleGenerateQuotation = (record: IConsultation) => {
-        // 跳转到报价单页面并传递咨询单数据
-        navigate('/entrustment/quotation', {
-            state: { fromConsultation: record }
-        });
+        // 1. 检查是否已转化（防止重复生成）
+        if (record.quotationNo) {
+            message.warning(`该咨询单已关联报价单 ${record.quotationNo}，不能重复生成`);
+            return;
+        }
 
-        // 更新咨询单状态为已报价
+        // 2. 检查状态是否允许转化（只有跟进中状态可以转化）
+        if (record.status !== 'following') {
+            message.warning('只有跟进中状态的咨询单才能生成报价单');
+            return;
+        }
+
+        // 3. 生成报价单号
+        const quotationNo = `BJ${dayjs().format('YYYYMMDD')}${String(Date.now()).slice(-3)}`;
+
+        // 4. 更新咨询单状态和关联信息
         const newData = dataSource.map(item => {
             if (item.id === record.id) {
                 return {
                     ...item,
                     status: 'quoted' as const,
+                    quotationNo: quotationNo,  // 回写报价单号
                     updatedAt: new Date().toISOString()
                 };
             }
@@ -187,6 +198,16 @@ const EntrustmentConsultation: React.FC = () => {
         });
         setDataSource(newData);
         applyFilters(newData, statusFilter, urgencyFilter, followerFilter, searchText, dateRange);
+
+        // 5. 跳转到报价单页面并传递咨询单数据
+        navigate('/entrustment/quotation', {
+            state: {
+                fromConsultation: { ...record, quotationNo },
+                preGeneratedQuotationNo: quotationNo
+            }
+        });
+
+        message.success(`正在为咨询单 ${record.consultationNo} 创建报价单`);
     };
 
     const handleSaveConsultation = (values: Partial<IConsultation>) => {
@@ -311,7 +332,9 @@ const EntrustmentConsultation: React.FC = () => {
             dataIndex: 'quotationNo',
             key: 'quotationNo',
             width: 140,
-            render: (text) => text ? <a>{text}</a> : '-'
+            render: (text) => text ? (
+                <a onClick={() => navigate('/entrustment/quotation')}>{text}</a>
+            ) : '-'
         },
         {
             title: '创建时间',
@@ -452,9 +475,6 @@ const EntrustmentConsultation: React.FC = () => {
                 rowSelection={rowSelection}
                 pagination={{ pageSize: 10 }}
                 scroll={{ x: 'max-content' }}
-                rowClassName={(record) =>
-                    record.urgencyLevel === 'very_urgent' ? 'urgent-row' : ''
-                }
             />
 
             <ConsultationForm
