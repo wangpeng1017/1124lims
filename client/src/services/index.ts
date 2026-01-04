@@ -22,6 +22,26 @@ export type { IReceivable, IPayment, IInvoice } from './financeApi';
 export { default as statisticsApi } from './statisticsApi';
 export type { EntrustmentStats, TaskCompletionStats, TrendItem } from './statisticsApi';
 
+// 咨询和报价单API服务
+export { default as consultationApi } from './consultationApi';
+export type {
+    IConsultation,
+    ConsultationQuery,
+    FollowUpRecord,
+    Attachment,
+    ConsultationStatus,
+    TestPurpose,
+    UrgencyLevel,
+    Feasibility,
+    FollowUpType
+} from './consultationApi';
+export { default as quotationApi } from './quotationApi';
+export type {
+    IQuotation,
+    QuotationQuery,
+    QuotationStatus
+} from './quotationApi';
+
 // 数据服务Hooks
 export {
     useEntrustmentService,

@@ -9,9 +9,12 @@ import {
     type IConsultation,
     type FollowUpRecord
 } from '../../mock/consultation';
+import { consultationApi } from '../../services/consultationApi';
+import { quotationApi } from '../../services/quotationApi';
 import { canClose, canGenerateQuotation, canAddFollowUp } from '../../config/consultationPermissions';
 import FollowUpModal from './FollowUpModal';
 import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
 
 const { TextArea } = Input;
 
@@ -32,6 +35,7 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
     const [isFollowUpModalVisible, setIsFollowUpModalVisible] = useState(false);
     const [isFeasibilityEditing, setIsFeasibilityEditing] = useState(false);
     const [feasibilityForm] = Form.useForm();
+    const [loading, setLoading] = useState(false);
 
     if (!consultation) return null;
 
@@ -39,21 +43,32 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
         setIsFollowUpModalVisible(true);
     };
 
-    const handleSaveFollowUp = (followUpRecord: Omit<FollowUpRecord, 'id'>) => {
-        const newRecord: FollowUpRecord = {
-            ...followUpRecord,
-            id: `F${Date.now()}`
-        };
+    const handleSaveFollowUp = async (followUpRecord: Omit<FollowUpRecord, 'id'>) => {
+        setLoading(true);
+        try {
+            // 调用API添加跟进记录
+            await consultationApi.addFollowUp(Number(consultation.id), followUpRecord);
 
-        const updatedConsultation: IConsultation = {
-            ...consultation,
-            followUpRecords: [...consultation.followUpRecords, newRecord],
-            updatedAt: new Date().toISOString()
-        };
+            // 更新本地状态
+            const newRecord: FollowUpRecord = {
+                ...followUpRecord,
+                id: `F${Date.now()}`
+            };
 
-        onUpdate(updatedConsultation);
-        message.success('跟进记录已添加');
-        setIsFollowUpModalVisible(false);
+            const updatedConsultation: IConsultation = {
+                ...consultation,
+                followUpRecords: [...consultation.followUpRecords, newRecord],
+                updatedAt: new Date().toISOString()
+            };
+
+            onUpdate(updatedConsultation);
+            message.success('跟进记录已添加');
+            setIsFollowUpModalVisible(false);
+        } catch (error) {
+            message.error('添加跟进记录失败');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleEditFeasibility = () => {
@@ -65,8 +80,20 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
         setIsFeasibilityEditing(true);
     };
 
-    const handleSaveFeasibility = () => {
-        feasibilityForm.validateFields().then(values => {
+    const handleSaveFeasibility = async () => {
+        setLoading(true);
+        try {
+            const values = feasibilityForm.getFieldsValue();
+
+            // 调用API更新可行性评估
+            await consultationApi.updateFeasibility(
+                Number(consultation.id),
+                values.feasibility,
+                values.feasibilityNote,
+                values.estimatedPrice
+            );
+
+            // 更新本地状态
             const updatedConsultation: IConsultation = {
                 ...consultation,
                 ...values,
@@ -75,11 +102,14 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
             onUpdate(updatedConsultation);
             message.success('可行性评估已更新');
             setIsFeasibilityEditing(false);
-        });
+        } catch (error) {
+            message.error('更新失败');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleGenerateQuotation = () => {
-        // 使用统一的权限检查
+    const handleGenerateQuotation = async () => {
         if (!canGenerateQuotation(consultation.status, !!consultation.quotationNo)) {
             if (consultation.quotationNo) {
                 message.warning(`该咨询单已关联报价单 ${consultation.quotationNo}，不能重复生成`);
@@ -94,36 +124,44 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
             content: '确定要为此咨询生成报价单吗？',
             okText: '确定',
             cancelText: '取消',
-            onOk: () => {
-                // 3. 生成报价单号
-                const quotationNo = `BJ${new Date().toISOString().slice(0, 10).replace(/-/g, '')}${String(Date.now()).slice(-3)}`;
+            onOk: async () => {
+                const quotationNo = `BJ${dayjs().format('YYYYMMDD')}${String(Date.now()).slice(-3)}`;
 
-                // 4. 更新咨询状态和关联信息
-                const updatedConsultation: IConsultation = {
-                    ...consultation,
-                    status: 'quoted',
-                    quotationNo: quotationNo,  // 回写报价单号
-                    updatedAt: new Date().toISOString()
-                };
-                onUpdate(updatedConsultation);
-                message.success('报价单已生成，正在跳转...');
+                try {
+                    // 调用API关联报价单
+                    await consultationApi.linkQuotation(
+                        Number(consultation.id),
+                        0, // 暂时传0，后续创建报价单后会更新
+                        quotationNo
+                    );
 
-                // 5. 跳转到报价单页面（携带咨询信息和预生成的报价单号）
-                setTimeout(() => {
-                    navigate('/entrustment/quotation', {
-                        state: {
-                            fromConsultation: updatedConsultation,
-                            preGeneratedQuotationNo: quotationNo
-                        }
-                    });
-                    onClose();
-                }, 1000);
+                    // 更新咨询状态和关联信息
+                    const updatedConsultation: IConsultation = {
+                        ...consultation,
+                        status: 'quoted',
+                        quotationNo: quotationNo,
+                        updatedAt: new Date().toISOString()
+                    };
+                    onUpdate(updatedConsultation);
+                    message.success('报价单已生成，正在跳转...');
+
+                    setTimeout(() => {
+                        navigate('/entrustment/quotation', {
+                            state: {
+                                fromConsultation: updatedConsultation,
+                                preGeneratedQuotationNo: quotationNo
+                            }
+                        });
+                        onClose();
+                    }, 1000);
+                } catch (error) {
+                    message.error('生成报价单失败');
+                }
             }
         });
     };
 
-    const handleCloseConsultation = () => {
-        // 使用统一的权限检查
+    const handleCloseConsultation = async () => {
         if (!canClose(consultation.status)) {
             message.warning('只有跟进中状态的咨询可以关闭');
             return;
@@ -134,15 +172,21 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
             content: '确定要关闭此咨询吗？',
             okText: '确定',
             cancelText: '取消',
-            onOk: () => {
-                const updatedConsultation: IConsultation = {
-                    ...consultation,
-                    status: 'closed',
-                    updatedAt: new Date().toISOString()
-                };
-                onUpdate(updatedConsultation);
-                message.success('咨询已关闭');
-                onClose();
+            onOk: async () => {
+                try {
+                    await consultationApi.close(Number(consultation.id));
+
+                    const updatedConsultation: IConsultation = {
+                        ...consultation,
+                        status: 'closed',
+                        updatedAt: new Date().toISOString()
+                    };
+                    onUpdate(updatedConsultation);
+                    message.success('咨询已关闭');
+                    onClose();
+                } catch (error) {
+                    message.error('关闭失败');
+                }
             }
         });
     };
@@ -171,10 +215,10 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
                 extra={
                     <Space>
                         {canClose(consultation.status) && (
-                            <Button onClick={handleCloseConsultation}>关闭咨询</Button>
+                            <Button onClick={handleCloseConsultation} loading={loading}>关闭咨询</Button>
                         )}
                         {canGenerateQuotation(consultation.status, !!consultation.quotationNo) && (
-                            <Button type="primary" onClick={handleGenerateQuotation}>
+                            <Button type="primary" onClick={handleGenerateQuotation} loading={loading}>
                                 生成报价单
                             </Button>
                         )}
@@ -294,7 +338,7 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
                                 />
                             </Form.Item>
                             <Space>
-                                <Button type="primary" onClick={handleSaveFeasibility}>保存</Button>
+                                <Button type="primary" onClick={handleSaveFeasibility} loading={loading}>保存</Button>
                                 <Button onClick={() => setIsFeasibilityEditing(false)}>取消</Button>
                             </Space>
                         </Form>

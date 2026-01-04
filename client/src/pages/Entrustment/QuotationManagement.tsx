@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Card, Button, Space, Tag, Input, Select, message, Popconfirm, Modal, Form, Upload, Radio } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, SearchOutlined, FileTextOutlined, EditOutlined, DeleteOutlined, CloseCircleOutlined, UploadOutlined, FormOutlined } from '@ant-design/icons';
 import { quotationData, STATUS_MAP, CLIENT_STATUS_MAP, type Quotation } from '../../mock/quotationData';
 import { ApprovalService } from '../../services/approvalService';
+import { quotationApi, type IQuotation } from '../../services/quotationApi';
 import QuotationForm from './QuotationForm';
 import QuotationDetailDrawer from './QuotationDetailDrawer';
 import { pdf } from '@react-pdf/renderer';
@@ -12,16 +13,78 @@ import QuotationPDF from '../../components/QuotationPDF';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { IConsultation } from '../../mock/consultation';
 import { useAuth } from '../../hooks/useAuth';
+import dayjs from 'dayjs';
 
 const { Search } = Input;
 const { Option } = Select;
+
+// API数据适配器：将后端数据转换为前端组件期望的格式
+const adaptApiData = (apiQuotation: IQuotation): Quotation => {
+    return {
+        id: String(apiQuotation.id || ''),
+        quotationNo: apiQuotation.quotationNo || '',
+        createTime: apiQuotation.createTime || new Date().toISOString().replace('T', ' ').substring(0, 19),
+
+        // 委托方信息
+        clientCompany: apiQuotation.clientName || '',
+        clientContact: apiQuotation.contactPerson || '',
+        clientTel: apiQuotation.phone || '',
+        clientEmail: '',
+        clientAddress: '',
+
+        // 服务方信息 (默认值)
+        serviceCompany: '检测实验室',
+        serviceContact: '张三',
+        serviceTel: '400-123-4567',
+        serviceEmail: 'service@lab.com',
+        serviceAddress: '北京市朝阳区',
+
+        // 样品和检测项目
+        sampleName: apiQuotation.sampleName || '',
+        items: apiQuotation.items ? JSON.parse(apiQuotation.items) : [],
+
+        // 价格汇总
+        subtotal: apiQuotation.totalAmount || 0,
+        taxTotal: 0,
+        discountTotal: apiQuotation.actualAmount || apiQuotation.totalAmount || 0,
+
+        // 备注
+        clientRemark: apiQuotation.remark || '',
+
+        // 审批流程 - 三级审批
+        status: (apiQuotation.status || 'draft') as Quotation['status'],
+        currentApprovalLevel: 0,
+        approvalHistory: [],
+
+        // 客户反馈
+        clientStatus: (apiQuotation.clientStatus as any) || 'pending',
+
+        // 关联咨询单
+        consultationId: apiQuotation.consultationId ? String(apiQuotation.consultationId) : undefined,
+        consultationNo: apiQuotation.consultationNo,
+
+        // 关联合同
+        contractNo: (apiQuotation as any).contractNo,
+
+        // PDF
+        createdBy: apiQuotation.creator || '系统',
+
+        // 其他字段
+        ...apiQuotation,
+    };
+};
 
 const QuotationManagement: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { canDelete } = useAuth();
-    const [dataSource, setDataSource] = useState<Quotation[]>(quotationData);
-    const [filteredData, setFilteredData] = useState<Quotation[]>(quotationData);
+
+    // 数据状态
+    const [dataSource, setDataSource] = useState<Quotation[]>([]);
+    const [filteredData, setFilteredData] = useState<Quotation[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    // 筛选状态
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [clientStatusFilter, setClientStatusFilter] = useState<string>('all');
     const [searchText, setSearchText] = useState('');
@@ -61,6 +124,50 @@ const QuotationManagement: React.FC = () => {
         },
     };
 
+    // 加载数据
+    const loadData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await quotationApi.page({
+                current: 1,
+                size: 100,
+            });
+            if (response.code === 200 && response.data) {
+                const adaptedData = response.data.records.map(adaptApiData);
+                setDataSource(adaptedData);
+                setFilteredData(adaptedData);
+            } else {
+                // 如果API调用失败，使用mock数据作为fallback
+                console.warn('API调用失败，使用mock数据');
+                setDataSource(quotationData);
+                setFilteredData(quotationData);
+            }
+        } catch (error) {
+            console.error('加载报价单数据失败:', error);
+            // 出错时使用mock数据
+            setDataSource(quotationData);
+            setFilteredData(quotationData);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // 初始化加载数据
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    // 检查是否从咨询单跳转过来
+    useEffect(() => {
+        const state = location.state as { fromConsultation?: IConsultation; preGeneratedQuotationNo?: string };
+        if (state?.fromConsultation) {
+            setFromConsultation(state.fromConsultation);
+            setEditingQuotation(null);
+            setIsFormVisible(true);
+            message.info(`正在为咨询单 ${state.fromConsultation.consultationNo} 创建报价单`);
+        }
+    }, [location]);
+
     // 筛选逻辑
     const applyFilters = (
         data: Quotation[],
@@ -70,17 +177,14 @@ const QuotationManagement: React.FC = () => {
     ) => {
         let filtered = [...data];
 
-        // 状态筛选
         if (status !== 'all') {
             filtered = filtered.filter(item => item.status === status);
         }
 
-        // 客户反馈筛选
         if (clientStatus !== 'all') {
             filtered = filtered.filter(item => item.clientStatus === clientStatus);
         }
 
-        // 搜索筛选
         if (search) {
             filtered = filtered.filter(item =>
                 item.quotationNo.toLowerCase().includes(search.toLowerCase()) ||
@@ -106,17 +210,6 @@ const QuotationManagement: React.FC = () => {
         applyFilters(dataSource, statusFilter, clientStatusFilter, value);
     };
 
-    // 检查是否从咨询单跳转过来
-    useEffect(() => {
-        const state = location.state as { fromConsultation?: IConsultation };
-        if (state?.fromConsultation) {
-            setFromConsultation(state.fromConsultation);
-            setEditingQuotation(null);
-            setIsFormVisible(true);
-            message.info(`正在为咨询单 ${state.fromConsultation.consultationNo} 创建报价单`);
-        }
-    }, [location]);
-
     const handleAdd = () => {
         setEditingQuotation(null);
         setFromConsultation(null);
@@ -137,16 +230,20 @@ const QuotationManagement: React.FC = () => {
         setIsFormVisible(true);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         const item = dataSource.find(d => d.id === id);
         if (item && item.status !== 'draft') {
             message.warning('只有草稿状态的报价单可以删除');
             return;
         }
-        const newData = dataSource.filter(item => item.id !== id);
-        setDataSource(newData);
-        applyFilters(newData, statusFilter, clientStatusFilter, searchText);
-        message.success('删除成功');
+
+        try {
+            await quotationApi.delete(Number(id));
+            message.success('删除成功');
+            loadData(); // 重新加载数据
+        } catch (error) {
+            message.error('删除失败');
+        }
     };
 
     const handleSubmitApproval = (record: Quotation) => {
@@ -155,7 +252,6 @@ const QuotationManagement: React.FC = () => {
             return;
         }
 
-        // 提交审批，传递业务数据
         const instance = ApprovalService.submitApproval(
             'quotation',
             record.id,
@@ -169,12 +265,12 @@ const QuotationManagement: React.FC = () => {
             }
         );
 
-        // 更新报价单状态
+        // 更新本地状态
         const newData = dataSource.map(item => {
             if (item.id === record.id) {
                 return {
                     ...item,
-                    status: 'pending_sales' as const,  // 进入第一级审批
+                    status: 'pending_sales' as const,
                     currentApprovalLevel: 1
                 };
             }
@@ -189,13 +285,8 @@ const QuotationManagement: React.FC = () => {
     const handleViewPDF = async (record: Quotation) => {
         try {
             message.loading({ content: '正在生成PDF...', key: 'pdf' });
-
-            // 生成PDF
             const blob = await pdf(<QuotationPDF quotation={record} />).toBlob();
-
-            // 下载PDF
             saveAs(blob, `${record.quotationNo}_报价单.pdf`);
-
             message.success({ content: 'PDF已生成并下载', key: 'pdf' });
         } catch (error) {
             console.error('PDF生成失败:', error);
@@ -216,43 +307,50 @@ const QuotationManagement: React.FC = () => {
             message.warning('请选择一个报价单');
             return;
         }
-        const record = selectedRows[0];
-        if (record.clientStatus !== 'pending') {
-            // 如果需要限制只有pending状态才能反馈，可以在这里添加逻辑
-            // 目前允许所有状态修改反馈
-        }
-        handleClientFeedback(record);
+        handleClientFeedback(selectedRows[0]);
     };
 
-    const handleSaveQuotation = (values: Partial<Quotation>) => {
-        if (editingQuotation) {
-            // 编辑模式
-            const newData = dataSource.map(item => {
-                if (item.id === editingQuotation.id) {
-                    return { ...item, ...values };
-                }
-                return item;
-            });
-            setDataSource(newData);
-            applyFilters(newData, statusFilter, clientStatusFilter, searchText);
-            message.success('报价单已更新');
-        } else {
-            // 新建模式
-            const newQuotation: Quotation = {
-                id: String(dataSource.length + 1),
-                quotationNo: `BJ${new Date().toISOString().slice(0, 10).replace(/-/g, '')}${String(dataSource.length + 1).padStart(3, '0')}`,
-                ...values,
-                // 如果是从咨询单创建,保存关联信息
-                consultationId: fromConsultation?.id,
-                consultationNo: fromConsultation?.consultationNo,
-            } as Quotation;
-            const newData = [newQuotation, ...dataSource];
-            setDataSource(newData);
-            applyFilters(newData, statusFilter, clientStatusFilter, searchText);
-            message.success('报价单已创建');
+    const handleSaveQuotation = async (values: Partial<Quotation>) => {
+        try {
+            if (editingQuotation) {
+                // 编辑模式 - 调用API更新
+                const apiData: Partial<IQuotation> = {
+                    id: Number(editingQuotation.id),
+                    clientName: values.clientCompany,
+                    contactPerson: values.clientContact,
+                    phone: values.clientTel,
+                    totalAmount: values.subtotal,
+                    actualAmount: values.discountTotal,
+                    items: values.items ? JSON.stringify(values.items) : '[]',
+                    remark: values.clientRemark,
+                    sampleName: values.sampleName,
+                };
+                await quotationApi.update(apiData);
+                message.success('报价单已更新');
+            } else {
+                // 新建模式 - 调用API创建
+                const apiData: Partial<IQuotation> = {
+                    clientName: values.clientCompany,
+                    contactPerson: values.clientContact,
+                    phone: values.clientTel,
+                    totalAmount: values.subtotal,
+                    actualAmount: values.discountTotal,
+                    items: values.items ? JSON.stringify(values.items) : '[]',
+                    remark: values.clientRemark,
+                    sampleName: values.sampleName,
+                    consultationId: fromConsultation?.id ? Number(fromConsultation.id) : undefined,
+                    consultationNo: fromConsultation?.consultationNo,
+                };
+                await quotationApi.create(apiData);
+                message.success('报价单已创建');
+            }
+
+            setIsFormVisible(false);
+            setFromConsultation(null);
+            loadData(); // 重新加载数据
+        } catch (error) {
+            message.error('保存失败');
         }
-        setIsFormVisible(false);
-        setFromConsultation(null);
     };
 
     const handleSubmitFeedback = () => {
@@ -263,7 +361,6 @@ const QuotationManagement: React.FC = () => {
             const newData = dataSource.map(item => {
                 if (item.id === feedbackQuotation.id) {
                     if (feedbackType === 'ok') {
-                        // OK反馈 - 保存合同信息
                         const contractFile = contractFileList[0];
                         return {
                             ...item,
@@ -273,7 +370,6 @@ const QuotationManagement: React.FC = () => {
                             contractFileName: contractFile?.name
                         };
                     } else {
-                        // NG反馈 - 保存原因
                         return {
                             ...item,
                             clientStatus: 'ng' as const,
@@ -294,7 +390,6 @@ const QuotationManagement: React.FC = () => {
     };
 
     const handleArchive = (record: Quotation) => {
-        // 只有已批准且客户反馈OK的报价单可以归档
         if (record.status !== 'approved' || record.clientStatus !== 'ok') {
             message.warning('只有已批准且客户反馈OK的报价单可以归档');
             return;
@@ -340,6 +435,50 @@ const QuotationManagement: React.FC = () => {
         });
     };
 
+    const handleGenerateContract = () => {
+        if (selectedRows.length !== 1) {
+            message.warning('请选择一个报价单');
+            return;
+        }
+        const quotation = selectedRows[0];
+
+        if (quotation.contractNo) {
+            message.warning(`该报价单已关联合同 ${quotation.contractNo}，不能重复生成`);
+            return;
+        }
+
+        if (quotation.status !== 'approved') {
+            message.warning('只有已批准的报价单才能生成合同');
+            return;
+        }
+        if (quotation.clientStatus !== 'ok') {
+            message.warning('客户反馈确认后才能生成合同');
+            return;
+        }
+
+        const contractNo = `HT${dayjs().format('YYYYMMDD')}${String(Date.now()).slice(-3)}`;
+
+        const newData = dataSource.map(item => {
+            if (item.id === quotation.id) {
+                return {
+                    ...item,
+                    contractNo: contractNo,
+                    status: 'archived' as const
+                };
+            }
+            return item;
+        });
+        setDataSource(newData);
+
+        navigate('/entrustment/contract', {
+            state: {
+                fromQuotation: { ...quotation, contractNo },
+                preGeneratedContractNo: contractNo
+            }
+        });
+        message.success(`正在为报价单 ${quotation.quotationNo} 创建合同`);
+    };
+
     const columns: ColumnsType<Quotation> = [
         {
             title: '报价单号',
@@ -376,7 +515,7 @@ const QuotationManagement: React.FC = () => {
             dataIndex: 'discountTotal',
             key: 'discountTotal',
             width: 120,
-            render: (value) => `¥${value.toFixed(2)}`
+            render: (value) => `¥${(value || 0).toFixed(2)}`
         },
         {
             title: '审批状态',
@@ -432,7 +571,6 @@ const QuotationManagement: React.FC = () => {
             render: (_, record) => {
                 const actions = [];
 
-                // 查看详情 - 所有状态都可以查看
                 actions.push(
                     <Button
                         key="view"
@@ -444,7 +582,6 @@ const QuotationManagement: React.FC = () => {
                     </Button>
                 );
 
-                // 草稿或已拒绝状态 - 可编辑
                 if (record.status === 'draft' || record.status === 'rejected') {
                     actions.push(
                         <Button
@@ -458,8 +595,6 @@ const QuotationManagement: React.FC = () => {
                     );
                 }
 
-                // 草稿状态 - 可删除
-                // 删除按钮 - 仅管理员可见
                 if (canDelete && record.status === 'draft') {
                     actions.push(
                         <Popconfirm
@@ -478,56 +613,6 @@ const QuotationManagement: React.FC = () => {
             }
         }
     ];
-
-    // 生成合同
-    const handleGenerateContract = () => {
-        if (selectedRows.length !== 1) {
-            message.warning('请选择一个报价单');
-            return;
-        }
-        const quotation = selectedRows[0];
-
-        // 1. 检查是否已生成合同（防止重复生成）
-        if (quotation.contractNo) {
-            message.warning(`该报价单已关联合同 ${quotation.contractNo}，不能重复生成`);
-            return;
-        }
-
-        // 2. 检查状态是否允许生成合同（已批准且客户确认OK）
-        if (quotation.status !== 'approved') {
-            message.warning('只有已批准的报价单才能生成合同');
-            return;
-        }
-        if (quotation.clientStatus !== 'ok') {
-            message.warning('客户反馈确认后才能生成合同');
-            return;
-        }
-
-        // 3. 生成合同编号
-        const contractNo = `HT${dayjs().format('YYYYMMDD')}${String(Date.now()).slice(-3)}`;
-
-        // 4. 更新报价单的合同关联信息
-        const newData = dataSource.map(item => {
-            if (item.id === quotation.id) {
-                return {
-                    ...item,
-                    contractNo: contractNo,  // 回写合同编号
-                    status: 'archived' as const
-                };
-            }
-            return item;
-        });
-        setDataSource(newData);
-
-        // 5. 跳转到合同管理页面，并传递报价单数据和预生成的合同编号
-        navigate('/entrustment/contract', {
-            state: {
-                fromQuotation: { ...quotation, contractNo },
-                preGeneratedContractNo: contractNo
-            }
-        });
-        message.success(`正在为报价单 ${quotation.quotationNo} 创建合同`);
-    };
 
     return (
         <Card
@@ -619,6 +704,7 @@ const QuotationManagement: React.FC = () => {
                 columns={columns}
                 dataSource={filteredData}
                 rowKey="id"
+                loading={loading}
                 pagination={{ pageSize: 10 }}
                 scroll={{ x: 'max-content' }}
             />
@@ -717,7 +803,6 @@ const QuotationManagement: React.FC = () => {
                 </Form>
             </Modal>
 
-            {/* 归档Modal */}
             <Modal
                 title="归档报价单"
                 open={isArchiveModalVisible}

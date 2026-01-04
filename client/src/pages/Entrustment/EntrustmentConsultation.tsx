@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Card, Button, Space, Tag, Input, Select, message, Popconfirm, DatePicker, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, CloseCircleOutlined, FileAddOutlined } from '@ant-design/icons';
-import { consultationData, CONSULTATION_STATUS_MAP, URGENCY_LEVEL_MAP, type IConsultation } from '../../mock/consultation';
+import { consultationData, CONSULTATION_STATUS_MAP, URGENCY_LEVEL_MAP, type IConsultation as MockIConsultation } from '../../mock/consultation';
+import { consultationApi, type IConsultation } from '../../services/consultationApi';
 import { canEdit, canDelete, canClose, canGenerateQuotation } from '../../config/consultationPermissions';
 import ConsultationForm from './ConsultationForm';
 import ConsultationDetailDrawer from './ConsultationDetailDrawer';
@@ -14,11 +15,112 @@ const { Search } = Input;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
+// API数据适配器：将后端数据转换为前端组件期望的格式
+const adaptApiData = (apiConsultation: IConsultation): MockIConsultation => {
+    return {
+        id: String(apiConsultation.id || ''),
+        consultationNo: apiConsultation.consultationNo || '',
+        createTime: apiConsultation.createTime ? apiConsultation.createTime.replace('T', ' ').substring(0, 19) : dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        updatedAt: apiConsultation.updateTime ? apiConsultation.updateTime.replace('T', ' ').substring(0, 19) : dayjs().format('YYYY-MM-DD HH:mm:ss'),
+
+        // 客户信息
+        clientCompany: apiConsultation.clientCompany || '',
+        clientContact: apiConsultation.clientContact || '',
+        clientTel: apiConsultation.clientTel || '',
+        clientEmail: apiConsultation.clientEmail,
+        clientAddress: apiConsultation.clientAddress,
+
+        // 咨询内容
+        sampleName: apiConsultation.sampleName || '',
+        sampleModel: apiConsultation.sampleModel,
+        sampleMaterial: apiConsultation.sampleMaterial,
+        estimatedQuantity: apiConsultation.estimatedQuantity,
+
+        testItems: apiConsultation.testItems || [],
+        testPurpose: apiConsultation.testPurpose || 'other',
+        urgencyLevel: apiConsultation.urgencyLevel || 'normal',
+        expectedDeadline: apiConsultation.expectedDeadline,
+
+        // 客户需求
+        clientRequirements: apiConsultation.clientRequirements,
+        budgetRange: apiConsultation.budgetRange,
+
+        // 跟进信息
+        status: apiConsultation.status || 'following',
+        follower: apiConsultation.follower || '',
+        followUpRecords: apiConsultation.followUpRecords || [],
+
+        // 评估信息
+        feasibility: apiConsultation.feasibility,
+        feasibilityNote: apiConsultation.feasibilityNote,
+        estimatedPrice: apiConsultation.estimatedPrice,
+
+        // 转化信息
+        quotationId: apiConsultation.quotationId ? String(apiConsultation.quotationId) : undefined,
+        quotationNo: apiConsultation.quotationNo,
+
+        // 元数据
+        createdBy: apiConsultation.createdBy || '系统',
+    };
+};
+
+// 反向适配器：将前端表单数据转换为API期望的格式
+const adaptFormToApi = (formConsultation: Partial<MockIConsultation>): Partial<IConsultation> => {
+    return {
+        id: formConsultation.id ? Number(formConsultation.id) : undefined,
+        consultationNo: formConsultation.consultationNo,
+
+        // 客户信息
+        clientCompany: formConsultation.clientCompany || '',
+        clientContact: formConsultation.clientContact || '',
+        clientTel: formConsultation.clientTel || '',
+        clientEmail: formConsultation.clientEmail,
+        clientAddress: formConsultation.clientAddress,
+
+        // 咨询内容
+        sampleName: formConsultation.sampleName || '',
+        sampleModel: formConsultation.sampleModel,
+        sampleMaterial: formConsultation.sampleMaterial,
+        estimatedQuantity: formConsultation.estimatedQuantity,
+
+        testItems: formConsultation.testItems || [],
+        testPurpose: formConsultation.testPurpose,
+        urgencyLevel: formConsultation.urgencyLevel,
+        expectedDeadline: formConsultation.expectedDeadline,
+
+        // 客户需求
+        clientRequirements: formConsultation.clientRequirements,
+        budgetRange: formConsultation.budgetRange,
+
+        // 跟进信息
+        status: formConsultation.status,
+        follower: formConsultation.follower,
+        followUpRecords: formConsultation.followUpRecords,
+
+        // 评估信息
+        feasibility: formConsultation.feasibility,
+        feasibilityNote: formConsultation.feasibilityNote,
+        estimatedPrice: formConsultation.estimatedPrice,
+
+        // 转化信息
+        quotationId: formConsultation.quotationId ? Number(formConsultation.quotationId) : undefined,
+        quotationNo: formConsultation.quotationNo,
+
+        // 元数据
+        createdBy: formConsultation.createdBy,
+    };
+};
+
 const EntrustmentConsultation: React.FC = () => {
     const navigate = useNavigate();
     const { canDelete: canDeleteByRole } = useAuth();
-    const [dataSource, setDataSource] = useState<IConsultation[]>(consultationData);
-    const [filteredData, setFilteredData] = useState<IConsultation[]>(consultationData);
+
+    // 数据状态
+    const [dataSource, setDataSource] = useState<MockIConsultation[]>([]);
+    const [filteredData, setFilteredData] = useState<MockIConsultation[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    // 筛选状态
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [urgencyFilter, setUrgencyFilter] = useState<string>('all');
     const [followerFilter, setFollowerFilter] = useState<string>('all');
@@ -27,20 +129,20 @@ const EntrustmentConsultation: React.FC = () => {
 
     // 表单状态
     const [isFormVisible, setIsFormVisible] = useState(false);
-    const [editingConsultation, setEditingConsultation] = useState<IConsultation | null>(null);
+    const [editingConsultation, setEditingConsultation] = useState<MockIConsultation | null>(null);
 
     // 详情抽屉状态
     const [isDetailVisible, setIsDetailVisible] = useState(false);
-    const [detailConsultation, setDetailConsultation] = useState<IConsultation | null>(null);
+    const [detailConsultation, setDetailConsultation] = useState<MockIConsultation | null>(null);
 
     // 行选择状态
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-    const [selectedRows, setSelectedRows] = useState<IConsultation[]>([]);
+    const [selectedRows, setSelectedRows] = useState<MockIConsultation[]>([]);
 
     const rowSelection = {
         type: 'radio' as const,
         selectedRowKeys,
-        onChange: (keys: React.Key[], rows: IConsultation[]) => {
+        onChange: (keys: React.Key[], rows: MockIConsultation[]) => {
             setSelectedRowKeys(keys);
             setSelectedRows(rows);
         },
@@ -49,9 +151,42 @@ const EntrustmentConsultation: React.FC = () => {
     // 获取所有跟进人列表
     const followers = Array.from(new Set(dataSource.map(item => item.follower)));
 
+    // 加载数据
+    const loadData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await consultationApi.page({
+                current: 1,
+                size: 100,
+            });
+            if (response.code === 200 && response.data) {
+                const adaptedData = response.data.records.map(adaptApiData);
+                setDataSource(adaptedData);
+                setFilteredData(adaptedData);
+            } else {
+                // 如果API调用失败，使用mock数据作为fallback
+                console.warn('API调用失败，使用mock数据');
+                setDataSource(consultationData);
+                setFilteredData(consultationData);
+            }
+        } catch (error) {
+            console.error('加载咨询数据失败:', error);
+            // 出错时使用mock数据
+            setDataSource(consultationData);
+            setFilteredData(consultationData);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // 初始化加载数据
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
     // 筛选逻辑
     const applyFilters = (
-        data: IConsultation[],
+        data: MockIConsultation[],
         status: string,
         urgency: string,
         follower: string,
@@ -60,17 +195,14 @@ const EntrustmentConsultation: React.FC = () => {
     ) => {
         let filtered = [...data];
 
-        // 状态筛选
         if (status !== 'all') {
             filtered = filtered.filter(item => item.status === status);
         }
 
-        // 跟进人筛选
         if (follower !== 'all') {
             filtered = filtered.filter(item => item.follower === follower);
         }
 
-        // 日期范围筛选
         if (dateRangeValue && dateRangeValue[0] && dateRangeValue[1]) {
             const startDate = dateRangeValue[0].format('YYYY-MM-DD');
             const endDate = dateRangeValue[1].format('YYYY-MM-DD');
@@ -79,7 +211,6 @@ const EntrustmentConsultation: React.FC = () => {
             );
         }
 
-        // 搜索筛选
         if (search) {
             filtered = filtered.filter(item =>
                 item.consultationNo.toLowerCase().includes(search.toLowerCase()) ||
@@ -121,8 +252,7 @@ const EntrustmentConsultation: React.FC = () => {
         setIsFormVisible(true);
     };
 
-    const handleEdit = (record: IConsultation) => {
-        // 使用统一的权限检查
+    const handleEdit = (record: MockIConsultation) => {
         if (!canEdit(record.status)) {
             message.warning('只有跟进中状态的咨询可以编辑');
             return;
@@ -131,49 +261,45 @@ const EntrustmentConsultation: React.FC = () => {
         setIsFormVisible(true);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         const item = dataSource.find(d => d.id === id);
         if (!item) return;
 
-        // 使用统一的权限检查
         if (!canDelete(item.status)) {
             message.warning('该状态不允许删除');
             return;
         }
-        const newData = dataSource.filter(item => item.id !== id);
-        setDataSource(newData);
-        applyFilters(newData, statusFilter, urgencyFilter, followerFilter, searchText, dateRange);
-        message.success('删除成功');
+
+        try {
+            await consultationApi.delete(Number(id));
+            message.success('删除成功');
+            loadData(); // 重新加载数据
+        } catch (error) {
+            message.error('删除失败');
+        }
     };
 
-    const handleViewDetail = (record: IConsultation) => {
+    const handleViewDetail = (record: MockIConsultation) => {
         setDetailConsultation(record);
         setIsDetailVisible(true);
     };
 
-    const handleCloseConsultation = (record: IConsultation) => {
-        // 使用统一的权限检查
+    const handleCloseConsultation = async (record: MockIConsultation) => {
         if (!canClose(record.status)) {
             message.warning('只有跟进中状态的咨询可以关闭');
             return;
         }
-        const newData = dataSource.map(item => {
-            if (item.id === record.id) {
-                return {
-                    ...item,
-                    status: 'closed' as const,
-                    updatedAt: new Date().toISOString()
-                };
-            }
-            return item;
-        });
-        setDataSource(newData);
-        applyFilters(newData, statusFilter, urgencyFilter, followerFilter, searchText, dateRange);
-        message.success('咨询已关闭');
+
+        try {
+            await consultationApi.close(Number(record.id));
+            message.success('咨询已关闭');
+            loadData(); // 重新加载数据
+        } catch (error) {
+            message.error('关闭失败');
+        }
     };
 
-    const handleGenerateQuotation = (record: IConsultation) => {
-        // 使用统一的权限检查
+    const handleGenerateQuotation = (record: MockIConsultation) => {
         if (!canGenerateQuotation(record.status, !!record.quotationNo)) {
             if (record.quotationNo) {
                 message.warning(`该咨询单已关联报价单 ${record.quotationNo}，不能重复生成`);
@@ -183,16 +309,15 @@ const EntrustmentConsultation: React.FC = () => {
             return;
         }
 
-        // 生成报价单号
         const quotationNo = `BJ${dayjs().format('YYYYMMDD')}${String(Date.now()).slice(-3)}`;
 
-        // 更新咨询单状态和关联信息
+        // 更新本地状态
         const newData = dataSource.map(item => {
             if (item.id === record.id) {
                 return {
                     ...item,
                     status: 'quoted' as const,
-                    quotationNo: quotationNo,  // 回写报价单号
+                    quotationNo: quotationNo,
                     updatedAt: new Date().toISOString()
                 };
             }
@@ -201,7 +326,7 @@ const EntrustmentConsultation: React.FC = () => {
         setDataSource(newData);
         applyFilters(newData, statusFilter, urgencyFilter, followerFilter, searchText, dateRange);
 
-        // 跳转到报价单页面并传递咨询单数据
+        // 跳转到报价单页面
         navigate('/entrustment/quotation', {
             state: {
                 fromConsultation: { ...record, quotationNo },
@@ -212,54 +337,47 @@ const EntrustmentConsultation: React.FC = () => {
         message.success(`正在为咨询单 ${record.consultationNo} 创建报价单`);
     };
 
-    const handleSaveConsultation = (values: Partial<IConsultation>) => {
-        if (editingConsultation) {
-            // 编辑模式
+    const handleSaveConsultation = async (values: Partial<MockIConsultation>) => {
+        try {
+            if (editingConsultation) {
+                // 编辑模式
+                const apiData = adaptFormToApi(values);
+                await consultationApi.update(apiData as IConsultation);
+                message.success('咨询已更新');
+            } else {
+                // 新建模式
+                const apiData = adaptFormToApi(values);
+                await consultationApi.create(apiData as IConsultation);
+                message.success('咨询已创建');
+            }
+
+            setIsFormVisible(false);
+            loadData(); // 重新加载数据
+        } catch (error) {
+            message.error('保存失败');
+        }
+    };
+
+    const handleDetailUpdate = async (updatedConsultation: MockIConsultation) => {
+        try {
+            const apiData = adaptFormToApi(updatedConsultation);
+            await consultationApi.update(apiData as IConsultation);
+
+            // 更新本地状态
             const newData = dataSource.map(item => {
-                if (item.id === editingConsultation.id) {
-                    return {
-                        ...item,
-                        ...values,
-                        updatedAt: new Date().toISOString()
-                    };
+                if (item.id === updatedConsultation.id) {
+                    return updatedConsultation;
                 }
                 return item;
             });
             setDataSource(newData);
             applyFilters(newData, statusFilter, urgencyFilter, followerFilter, searchText, dateRange);
-            message.success('咨询已更新');
-        } else {
-            // 新建模式 - 默认状态为 following
-            const newConsultation: IConsultation = {
-                id: String(dataSource.length + 1),
-                consultationNo: `ZX${dayjs().format('YYYYMMDD')}${String(dataSource.length + 1).padStart(3, '0')}`,
-                createTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-                status: 'following',
-                followUpRecords: [],
-                createdBy: '当前用户',
-                updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-                ...values
-            } as IConsultation;
-            const newData = [newConsultation, ...dataSource];
-            setDataSource(newData);
-            applyFilters(newData, statusFilter, urgencyFilter, followerFilter, searchText, dateRange);
-            message.success('咨询已创建');
+        } catch (error) {
+            message.error('更新失败');
         }
-        setIsFormVisible(false);
     };
 
-    const handleDetailUpdate = (updatedConsultation: IConsultation) => {
-        const newData = dataSource.map(item => {
-            if (item.id === updatedConsultation.id) {
-                return updatedConsultation;
-            }
-            return item;
-        });
-        setDataSource(newData);
-        applyFilters(newData, statusFilter, urgencyFilter, followerFilter, searchText, dateRange);
-    };
-
-    const columns: ColumnsType<IConsultation> = [
+    const columns: ColumnsType<MockIConsultation> = [
         {
             title: '咨询单号',
             dataIndex: 'consultationNo',
@@ -318,7 +436,7 @@ const EntrustmentConsultation: React.FC = () => {
             dataIndex: 'status',
             key: 'status',
             width: 100,
-            render: (status: IConsultation['status']) => {
+            render: (status: MockIConsultation['status']) => {
                 const config = CONSULTATION_STATUS_MAP[status];
                 return <Tag color={config.color}>{config.text}</Tag>;
             }
@@ -353,7 +471,6 @@ const EntrustmentConsultation: React.FC = () => {
             render: (_, record) => {
                 const actions = [];
 
-                // 查看详情 - 所有状态都可以查看
                 actions.push(
                     <Button
                         key="view"
@@ -365,7 +482,6 @@ const EntrustmentConsultation: React.FC = () => {
                     </Button>
                 );
 
-                // 使用统一的权限检查 - 编辑按钮
                 if (canEdit(record.status)) {
                     actions.push(
                         <Button
@@ -379,7 +495,6 @@ const EntrustmentConsultation: React.FC = () => {
                     );
                 }
 
-                // 使用统一的权限检查 - 删除按钮（需管理员权限）
                 if (canDeleteByRole && canDelete(record.status)) {
                     actions.push(
                         <Popconfirm
@@ -472,6 +587,7 @@ const EntrustmentConsultation: React.FC = () => {
                 columns={columns}
                 dataSource={filteredData}
                 rowKey="id"
+                loading={loading}
                 rowSelection={rowSelection}
                 pagination={{ pageSize: 10 }}
                 scroll={{ x: 'max-content' }}
