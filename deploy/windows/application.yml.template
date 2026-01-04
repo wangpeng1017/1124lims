@@ -1,0 +1,108 @@
+# ========================================
+# 2LIMS 后端应用配置文件
+# 文件名: application.yml
+# 部署时请修改下方的数据库密码
+# ========================================
+
+server:
+  # 后端服务端口（如有冲突请修改）
+  port: 8081
+  servlet:
+    context-path: /
+  # 最大文件上传大小
+  multipart:
+    max-file-size: 100MB
+    max-request-size: 100MB
+
+spring:
+  application:
+    name: lims
+
+  # 数据源配置
+  datasource:
+    # 数据库连接URL
+    # localhost:3306 表示本地MySQL的3306端口
+    # lims 是数据库名称
+    url: jdbc:mysql://localhost:3306/lims?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+
+    # 数据库用户名
+    username: root
+
+    # 数据库密码【请修改为实际安装时设置的密码】
+    password: Root@123
+
+    # 驱动类
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+    # HikariCP 连接池配置
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      auto-commit: true
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+
+  # JPA 配置
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+
+  # Jackson 配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non_null
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  # Mapper XML 文件位置
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
+  # 实体类扫描包
+  type-aliases-package: com.lims.entity
+  configuration:
+    # 驼峰命名转换
+    map-underscore-to-camel-case: true
+    # 日志输出
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      # 主键类型
+      id-type: auto
+      # 逻辑删除字段
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# 日志配置
+logging:
+  level:
+    # SQL 日志（调试时可开启）
+    com.lims.mapper: debug
+  file:
+    # 日志文件路径（Windows路径使用正斜杠 /）
+    name: C:/lims-app/logs/lims.log
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# 自定义配置
+lims:
+  # 文件上传路径
+  upload:
+    path: C:/lims-app/uploads
+  # 报告生成路径
+  report:
+    path: C:/lims-app/reports
