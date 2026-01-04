@@ -4,10 +4,7 @@
  * 咨询状态流转说明：
  *
  * 状态流转图：
- *   [pending - 待跟进]
- *        | 添加跟进记录
- *        ↓
- *   [following - 跟进中]
+ *   [following - 跟进中] ← 新建咨询默认状态
  *        | 生成报价单
  *        ↓
  *   [quoted - 已报价]
@@ -18,11 +15,10 @@
  *   [closed - 已关闭] ← 手动关闭（任意时间）
  *
  * 各状态下可执行的操作：
- * - pending：可编辑、删除（管理员）、关闭、添加跟进
- * - following：可编辑、关闭、生成报价单、添加跟进
- * - quoted：只能查看（终态）
- * - rejected：只能查看（终态）
- * - closed：只能查看（终态）
+ * - following：可编辑、关闭、生成报价单、添加跟进、删除（管理员）
+ * - quoted：只能查看（终态），可删除（管理员）
+ * - rejected：只能查看（终态），可删除（管理员）
+ * - closed：只能查看（终态），可删除（管理员）
  */
 
 export interface FollowUpRecord {
@@ -62,8 +58,8 @@ export interface IConsultation {
     budgetRange?: string;                // 预算范围 (如: 5000-10000)
 
     // 跟进信息
-    status: 'pending' | 'following' | 'quoted' | 'rejected' | 'closed';
-    // 待跟进/跟进中/已报价/已拒绝/已关闭
+    status: 'following' | 'quoted' | 'rejected' | 'closed';
+    // 跟进中/已报价/已拒绝/已关闭
     follower: string;                    // 跟进人
     followUpRecords: FollowUpRecord[];   // 跟进记录
 
@@ -108,8 +104,7 @@ export const URGENCY_LEVEL_MAP: Record<IConsultation['urgencyLevel'], { text: st
 
 // 咨询状态映射
 export const CONSULTATION_STATUS_MAP: Record<IConsultation['status'], { text: string; color: string }> = {
-    pending: { text: '待跟进', color: 'default' },      // 新创建，等待处理
-    following: { text: '跟进中', color: 'processing' }, // 正在跟进客户
+    following: { text: '跟进中', color: 'processing' }, // 正在跟进客户（新建咨询默认状态）
     quoted: { text: '已报价', color: 'success' },       // 已生成报价单
     rejected: { text: '已拒绝', color: 'error' },       // 客户拒绝报价（由报价单被拒后自动流转）
     closed: { text: '已关闭', color: 'default' }        // 手动关闭咨询
@@ -285,7 +280,7 @@ export const consultationData: IConsultation[] = [
         urgencyLevel: 'normal',
         expectedDeadline: '2023-12-25',
         budgetRange: '10000-15000',
-        status: 'pending',
+        status: 'following',
         follower: '王五',
         followUpRecords: [],
         createdBy: '王五',
@@ -448,7 +443,7 @@ export const consultationData: IConsultation[] = [
         expectedDeadline: '2023-12-22',
         clientRequirements: '需要检测焊接质量',
         budgetRange: '4000-6000',
-        status: 'pending',
+        status: 'following',
         follower: '李四',
         followUpRecords: [],
         createdBy: '李四',

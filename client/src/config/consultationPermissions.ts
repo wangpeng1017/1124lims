@@ -12,27 +12,26 @@ import type { IConsultation } from '../mock/consultation';
  *
  * @remarks
  * 各状态下的可执行操作定义：
- * - pending（待跟进）：可编辑、删除、关闭、添加跟进
- * - following（跟进中）：可编辑、关闭、生成报价单、添加跟进
- * - quoted（已报价）：只能查看
- * - rejected（已拒绝）：只能查看
- * - closed（已关闭）：只能查看
+ * - following（跟进中）：可编辑、删除（管理员）、关闭、生成报价单、添加跟进
+ * - quoted（已报价）：只能查看，可删除（管理员）
+ * - rejected（已拒绝）：只能查看，可删除（管理员）
+ * - closed（已关闭）：只能查看，可删除（管理员）
  */
 export const CONSULTATION_PERMISSIONS = {
     /** 可编辑的状态 */
-    canEdit: ['pending', 'following'],
+    canEdit: ['following'],
 
-    /** 可删除的状态（仅管理员，且只允许删除待跟进的） */
-    canDelete: ['pending'],
+    /** 可删除的状态（仅管理员，可删除任意状态） */
+    canDelete: ['following', 'quoted', 'rejected', 'closed'],
 
     /** 可关闭的状态 */
-    canClose: ['pending', 'following'],
+    canClose: ['following'],
 
     /** 可生成报价单的状态 */
     canGenerateQuotation: ['following'],
 
     /** 可添加跟进记录的状态 */
-    canAddFollowUp: ['pending', 'following']
+    canAddFollowUp: ['following']
 } as const;
 
 /**
@@ -43,7 +42,7 @@ export const canEdit = (status: IConsultation['status']): boolean => {
 };
 
 /**
- * 判断是否可以删除咨询
+ * 判断是否可以删除咨询（管理员）
  */
 export const canDelete = (status: IConsultation['status']): boolean => {
     return CONSULTATION_PERMISSIONS.canDelete.includes(status as any);

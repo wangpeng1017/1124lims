@@ -65,8 +65,6 @@ const EntrustmentConsultation: React.FC = () => {
             filtered = filtered.filter(item => item.status === status);
         }
 
-        // 跟进人筛选（移除紧急程度筛选）
-
         // 跟进人筛选
         if (follower !== 'all') {
             filtered = filtered.filter(item => item.follower === follower);
@@ -126,7 +124,7 @@ const EntrustmentConsultation: React.FC = () => {
     const handleEdit = (record: IConsultation) => {
         // 使用统一的权限检查
         if (!canEdit(record.status)) {
-            message.warning('只有待跟进和跟进中状态的咨询可以编辑');
+            message.warning('只有跟进中状态的咨询可以编辑');
             return;
         }
         setEditingConsultation(record);
@@ -139,7 +137,7 @@ const EntrustmentConsultation: React.FC = () => {
 
         // 使用统一的权限检查
         if (!canDelete(item.status)) {
-            message.warning('只有待跟进状态的咨询可以删除');
+            message.warning('该状态不允许删除');
             return;
         }
         const newData = dataSource.filter(item => item.id !== id);
@@ -156,7 +154,7 @@ const EntrustmentConsultation: React.FC = () => {
     const handleCloseConsultation = (record: IConsultation) => {
         // 使用统一的权限检查
         if (!canClose(record.status)) {
-            message.warning('只有待跟进和跟进中状态的咨询可以关闭');
+            message.warning('只有跟进中状态的咨询可以关闭');
             return;
         }
         const newData = dataSource.map(item => {
@@ -185,10 +183,10 @@ const EntrustmentConsultation: React.FC = () => {
             return;
         }
 
-        // 3. 生成报价单号
+        // 生成报价单号
         const quotationNo = `BJ${dayjs().format('YYYYMMDD')}${String(Date.now()).slice(-3)}`;
 
-        // 4. 更新咨询单状态和关联信息
+        // 更新咨询单状态和关联信息
         const newData = dataSource.map(item => {
             if (item.id === record.id) {
                 return {
@@ -203,7 +201,7 @@ const EntrustmentConsultation: React.FC = () => {
         setDataSource(newData);
         applyFilters(newData, statusFilter, urgencyFilter, followerFilter, searchText, dateRange);
 
-        // 5. 跳转到报价单页面并传递咨询单数据
+        // 跳转到报价单页面并传递咨询单数据
         navigate('/entrustment/quotation', {
             state: {
                 fromConsultation: { ...record, quotationNo },
@@ -231,12 +229,12 @@ const EntrustmentConsultation: React.FC = () => {
             applyFilters(newData, statusFilter, urgencyFilter, followerFilter, searchText, dateRange);
             message.success('咨询已更新');
         } else {
-            // 新建模式
+            // 新建模式 - 默认状态为 following
             const newConsultation: IConsultation = {
                 id: String(dataSource.length + 1),
                 consultationNo: `ZX${dayjs().format('YYYYMMDD')}${String(dataSource.length + 1).padStart(3, '0')}`,
                 createTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-                status: 'pending',
+                status: 'following',
                 followUpRecords: [],
                 createdBy: '当前用户',
                 updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
@@ -447,7 +445,6 @@ const EntrustmentConsultation: React.FC = () => {
                     onChange={handleStatusFilterChange}
                 >
                     <Option value="all">全部状态</Option>
-                    <Option value="pending">待跟进</Option>
                     <Option value="following">跟进中</Option>
                     <Option value="quoted">已报价</Option>
                     <Option value="rejected">已拒绝</Option>

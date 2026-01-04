@@ -48,7 +48,6 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
         const updatedConsultation: IConsultation = {
             ...consultation,
             followUpRecords: [...consultation.followUpRecords, newRecord],
-            status: consultation.status === 'pending' ? 'following' : consultation.status,
             updatedAt: new Date().toISOString()
         };
 
@@ -126,7 +125,7 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
     const handleCloseConsultation = () => {
         // 使用统一的权限检查
         if (!canClose(consultation.status)) {
-            message.warning('只有待跟进和跟进中状态的咨询可以关闭');
+            message.warning('只有跟进中状态的咨询可以关闭');
             return;
         }
 
