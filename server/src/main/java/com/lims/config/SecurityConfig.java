@@ -45,7 +45,8 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/webjars/**",
-            "/favicon.ico"
+            "/favicon.ico",
+            "/admin/fix/**"  // 临时开放权限修复接口
     };
 
     @Bean
