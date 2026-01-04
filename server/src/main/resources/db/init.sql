@@ -105,15 +105,21 @@ INSERT INTO sys_dept (dept_name, dept_code, parent_id, ancestors, sort) VALUES
 ('行政部', 'ADMIN', 1, '0,1', 4);
 
 -- 插入默认角色 (包含数据权限范围)
-INSERT INTO sys_role (role_name, role_code, description, data_scope) VALUES 
-('系统管理员', 'admin', '拥有系统所有权限', 1),
+-- data_scope: 1-全部数据 2-本部门及以下 3-本部门 4-仅本人 5-自定义
+INSERT INTO sys_role (role_name, role_code, description, data_scope) VALUES
+('系统管理员', 'admin', '拥有系统所有权限和数据访问权限（data_scope=1全部数据）', 1),
 ('实验室主管', 'lab_manager', '负责实验室业务管理', 2),
 ('检测人员', 'tester', '负责任务执行和数据录入', 4),
 ('销售人员', 'sales', '负责委托管理和客户管理', 3),
 ('财务人员', 'finance', '负责财务结算', 3);
 
 -- 插入默认管理员 (密码: admin123, BCrypt加密)
-INSERT INTO sys_user (username, password, real_name, email, phone, dept_id, status) VALUES 
+-- 管理员账号: admin / admin123
+-- 权限说明:
+--   1. 代码层面: PermissionService.hasPermission() 对 admin 角色直接返回 true
+--   2. 数据层面: data_scope=1 表示可访问全部数据
+--   3. 角色关联: 已关联 admin 角色(role_id=1)
+INSERT INTO sys_user (username, password, real_name, email, phone, dept_id, status) VALUES
 ('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKs5gE6Q0nP1N9I4s7w4m7kT.KQ.', '系统管理员', 'admin@lims.com', '13800138000', 1, 1);
 
 -- 关联管理员角色
