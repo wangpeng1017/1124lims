@@ -1,5 +1,30 @@
 // 委托咨询相关类型定义
 
+/**
+ * 咨询状态流转说明：
+ *
+ * 状态流转图：
+ *   [pending - 待跟进]
+ *        | 添加跟进记录
+ *        ↓
+ *   [following - 跟进中]
+ *        | 生成报价单
+ *        ↓
+ *   [quoted - 已报价]
+ *        |
+ *        |--- 报价被客户接受 → [合同流程]
+ *        |--- 报价被客户拒绝 → [rejected - 已拒绝]
+ *        |
+ *   [closed - 已关闭] ← 手动关闭（任意时间）
+ *
+ * 各状态下可执行的操作：
+ * - pending：可编辑、删除（管理员）、关闭、添加跟进
+ * - following：可编辑、关闭、生成报价单、添加跟进
+ * - quoted：只能查看（终态）
+ * - rejected：只能查看（终态）
+ * - closed：只能查看（终态）
+ */
+
 export interface FollowUpRecord {
     id: string;
     date: string;                        // 跟进日期
@@ -83,11 +108,11 @@ export const URGENCY_LEVEL_MAP: Record<IConsultation['urgencyLevel'], { text: st
 
 // 咨询状态映射
 export const CONSULTATION_STATUS_MAP: Record<IConsultation['status'], { text: string; color: string }> = {
-    pending: { text: '待跟进', color: 'default' },
-    following: { text: '跟进中', color: 'processing' },
-    quoted: { text: '已报价', color: 'success' },
-    rejected: { text: '已拒绝', color: 'error' },
-    closed: { text: '已关闭', color: 'default' }
+    pending: { text: '待跟进', color: 'default' },      // 新创建，等待处理
+    following: { text: '跟进中', color: 'processing' }, // 正在跟进客户
+    quoted: { text: '已报价', color: 'success' },       // 已生成报价单
+    rejected: { text: '已拒绝', color: 'error' },       // 客户拒绝报价（由报价单被拒后自动流转）
+    closed: { text: '已关闭', color: 'default' }        // 手动关闭咨询
 };
 
 // 跟进方式映射

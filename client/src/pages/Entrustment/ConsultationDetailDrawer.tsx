@@ -9,6 +9,7 @@ import {
     type IConsultation,
     type FollowUpRecord
 } from '../../mock/consultation';
+import { canClose, canGenerateQuotation, canAddFollowUp } from '../../config/consultationPermissions';
 import FollowUpModal from './FollowUpModal';
 import { useNavigate } from 'react-router-dom';
 
@@ -79,15 +80,13 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
     };
 
     const handleGenerateQuotation = () => {
-        // 1. 检查是否已转化（防止重复生成）
-        if (consultation.quotationNo) {
-            message.warning(`该咨询单已关联报价单 ${consultation.quotationNo}，不能重复生成`);
-            return;
-        }
-
-        // 2. 检查状态是否允许转化
-        if (consultation.status !== 'following') {
-            message.warning('只有跟进中状态的咨询单才能生成报价单');
+        // 使用统一的权限检查
+        if (!canGenerateQuotation(consultation.status, !!consultation.quotationNo)) {
+            if (consultation.quotationNo) {
+                message.warning(`该咨询单已关联报价单 ${consultation.quotationNo}，不能重复生成`);
+            } else {
+                message.warning('只有跟进中状态的咨询单才能生成报价单');
+            }
             return;
         }
 
@@ -125,6 +124,12 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
     };
 
     const handleCloseConsultation = () => {
+        // 使用统一的权限检查
+        if (!canClose(consultation.status)) {
+            message.warning('只有待跟进和跟进中状态的咨询可以关闭');
+            return;
+        }
+
         Modal.confirm({
             title: '关闭咨询',
             content: '确定要关闭此咨询吗？',
@@ -166,13 +171,13 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
                 open={visible}
                 extra={
                     <Space>
-                        {(consultation.status === 'pending' || consultation.status === 'following') && (
-                            <>
-                                <Button onClick={handleCloseConsultation}>关闭咨询</Button>
-                                <Button type="primary" onClick={handleGenerateQuotation}>
-                                    生成报价单
-                                </Button>
-                            </>
+                        {canClose(consultation.status) && (
+                            <Button onClick={handleCloseConsultation}>关闭咨询</Button>
+                        )}
+                        {canGenerateQuotation(consultation.status, !!consultation.quotationNo) && (
+                            <Button type="primary" onClick={handleGenerateQuotation}>
+                                生成报价单
+                            </Button>
                         )}
                     </Space>
                 }
@@ -319,7 +324,7 @@ const ConsultationDetailDrawer: React.FC<ConsultationDetailDrawerProps> = ({
                 <Card
                     title="跟进记录"
                     extra={
-                        (consultation.status === 'pending' || consultation.status === 'following') && (
+                        canAddFollowUp(consultation.status) && (
                             <Button type="primary" size="small" onClick={handleAddFollowUp}>
                                 添加跟进
                             </Button>

@@ -3,6 +3,7 @@ import { Table, Card, Button, Space, Tag, Input, Select, message, Popconfirm, Da
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, CloseCircleOutlined, FileAddOutlined } from '@ant-design/icons';
 import { consultationData, CONSULTATION_STATUS_MAP, URGENCY_LEVEL_MAP, type IConsultation } from '../../mock/consultation';
+import { canEdit, canDelete, canClose, canGenerateQuotation } from '../../config/consultationPermissions';
 import ConsultationForm from './ConsultationForm';
 import ConsultationDetailDrawer from './ConsultationDetailDrawer';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +16,7 @@ const { RangePicker } = DatePicker;
 
 const EntrustmentConsultation: React.FC = () => {
     const navigate = useNavigate();
-    const { canDelete } = useAuth();
+    const { canDelete: canDeleteByRole } = useAuth();
     const [dataSource, setDataSource] = useState<IConsultation[]>(consultationData);
     const [filteredData, setFilteredData] = useState<IConsultation[]>(consultationData);
     const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -123,7 +124,8 @@ const EntrustmentConsultation: React.FC = () => {
     };
 
     const handleEdit = (record: IConsultation) => {
-        if (record.status !== 'pending' && record.status !== 'following') {
+        // 使用统一的权限检查
+        if (!canEdit(record.status)) {
             message.warning('只有待跟进和跟进中状态的咨询可以编辑');
             return;
         }
@@ -133,7 +135,10 @@ const EntrustmentConsultation: React.FC = () => {
 
     const handleDelete = (id: string) => {
         const item = dataSource.find(d => d.id === id);
-        if (item && item.status !== 'pending') {
+        if (!item) return;
+
+        // 使用统一的权限检查
+        if (!canDelete(item.status)) {
             message.warning('只有待跟进状态的咨询可以删除');
             return;
         }
@@ -149,7 +154,8 @@ const EntrustmentConsultation: React.FC = () => {
     };
 
     const handleCloseConsultation = (record: IConsultation) => {
-        if (record.status !== 'pending' && record.status !== 'following') {
+        // 使用统一的权限检查
+        if (!canClose(record.status)) {
             message.warning('只有待跟进和跟进中状态的咨询可以关闭');
             return;
         }
@@ -169,15 +175,13 @@ const EntrustmentConsultation: React.FC = () => {
     };
 
     const handleGenerateQuotation = (record: IConsultation) => {
-        // 1. 检查是否已转化（防止重复生成）
-        if (record.quotationNo) {
-            message.warning(`该咨询单已关联报价单 ${record.quotationNo}，不能重复生成`);
-            return;
-        }
-
-        // 2. 检查状态是否允许转化（只有跟进中状态可以转化）
-        if (record.status !== 'following') {
-            message.warning('只有跟进中状态的咨询单才能生成报价单');
+        // 使用统一的权限检查
+        if (!canGenerateQuotation(record.status, !!record.quotationNo)) {
+            if (record.quotationNo) {
+                message.warning(`该咨询单已关联报价单 ${record.quotationNo}，不能重复生成`);
+            } else {
+                message.warning('只有跟进中状态的咨询单才能生成报价单');
+            }
             return;
         }
 
@@ -363,8 +367,8 @@ const EntrustmentConsultation: React.FC = () => {
                     </Button>
                 );
 
-                // 待跟进/跟进中/已拒绝状态 - 可编辑
-                if (['pending', 'following', 'rejected'].includes(record.status)) {
+                // 使用统一的权限检查 - 编辑按钮
+                if (canEdit(record.status)) {
                     actions.push(
                         <Button
                             key="edit"
@@ -377,9 +381,8 @@ const EntrustmentConsultation: React.FC = () => {
                     );
                 }
 
-                // 待跟进/已拒绝/已关闭状态 - 可删除（删除=物理删除数据，仅管理员可见）
-
-                if (canDelete && ['pending', 'rejected', 'closed'].includes(record.status)) {
+                // 使用统一的权限检查 - 删除按钮（需管理员权限）
+                if (canDeleteByRole && canDelete(record.status)) {
                     actions.push(
                         <Popconfirm
                             key="delete"
@@ -407,18 +410,18 @@ const EntrustmentConsultation: React.FC = () => {
                         type="primary"
                         icon={<FileAddOutlined />}
                         onClick={() => selectedRows[0] && handleGenerateQuotation(selectedRows[0])}
-                        disabled={selectedRows.length === 0 || selectedRows[0]?.status !== 'following' || !!selectedRows[0]?.quotationNo}
+                        disabled={selectedRows.length === 0 || !canGenerateQuotation(selectedRows[0]?.status, !!selectedRows[0]?.quotationNo)}
                     >
                         生成报价单
                     </Button>
                     <Popconfirm
                         title="确定关闭此咨询吗?"
                         onConfirm={() => selectedRows[0] && handleCloseConsultation(selectedRows[0])}
-                        disabled={selectedRows.length === 0 || (selectedRows[0]?.status !== 'pending' && selectedRows[0]?.status !== 'following')}
+                        disabled={selectedRows.length === 0 || !canClose(selectedRows[0]?.status)}
                     >
                         <Button
                             icon={<CloseCircleOutlined />}
-                            disabled={selectedRows.length === 0 || (selectedRows[0]?.status !== 'pending' && selectedRows[0]?.status !== 'following')}
+                            disabled={selectedRows.length === 0 || !canClose(selectedRows[0]?.status)}
                         >
                             关闭咨询
                         </Button>
