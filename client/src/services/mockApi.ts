@@ -288,7 +288,8 @@ export const mockApi = {
 
 // 路由匹配器，将 URL 路径映射到 mock API
 export async function getMockResponse(url: string, method: string = 'GET', data?: any) {
-    const path = url.replace(/^\/api\//, '');
+    // 移除开头的斜杠和 /api 前缀
+    const path = url.replace(/^\/+/, '').replace(/^api\//, '');
 
     try {
         // 委托单相关
