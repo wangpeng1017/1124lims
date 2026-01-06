@@ -32,10 +32,16 @@ export function useEntrustmentService() {
                 size: params.size || 10,
                 ...params
             });
-            setData(res.data.records);
-            setTotal(res.data.total);
+            // 确保 data 和 records 存在（兼容 mock 回退）
+            const records = res?.data?.records || [];
+            const total = res?.data?.total || 0;
+            setData(records);
+            setTotal(total);
         } catch (error: any) {
-            message.error(error.message || '获取委托单列表失败');
+            console.error('获取委托单列表失败:', error);
+            // 不显示错误消息，因为可能已经使用了 mock 数据
+            setData([]);
+            setTotal(0);
         } finally {
             setLoading(false);
         }

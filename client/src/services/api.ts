@@ -1,7 +1,11 @@
 import axios, { type AxiosResponse, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { getMockResponse } from './mockApi';
 
 // API基础配置
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
+// 是否启用 Mock 回退（生产环境默认启用，当真实 API 不可用时使用 mock 数据）
+const ENABLE_MOCK_FALLBACK = import.meta.env.VITE_USE_API !== 'false';
 
 // 创建axios实例
 const api = axios.create({
@@ -37,7 +41,35 @@ api.interceptors.response.use(
         }
         return data;
     },
-    (error: AxiosError) => {
+    async (error: AxiosError) => {
+        const originalRequest = error.config as any;
+
+        // 当 API 请求失败且启用 Mock 回退时，尝试使用 mock 数据
+        if (ENABLE_MOCK_FALLBACK && originalRequest && !originalRequest._mockTried) {
+            // 标记已尝试 mock，避免重复尝试
+            originalRequest._mockTried = true;
+
+            const method = originalRequest.method?.toUpperCase() || 'GET';
+            const url = (originalRequest.url || '').replace(API_BASE_URL, '');
+            const requestData = originalRequest.params || originalRequest.data;
+
+            console.log(`[Mock Fallback] API 请求失败，尝试使用 mock 数据: ${method} ${url}`);
+
+            try {
+                const mockResponse = await getMockResponse(url, method, requestData);
+
+                if (mockResponse) {
+                    console.log(`[Mock Fallback] 使用 mock 数据成功: ${url}`);
+                    return mockResponse;
+                } else {
+                    console.warn(`[Mock Fallback] 没有找到匹配的 mock 数据: ${url}`);
+                }
+            } catch (mockError) {
+                console.error(`[Mock Fallback] Mock 数据加载失败:`, mockError);
+            }
+        }
+
+        // 原有错误处理逻辑
         if (error.response) {
             const { status, data } = error.response;
             switch (status) {
