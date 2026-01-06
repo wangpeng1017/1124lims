@@ -45,4 +45,6 @@ consultation.ts ──→ quotationData.ts ──→ contract.ts ──→ entru
 
 ## 最近变更
 
+- 2026-01-06: entrustment.ts 新增10条不同状态的测试数据，用于展示子行功能
+- 2026-01-06: 新增 services/mockApi.ts，提供统一的 Mock 数据服务
 - 2026-01-04: entrustment.ts 扩展关联字段，contract.ts 添加委托单关联
