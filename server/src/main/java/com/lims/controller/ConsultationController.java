@@ -30,7 +30,7 @@ public class ConsultationController {
 
     @Operation(summary = "分页查询咨询单")
     @GetMapping("/page")
-    @PreAuthorize("@ss.hasPermission('consultation:list')")
+    @PreAuthorize("@ss.hasPermission('consultation:query')")
     public Result<PageResult<Consultation>> page(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
